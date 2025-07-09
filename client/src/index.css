@@ -576,7 +576,7 @@
   }
 
   .mobile-card-content {
-    @apply p-4 sm:p-6 lg:p-8;
+    @apply p-6 sm:p-8 lg:p-10;
   }
 
   /* Additional utility classes */
