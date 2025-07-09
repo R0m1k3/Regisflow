@@ -15,7 +15,7 @@ echo "✅ Base de données prête!"
 
 # Exécuter les migrations de base de données
 echo "🔄 Exécution des migrations..."
-npx drizzle-kit push:pg
+npx drizzle-kit push
 
 # Créer le répertoire des sauvegardes s'il n'existe pas
 mkdir -p /app/backups
