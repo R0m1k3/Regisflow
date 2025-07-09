@@ -33,3 +33,4 @@ SELECT datname, datowner FROM pg_database WHERE datname = 'regisflow';
 -- Utilisateur: regisflow
 -- Mot de passe: RegisFlow2024!
 -- Base de données: regisflow
+-- Port: 5433 (assurez-vous que PostgreSQL écoute sur ce port)

@@ -31,7 +31,7 @@ nano .env
 
 ```env
 # Configuration de la base de données EXTERNE (PRÉCONFIGURÉE)
-DATABASE_URL=postgresql://regisflow:RegisFlow2024!@VOTRE_IP_POSTGRES:5432/regisflow
+DATABASE_URL=postgresql://regisflow:RegisFlow2024!@VOTRE_IP_POSTGRES:5433/regisflow
 
 # Configuration de l'application
 NODE_ENV=production
@@ -108,6 +108,7 @@ docker-compose logs -f
 
 ### Configuration PostgreSQL Externe
 - **Prérequis**: Serveur PostgreSQL accessible depuis Docker
+- **Port**: 5433 (standard pour PostgreSQL externe)
 - **Configuration**: Via variable d'environnement DATABASE_URL
 - **Accès réseau**: Le container doit pouvoir accéder à l'IP de votre serveur PostgreSQL
 - **Firewall**: Autoriser les connexions depuis l'IP du container Docker
