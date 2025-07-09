@@ -40,32 +40,31 @@ function DashboardContent() {
   return (
     <div className="min-h-screen bg-background">
       {/* Modern Header */}
-      <header className="sticky top-0 z-50 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="max-w-7xl mx-auto mobile-padding">
-          <div className="flex justify-between items-center h-14 sm:h-16">
-            <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center gap-4">
               <div className="relative">
-                <div className="p-1.5 sm:p-2 bg-gradient-to-br from-primary to-purple-600 rounded-lg sm:rounded-xl shadow-sm">
-                  <Package className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                <div className="p-2 bg-primary text-primary-foreground">
+                  <Package className="h-6 w-6" />
                 </div>
-                <div className="absolute -inset-1 bg-gradient-to-br from-primary to-purple-600 rounded-lg sm:rounded-xl blur opacity-20 -z-10"></div>
               </div>
               <div className="min-w-0">
-                <h1 className="text-lg sm:text-xl font-bold gradient-text truncate">RegisFlow</h1>
-                <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Registre des ventes des Feux d'artifice</p>
+                <h1 className="text-xl font-bold text-foreground truncate">RegisFlow</h1>
+                <p className="text-sm text-muted-foreground hidden sm:block">Registre des ventes des Feux d'artifice</p>
               </div>
             </div>
             
             <div className="flex items-center gap-2 sm:gap-4">
               {/* Store Selector for Admin */}
               {isAdmin && !isLoadingStores && (
-                <div className="hidden sm:flex items-center gap-2 sm:gap-3 p-1.5 sm:p-2 bg-muted/50 rounded-lg border border-border/50">
+                <div className="hidden sm:flex items-center gap-3 p-2 bg-muted border border-border">
                   <Building2 className="h-4 w-4 text-muted-foreground" />
                   <Select 
                     value={selectedStoreId?.toString() || ""} 
                     onValueChange={(value) => setSelectedStoreId(parseInt(value))}
                   >
-                    <SelectTrigger className="w-32 sm:w-48 border-0 bg-transparent focus:ring-0 text-sm">
+                    <SelectTrigger className="w-48 border-0 bg-transparent focus:ring-0 text-sm">
                       <SelectValue placeholder="Magasin" />
                     </SelectTrigger>
                     <SelectContent>
@@ -81,7 +80,7 @@ function DashboardContent() {
 
               {/* Current Store Display for Non-Admin */}
               {!isAdmin && selectedStore && (
-                <div className="hidden sm:flex items-center gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-muted/50 rounded-lg border border-border/50">
+                <div className="hidden sm:flex items-center gap-2 px-3 py-2 bg-muted border border-border">
                   <Building2 className="h-4 w-4 text-primary" />
                   <span className="text-sm font-medium">{selectedStore.name}</span>
                 </div>
@@ -116,29 +115,29 @@ function DashboardContent() {
       <main className="max-w-7xl mx-auto mobile-padding py-4 sm:py-6 lg:py-8">
         <div className="fade-in">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mobile-form-responsive">
-            <TabsList className={`grid w-full ${canAccessAdmin ? 'grid-cols-3' : 'grid-cols-2'} max-w-full sm:max-w-2xl h-12 sm:h-14 bg-muted bg-opacity-50 p-1.5 sm:p-2 rounded-xl sm:rounded-2xl border border-border border-opacity-50`}>
+            <TabsList className={`grid w-full ${canAccessAdmin ? 'grid-cols-3' : 'grid-cols-2'} max-w-full sm:max-w-2xl h-14 bg-muted p-0 border border-border`}>
               <TabsTrigger 
                 value="new-sale" 
-                className="h-9 sm:h-10 rounded-lg sm:rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-md smooth-transition font-medium text-xs sm:text-sm"
+                className="h-full data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary font-medium text-sm"
               >
-                <Package className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
+                <Package className="h-5 w-5 mr-2" />
                 <span className="hidden sm:inline">Nouvelle Vente</span>
                 <span className="sm:hidden">Vente</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="history" 
-                className="h-9 sm:h-10 rounded-lg sm:rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-md smooth-transition font-medium text-xs sm:text-sm"
+                className="h-full data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary font-medium text-sm"
               >
-                <History className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
+                <History className="h-5 w-5 mr-2" />
                 <span className="hidden sm:inline">Historique</span>
                 <span className="sm:hidden">Liste</span>
               </TabsTrigger>
               {canAccessAdmin && (
                 <TabsTrigger 
                   value="admin" 
-                  className="h-9 sm:h-10 rounded-lg sm:rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-md smooth-transition font-medium text-xs sm:text-sm"
+                  className="h-full data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary font-medium text-sm"
                 >
-                  <Settings className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
+                  <Settings className="h-5 w-5 mr-2" />
                   <span className="hidden sm:inline">Administration</span>
                   <span className="sm:hidden">Admin</span>
                 </TabsTrigger>

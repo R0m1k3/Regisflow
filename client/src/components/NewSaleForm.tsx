@@ -166,10 +166,10 @@ export default function NewSaleForm() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="mobile-form-responsive">
             {/* Seller Information */}
-            <div className="modern-card bg-muted bg-opacity-30 mobile-form-section rounded-xl border-l-4 border-primary">
-              <h3 className="mobile-header-responsive font-semibold text-foreground mb-4 sm:mb-6 flex items-center gap-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary rounded-lg flex items-center justify-center shadow-sm">
-                  <User className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+            <div className="bg-muted border border-border mobile-form-section border-l-4 border-l-primary">
+              <h3 className="font-semibold text-foreground mb-6 flex items-center gap-3">
+                <div className="w-10 h-10 bg-primary text-primary-foreground flex items-center justify-center">
+                  <User className="h-5 w-5" />
                 </div>
                 <span className="truncate">Informations Vendeur</span>
               </h3>
@@ -204,10 +204,10 @@ export default function NewSaleForm() {
             </div>
 
             {/* Product Information */}
-            <div className="modern-card bg-blue-50 bg-opacity-50 mobile-form-section rounded-xl border-l-4 border-blue-500">
-              <h3 className="mobile-header-responsive font-semibold text-foreground mb-4 sm:mb-6 flex items-center gap-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-500 rounded-lg flex items-center justify-center shadow-sm">
-                  <Package className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+            <div className="bg-blue-50 border border-border mobile-form-section border-l-4 border-l-blue-500">
+              <h3 className="font-semibold text-foreground mb-6 flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-500 text-white flex items-center justify-center">
+                  <Package className="h-5 w-5" />
                 </div>
                 <span className="truncate">Informations Produit</span>
               </h3>
@@ -306,10 +306,10 @@ export default function NewSaleForm() {
             </div>
 
             {/* Customer Information */}
-            <div className="modern-card bg-emerald-50 bg-opacity-50 mobile-form-section rounded-xl border-l-4 border-emerald-500">
-              <h3 className="mobile-header-responsive font-semibold text-foreground mb-4 sm:mb-6 flex items-center gap-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-emerald-500 rounded-lg flex items-center justify-center shadow-sm">
-                  <Users className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+            <div className="bg-emerald-50 border border-border mobile-form-section border-l-4 border-l-emerald-500">
+              <h3 className="font-semibold text-foreground mb-6 flex items-center gap-3">
+                <div className="w-10 h-10 bg-emerald-500 text-white flex items-center justify-center">
+                  <Users className="h-5 w-5" />
                 </div>
                 <span className="truncate">Informations Client</span>
               </h3>
@@ -394,10 +394,10 @@ export default function NewSaleForm() {
             </div>
 
             {/* Identity Information */}
-            <div className="modern-card bg-amber-50 bg-opacity-50 mobile-form-section rounded-xl border-l-4 border-amber-500">
-              <h3 className="mobile-header-responsive font-semibold text-foreground mb-4 sm:mb-6 flex items-center gap-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-amber-500 rounded-lg flex items-center justify-center shadow-sm">
-                  <svg className="h-4 w-4 sm:h-5 sm:w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-amber-50 border border-border mobile-form-section border-l-4 border-l-amber-500">
+              <h3 className="font-semibold text-foreground mb-6 flex items-center gap-3">
+                <div className="w-10 h-10 bg-amber-500 text-white flex items-center justify-center">
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
                   </svg>
                 </div>
@@ -503,7 +503,7 @@ export default function NewSaleForm() {
                 type="submit" 
                 size="lg"
                 disabled={isSubmitting || createSaleMutation.isPending}
-                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-[1.02] smooth-transition touch-friendly-button order-1 sm:order-2"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground border-0 shadow-lg hover:shadow-xl order-1 sm:order-2"
               >
                 <Save className="h-5 w-5 mr-2" />
                 <span className="hidden sm:inline">{isSubmitting || createSaleMutation.isPending ? 'Enregistrement...' : 'Enregistrer la Vente'}</span>
