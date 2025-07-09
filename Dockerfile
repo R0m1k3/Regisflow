@@ -55,7 +55,6 @@ RUN npm cache clean --force && \
 
 # Copier les scripts de configuration
 COPY --chown=regisflow:nodejs docker-entrypoint-simple.sh /usr/local/bin/docker-entrypoint.sh
-COPY --chown=regisflow:nodejs postgres-prod.conf ./
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Changer vers l'utilisateur non-root

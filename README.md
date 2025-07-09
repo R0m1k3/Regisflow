@@ -1,110 +1,85 @@
-# Registre des Ventes de Pétards
+# RegisFlow
 
-Application React complète pour la gestion et le suivi des ventes de feux d'artifice en conformité avec la réglementation française.
+Application web complète de gestion des ventes de feux d'artifice en conformité avec la réglementation française.
 
 ## Fonctionnalités
 
-### 🔐 Système d'authentification
-- Connexion par nom d'utilisateur et mot de passe
-- Système de rôles : Administrateur, Manager, Employé
-- Sessions sécurisées avec PostgreSQL
+- ✅ Authentification multi-utilisateur avec rôles (Admin, Manager, Employee)
+- ✅ Gestion multi-magasins avec isolation des données
+- ✅ Enregistrement des ventes conforme à la réglementation
+- ✅ Sauvegardes automatiques toutes les 12h
+- ✅ Purge automatique des données (19 mois de rétention)
+- ✅ Export CSV/PDF pour rapports réglementaires
+- ✅ Interface responsive avec design moderne
 
-### 👥 Gestion des utilisateurs et magasins
-- **Administrateur** : Accès complet à toutes les fonctionnalités
-- **Manager** : Accès à toutes les fonctionnalités sauf l'administration et les sauvegardes automatiques
-- **Employé** : Création de ventes et consultation de l'historique uniquement
+## Démarrage Rapide
 
-### 🏪 Multi-magasins
-- Chaque magasin a son propre historique de ventes
-- Les utilisateurs sont liés à un magasin spécifique
-- Isolation des données par magasin
+### Développement
+```bash
+# Installation des dépendances
+npm install
 
-### 📋 Enregistrement des ventes
-- Formulaire complet avec validation des champs obligatoires
-- Support des codes EAN13 avec validation
-- Capture photo des pièces d'identité
-- Classification des produits (F2/F3)
+# Démarrage en développement
+npm run dev
+```
 
-### 📊 Historique et export
-- Historique des ventes avec filtrage par dates
-- Export CSV pour la conformité réglementaire
-- Suppression des ventes (Manager et Administrateur uniquement)
+### Production avec Docker
+```bash
+# Démarrage simple
+docker-compose up -d
 
-## Installation et démarrage
-
-1. **Installation des dépendances :**
-   ```bash
-   npm install
-   ```
-
-2. **Configuration de la base de données :**
-   ```bash
-   npm run db:push
-   ```
-
-3. **Démarrage de l'application :**
-   ```bash
-   npm run dev
-   ```
-
-## 🔑 Compte administrateur par défaut
-
-Lors de la première installation sur une base de données vierge, un compte administrateur est automatiquement créé :
-
-**Nom d'utilisateur :** `admin`
-**Mot de passe :** `admin123`
-
-⚠️ **IMPORTANT** : Changez ce mot de passe immédiatement après la première connexion !
+# Vérification des logs
+docker-compose logs -f regisflow
+```
 
 ## Configuration
 
-### Variables d'environnement
-- `DATABASE_URL` : URL de connexion PostgreSQL
-- `SESSION_SECRET` : Clé secrète pour les sessions (optionnel, une clé par défaut est générée)
+### Variables d'environnement (.env)
+```env
+DATABASE_URL=postgresql://regisflow:RegisFlow2024!PostgreSQL@regisflow-db:5432/regisflow
+SESSION_SECRET=RegisFlow2024SessionSecretKey1234567890ABCDEF
+NODE_ENV=production
+PORT=5000
+```
 
-### Structure des rôles
+### Compte par défaut
+- **Utilisateur** : admin
+- **Mot de passe** : admin123
 
-#### Administrateur
-- ✅ Création et gestion des utilisateurs
-- ✅ Création et gestion des magasins
-- ✅ Accès à toutes les ventes de tous les magasins
-- ✅ Suppression des ventes
-- ✅ Export des données
-- ✅ Sauvegardes automatiques
+⚠️ **Important** : Changez le mot de passe par défaut après la première connexion.
 
-#### Manager
-- ✅ Création de ventes
-- ✅ Consultation de l'historique du magasin
-- ✅ Suppression des ventes
-- ✅ Export des données
-- ❌ Administration des utilisateurs/magasins
-- ❌ Sauvegardes automatiques
+## Architecture Technique
 
-#### Employé
-- ✅ Création de ventes
-- ✅ Consultation de l'historique du magasin
-- ❌ Suppression des ventes
-- ❌ Export des données
-- ❌ Administration
-- ❌ Sauvegardes automatiques
-
-## Technologies utilisées
-
-- **Frontend** : React 18, TypeScript, TailwindCSS, shadcn/ui
-- **Backend** : Express.js, TypeScript
+- **Frontend** : React 18 + TypeScript + TailwindCSS + shadcn/ui
+- **Backend** : Express.js + TypeScript
 - **Base de données** : PostgreSQL avec Drizzle ORM
-- **Authentification** : Sessions avec bcrypt
-- **Stockage local** : IndexedDB pour la résilience
+- **Authentification** : Sessions sécurisées avec bcrypt
+- **Déploiement** : Docker avec multi-stage build
 
-## Conformité réglementaire
+## Scripts Disponibles
 
-L'application respecte les exigences françaises pour la vente de feux d'artifice :
-- Enregistrement obligatoire des informations vendeur
-- Vérification de l'identité de l'acheteur
-- Classification des produits (F2/F3)
-- Traçabilité complète des ventes
-- Export des données pour les autorités
+- `npm run dev` : Développement avec hot-reload
+- `npm run build` : Construction pour production
+- `npm run start` : Démarrage en production
+- `npm run db:push` : Migration de base de données
 
-## Support
+## Structure du Projet
 
-Pour toute question ou problème, consultez la documentation ou contactez l'administrateur système.
+```
+RegisFlow/
+├── client/          # Frontend React
+├── server/          # Backend Express
+├── shared/          # Types partagés et schémas
+├── backups/         # Sauvegardes automatiques
+├── docker-compose.yml
+├── Dockerfile
+└── README.md
+```
+
+## Conformité Réglementaire
+
+L'application respecte la réglementation française pour la vente de feux d'artifice :
+- Enregistrement obligatoire des ventes
+- Conservation des données pendant 19 mois
+- Purge automatique des données expirées
+- Traçabilité complète des transactions
