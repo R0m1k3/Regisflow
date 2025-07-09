@@ -149,16 +149,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Determine which store to query
       let targetStoreId: number;
-      if (user.role === 'admin') {
-        if (storeId) {
-          // Admin querying a specific store
-          targetStoreId = parseInt(storeId as string);
-        } else {
-          // Admin without specific store - should not happen with the new frontend
-          return res.status(400).json({ error: "Store ID required for admin queries" });
+      
+      if (storeId) {
+        // storeId provided in query
+        targetStoreId = parseInt(storeId as string);
+        
+        // For non-admin users, verify they can only access their own store
+        if (user.role !== 'admin' && targetStoreId !== user.storeId) {
+          return res.status(403).json({ error: "Access denied to this store" });
         }
       } else {
-        // Non-admin users can only query their own store
+        // No storeId provided - use user's assigned store for non-admin
         if (!user.storeId) {
           return res.status(400).json({ error: "User has no assigned store" });
         }

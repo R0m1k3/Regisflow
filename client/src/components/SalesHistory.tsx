@@ -33,8 +33,8 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
       if (startDate) params.append('startDate', startDate);
       if (endDate) params.append('endDate', endDate);
       
-      // Add storeId for admin users
-      if (user?.role === 'admin' && selectedStoreId) {
+      // Always add storeId for queries
+      if (selectedStoreId) {
         params.append('storeId', selectedStoreId.toString());
       }
       
@@ -42,7 +42,9 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
       const response = await apiRequest(`/api/sales${queryString ? `?${queryString}` : ''}`);
       return response.json();
     },
-    enabled: !!selectedStoreId, // Only run query when store is selected
+    enabled: !!selectedStoreId && !!user, // Only run query when store is selected and user is loaded
+    refetchOnMount: true, // Always refetch when component mounts
+    refetchOnWindowFocus: false, // Don't refetch on window focus
   });
 
   const sales = Array.isArray(salesData) ? salesData : [];
