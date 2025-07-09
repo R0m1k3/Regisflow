@@ -75,7 +75,8 @@ export default function NewSaleForm() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/sales'] });
+      // Invalidate all sales queries to refresh the history
+      queryClient.invalidateQueries({ queryKey: ['/api/sales'], exact: false });
       toast({
         title: "Vente enregistrée",
         description: "La vente a été enregistrée avec succès",

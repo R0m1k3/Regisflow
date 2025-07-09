@@ -52,7 +52,8 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
     mutationFn: (saleId: number) =>
       apiRequest(`/api/sales/${saleId}`, { method: 'DELETE' }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/sales'] });
+      // Invalidate all sales queries to refresh the history
+      queryClient.invalidateQueries({ queryKey: ['/api/sales'], exact: false });
       toast({
         title: "Vente supprimée",
         description: "La vente a été supprimée avec succès",
