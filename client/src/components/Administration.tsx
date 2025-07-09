@@ -55,6 +55,15 @@ export default function Administration() {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [editingStore, setEditingStore] = useState<Store | null>(null);
 
+  // Get current user info to prevent self-role modification
+  const { data: currentUser } = useQuery<User>({
+    queryKey: ['/api/auth/me'],
+    queryFn: async () => {
+      const response = await apiRequest('/api/auth/me');
+      return response.json();
+    },
+  });
+
   // Queries
   const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
     queryKey: ['/api/admin/users'],
@@ -126,8 +135,11 @@ export default function Administration() {
       editUserForm.reset();
       toast({ title: "Utilisateur modifié avec succès" });
     },
-    onError: () => {
-      toast({ title: "Erreur", description: "Impossible de modifier l'utilisateur", variant: "destructive" });
+    onError: (error) => {
+      const errorMessage = error.message.includes("Vous ne pouvez pas changer votre propre rôle") 
+        ? "Vous ne pouvez pas changer votre propre rôle d'administrateur"
+        : "Impossible de modifier l'utilisateur";
+      toast({ title: "Erreur", description: errorMessage, variant: "destructive" });
     },
   });
 
@@ -813,24 +825,36 @@ export default function Administration() {
                         <FormField
                           control={editUserForm.control}
                           name="role"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Rôle</FormLabel>
-                              <Select value={field.value} onValueChange={field.onChange}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="employee">Employé</SelectItem>
-                                  <SelectItem value="manager">Manager</SelectItem>
-                                  <SelectItem value="administrator">Administrateur</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
+                          render={({ field }) => {
+                            const isEditingSelf = editingUser?.id === currentUser?.id;
+                            return (
+                              <FormItem>
+                                <FormLabel>Rôle</FormLabel>
+                                <Select 
+                                  value={field.value} 
+                                  onValueChange={field.onChange}
+                                  disabled={isEditingSelf}
+                                >
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="employee">Employé</SelectItem>
+                                    <SelectItem value="manager">Manager</SelectItem>
+                                    <SelectItem value="administrator">Administrateur</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                {isEditingSelf && (
+                                  <p className="text-sm text-muted-foreground">
+                                    Vous ne pouvez pas modifier votre propre rôle
+                                  </p>
+                                )}
+                                <FormMessage />
+                              </FormItem>
+                            );
+                          }}
                         />
                         <FormField
                           control={editUserForm.control}
