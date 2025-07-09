@@ -32,14 +32,22 @@ echo "✅ Base de données prête!"
 
 # Exécuter les migrations de base de données
 echo "🔄 Exécution des migrations..."
-npx drizzle-kit push
+if command -v drizzle-kit >/dev/null 2>&1; then
+    npx drizzle-kit push
+else
+    echo "⚠️  drizzle-kit non disponible, tentative avec npm run db:push..."
+    if [ -f package.json ]; then
+        npm run db:push || echo "ℹ️  Migrations manuelles nécessaires"
+    else
+        echo "ℹ️  Package.json non trouvé, poursuite sans migrations"
+    fi
+fi
 
 # Créer le répertoire des sauvegardes s'il n'existe pas
 mkdir -p /app/backups
 
-# Construire l'application pour la production
-echo "🔨 Construction de l'application..."
-npm run build
+# L'application est déjà construite dans le Dockerfile
+echo "✅ Application pré-construite"
 
 # Démarrer l'application en production
 echo "🎯 Démarrage de l'application RegisFlow..."

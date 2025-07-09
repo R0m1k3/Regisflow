@@ -45,14 +45,15 @@ COPY --from=builder --chown=regisflow:nodejs /build/package*.json ./
 COPY --from=builder --chown=regisflow:nodejs /build/dist ./dist
 COPY --from=builder --chown=regisflow:nodejs /build/shared ./shared
 COPY --from=builder --chown=regisflow:nodejs /build/drizzle.config.ts ./
+COPY --from=builder --chown=regisflow:nodejs /build/node_modules ./node_modules
 
-# Installer uniquement les dépendances de production
-RUN npm ci --only=production && \
-    npm cache clean --force && \
+# Les dépendances sont déjà copiées depuis le builder
+# Nettoyer le cache npm uniquement
+RUN npm cache clean --force && \
     rm -rf /tmp/*
 
 # Copier les scripts de configuration
-COPY --chown=regisflow:nodejs docker-entrypoint.sh /usr/local/bin/
+COPY --chown=regisflow:nodejs docker-entrypoint-simple.sh /usr/local/bin/docker-entrypoint.sh
 COPY --chown=regisflow:nodejs postgres-prod.conf ./
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
