@@ -25,7 +25,10 @@ docker-compose exec regisflow env | grep -E "(DATABASE_URL|POSTGRES|NODE_ENV)"
 
 echo ""
 echo "6. Test manuel de connexion PostgreSQL:"
+echo "   - Test depuis le container postgres:"
 docker-compose exec postgres pg_isready -U regisflow -d regisflow
+echo "   - Test depuis le container regisflow vers postgres:5432:"
+docker-compose exec regisflow pg_isready -h postgres -p 5432 -U regisflow
 
 echo ""
 echo "7. Processus dans le container PostgreSQL:"
