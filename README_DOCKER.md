@@ -75,7 +75,7 @@ host regisflow regisflow 0.0.0.0/0 md5
 sudo systemctl restart postgresql
 ```
 
-**SEULE MODIFICATION NÉCESSAIRE** : Remplacer `VOTRE_IP_POSTGRES` par l'IP réelle de votre serveur.
+**AUCUNE MODIFICATION NÉCESSAIRE** : Tout est préconfigué pour fonctionner immédiatement.
 
 ### 3. Lancer l'application
 

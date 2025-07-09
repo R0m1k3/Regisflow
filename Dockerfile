@@ -40,5 +40,5 @@ ENV PORT=5000
 # Utiliser dumb-init pour gérer les signaux
 ENTRYPOINT ["dumb-init", "--"]
 
-# Démarrer l'application avec tsx pour éviter les problèmes de build
-CMD ["docker-entrypoint.sh", "npx", "tsx", "server/index.ts"]
+# Démarrer avec le script d'entrée
+CMD ["docker-entrypoint.sh"]

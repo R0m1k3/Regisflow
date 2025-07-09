@@ -37,6 +37,10 @@ npx drizzle-kit push
 # Créer le répertoire des sauvegardes s'il n'existe pas
 mkdir -p /app/backups
 
-# Démarrer l'application
+# Construire l'application pour la production
+echo "🔨 Construction de l'application..."
+npm run build
+
+# Démarrer l'application en production
 echo "🎯 Démarrage de l'application RegisFlow..."
-exec "$@"
+exec npm run start
