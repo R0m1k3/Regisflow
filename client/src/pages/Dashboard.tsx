@@ -8,7 +8,7 @@ import { StoreProvider, useStoreContext } from "@/hooks/useStoreContext";
 import NewSaleForm from "@/components/NewSaleForm";
 import SalesHistory from "@/components/SalesHistory";
 import Administration from "@/components/Administration";
-import { Package, History, Settings, LogOut, User, Building2 } from "lucide-react";
+import { Package, History, Settings, LogOut, User, Building2, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 function DashboardContent() {
@@ -38,31 +38,34 @@ function DashboardContent() {
   const isAdmin = user?.role === "admin";
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+    <div className="min-h-screen bg-background">
+      {/* Modern Header */}
+      <header className="sticky top-0 z-50 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <Package className="h-6 w-6 text-primary" />
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="p-2 bg-gradient-to-br from-primary to-purple-600 rounded-xl shadow-sm">
+                  <Package className="h-6 w-6 text-white" />
+                </div>
+                <div className="absolute -inset-1 bg-gradient-to-br from-primary to-purple-600 rounded-xl blur opacity-20 -z-10"></div>
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">Registre des Ventes</h1>
-                <p className="text-sm text-gray-500">Gestion des feux d'artifice</p>
+                <h1 className="text-xl font-bold gradient-text">Registre des Ventes</h1>
+                <p className="text-sm text-muted-foreground">Gestion moderne des feux d'artifice</p>
               </div>
             </div>
             
             <div className="flex items-center gap-4">
               {/* Store Selector for Admin */}
               {isAdmin && !isLoadingStores && (
-                <div className="flex items-center gap-2">
-                  <Building2 className="h-4 w-4 text-gray-500" />
+                <div className="flex items-center gap-3 p-2 bg-muted/50 rounded-lg border border-border/50">
+                  <Building2 className="h-4 w-4 text-muted-foreground" />
                   <Select 
                     value={selectedStoreId?.toString() || ""} 
                     onValueChange={(value) => setSelectedStoreId(parseInt(value))}
                   >
-                    <SelectTrigger className="w-48">
+                    <SelectTrigger className="w-48 border-0 bg-transparent focus:ring-0">
                       <SelectValue placeholder="Sélectionner un magasin" />
                     </SelectTrigger>
                     <SelectContent>
@@ -78,22 +81,32 @@ function DashboardContent() {
 
               {/* Current Store Display for Non-Admin */}
               {!isAdmin && selectedStore && (
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Building2 className="h-4 w-4" />
-                  <span>{selectedStore.name}</span>
+                <div className="flex items-center gap-2 px-3 py-2 bg-muted/50 rounded-lg border border-border/50">
+                  <Building2 className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium">{selectedStore.name}</span>
                 </div>
               )}
 
-              <div className="text-right">
-                <p className="text-sm font-medium text-gray-900">
-                  {user?.firstName} {user?.lastName}
-                </p>
-                <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
+              <div className="flex items-center gap-3">
+                <div className="text-right">
+                  <p className="text-sm font-semibold text-foreground">
+                    {user?.firstName} {user?.lastName}
+                  </p>
+                  <div className="flex items-center gap-1">
+                    {user?.role === 'admin' && <Shield className="h-3 w-3 text-primary" />}
+                    <p className="text-xs text-muted-foreground capitalize">{user?.role}</p>
+                  </div>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleLogout}
+                  className="border-2 hover:bg-destructive hover:text-destructive-foreground hover:border-destructive smooth-transition"
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Déconnexion
+                </Button>
               </div>
-              <Button variant="outline" size="sm" onClick={handleLogout}>
-                <LogOut className="h-4 w-4 mr-2" />
-                Déconnexion
-              </Button>
             </div>
           </div>
         </div>
@@ -102,20 +115,38 @@ function DashboardContent() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {selectedStore && (
-          <div className="mb-6">
-            <Card>
+          <div className="mb-8 slide-in-up">
+            <Card className="modern-card-elevated overflow-hidden">
               <CardContent className="pt-6">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-blue-100 rounded-lg">
-                    <Building2 className="h-6 w-6 text-blue-600" />
+                <div className="flex items-center gap-6">
+                  <div className="relative">
+                    <div className="p-4 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg">
+                      <Building2 className="h-8 w-8 text-white" />
+                    </div>
+                    <div className="absolute -inset-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl blur opacity-20 -z-10"></div>
                   </div>
-                  <div>
-                    <h2 className="text-lg font-semibold text-gray-900">{selectedStore.name}</h2>
-                    <div className="text-sm text-gray-600">
-                      {selectedStore.address && <p>{selectedStore.address}</p>}
-                      <div className="flex gap-4">
-                        {selectedStore.phone && <span>📞 {selectedStore.phone}</span>}
-                        {selectedStore.email && <span>✉️ {selectedStore.email}</span>}
+                  <div className="flex-1">
+                    <h2 className="text-2xl font-bold text-foreground mb-2">{selectedStore.name}</h2>
+                    <div className="space-y-1">
+                      {selectedStore.address && (
+                        <p className="text-muted-foreground flex items-center gap-2">
+                          <span className="w-4 h-4 flex items-center justify-center">📍</span>
+                          {selectedStore.address}
+                        </p>
+                      )}
+                      <div className="flex gap-6 text-sm">
+                        {selectedStore.phone && (
+                          <span className="text-muted-foreground flex items-center gap-2">
+                            <span className="w-4 h-4 flex items-center justify-center">📞</span>
+                            {selectedStore.phone}
+                          </span>
+                        )}
+                        {selectedStore.email && (
+                          <span className="text-muted-foreground flex items-center gap-2">
+                            <span className="w-4 h-4 flex items-center justify-center">✉️</span>
+                            {selectedStore.email}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -125,38 +156,55 @@ function DashboardContent() {
           </div>
         )}
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:grid-cols-auto">
-            <TabsTrigger value="new-sale" className="flex items-center gap-2">
-              <Package className="h-4 w-4" />
-              Nouvelle Vente
-            </TabsTrigger>
-            <TabsTrigger value="history" className="flex items-center gap-2">
-              <History className="h-4 w-4" />
-              Historique
-            </TabsTrigger>
-            {canAccessAdmin && (
-              <TabsTrigger value="admin" className="flex items-center gap-2">
-                <Settings className="h-4 w-4" />
-                Administration
+        <div className="fade-in">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+            <TabsList className={`grid w-full ${canAccessAdmin ? 'grid-cols-3' : 'grid-cols-2'} max-w-2xl h-14 bg-muted/50 p-2 rounded-2xl border border-border/50`}>
+              <TabsTrigger 
+                value="new-sale" 
+                className="h-10 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-md smooth-transition font-medium"
+              >
+                <Package className="h-5 w-5 mr-2" />
+                Nouvelle Vente
               </TabsTrigger>
-            )}
-          </TabsList>
+              <TabsTrigger 
+                value="history" 
+                className="h-10 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-md smooth-transition font-medium"
+              >
+                <History className="h-5 w-5 mr-2" />
+                Historique
+              </TabsTrigger>
+              {canAccessAdmin && (
+                <TabsTrigger 
+                  value="admin" 
+                  className="h-10 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-md smooth-transition font-medium"
+                >
+                  <Settings className="h-5 w-5 mr-2" />
+                  Administration
+                </TabsTrigger>
+              )}
+            </TabsList>
 
-          <TabsContent value="new-sale">
-            <NewSaleForm />
-          </TabsContent>
-
-          <TabsContent value="history">
-            <SalesHistory canDelete={canDeleteSales} />
-          </TabsContent>
-
-          {canAccessAdmin && (
-            <TabsContent value="admin">
-              <Administration />
+            <TabsContent value="new-sale" className="mt-8">
+              <div className="slide-in-up">
+                <NewSaleForm />
+              </div>
             </TabsContent>
-          )}
-        </Tabs>
+
+            <TabsContent value="history" className="mt-8">
+              <div className="slide-in-up">
+                <SalesHistory canDelete={canDeleteSales} />
+              </div>
+            </TabsContent>
+
+            {canAccessAdmin && (
+              <TabsContent value="admin" className="mt-8">
+                <div className="slide-in-up">
+                  <Administration />
+                </div>
+              </TabsContent>
+            )}
+          </Tabs>
+        </div>
       </main>
     </div>
   );

@@ -158,13 +158,15 @@ export default function NewSaleForm() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Package className="h-5 w-5" />
+    <Card className="modern-card-elevated">
+      <CardHeader className="pb-6">
+        <CardTitle className="flex items-center gap-3 text-2xl">
+          <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl">
+            <Package className="h-6 w-6 text-white" />
+          </div>
           Nouvelle Vente
         </CardTitle>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-2">
           Enregistrement d'une vente de feux d'artifice
         </p>
       </CardHeader>
@@ -172,9 +174,11 @@ export default function NewSaleForm() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             {/* Seller Information */}
-            <div className="border-l-4 border-primary pl-4">
-              <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
-                <User className="h-5 w-5 text-primary" />
+            <div className="modern-card bg-muted/30 p-6 rounded-xl border-l-4 border-primary">
+              <h3 className="text-xl font-semibold text-foreground mb-6 flex items-center gap-3">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <User className="h-5 w-5 text-primary" />
+                </div>
                 Informations Vendeur
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -208,9 +212,11 @@ export default function NewSaleForm() {
             </div>
 
             {/* Product Information */}
-            <div className="border-l-4 border-info pl-4">
-              <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
-                <Package className="h-5 w-5 text-info" />
+            <div className="modern-card bg-blue-50/50 p-6 rounded-xl border-l-4 border-blue-500">
+              <h3 className="text-xl font-semibold text-foreground mb-6 flex items-center gap-3">
+                <div className="p-2 bg-blue-500/10 rounded-lg">
+                  <Package className="h-5 w-5 text-blue-600" />
+                </div>
                 Informations Produit
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -308,9 +314,11 @@ export default function NewSaleForm() {
             </div>
 
             {/* Customer Information */}
-            <div className="border-l-4 border-success pl-4">
-              <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
-                <Users className="h-5 w-5 text-success" />
+            <div className="modern-card bg-emerald-50/50 p-6 rounded-xl border-l-4 border-emerald-500">
+              <h3 className="text-xl font-semibold text-foreground mb-6 flex items-center gap-3">
+                <div className="p-2 bg-emerald-500/10 rounded-lg">
+                  <Users className="h-5 w-5 text-emerald-600" />
+                </div>
                 Informations Client
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -370,11 +378,13 @@ export default function NewSaleForm() {
             </div>
 
             {/* Identity Information */}
-            <div className="border-l-4 border-warning pl-4">
-              <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
-                <svg className="h-5 w-5 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
-                </svg>
+            <div className="modern-card bg-amber-50/50 p-6 rounded-xl border-l-4 border-amber-500">
+              <h3 className="text-xl font-semibold text-foreground mb-6 flex items-center gap-3">
+                <div className="p-2 bg-amber-500/10 rounded-lg">
+                  <svg className="h-5 w-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                  </svg>
+                </div>
                 Pièce d'Identité
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -444,9 +454,14 @@ export default function NewSaleForm() {
               </div>
             </div>
 
-            {/* Form Actions - Always visible */}
-            <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200 bg-white">
-              <Button type="button" variant="outline" onClick={() => {
+            {/* Form Actions */}
+            <div className="flex justify-end space-x-4 pt-8 mt-8 border-t border-border/50">
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="lg"
+                className="border-2 hover:bg-muted smooth-transition"
+                onClick={() => {
                 form.reset({
                   vendeur: '',
                   dateVente: new Date().toISOString().split('T')[0],
@@ -464,11 +479,16 @@ export default function NewSaleForm() {
                   dateDelivrance: '',
                 });
               }}>
-                <X className="h-4 w-4 mr-2" />
-                Annuler
+                <X className="h-5 w-5 mr-2" />
+                Réinitialiser
               </Button>
-              <Button type="submit" disabled={isSubmitting || createSaleMutation.isPending} className="bg-green-600 hover:bg-green-700 text-white">
-                <Save className="h-4 w-4 mr-2" />
+              <Button 
+                type="submit" 
+                size="lg"
+                disabled={isSubmitting || createSaleMutation.isPending}
+                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-[1.02] smooth-transition"
+              >
+                <Save className="h-5 w-5 mr-2" />
                 {isSubmitting || createSaleMutation.isPending ? 'Enregistrement...' : 'Enregistrer la Vente'}
               </Button>
             </div>
