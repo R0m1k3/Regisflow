@@ -57,11 +57,13 @@ export default function NewSaleForm() {
   const availableCategories = typeArticle ? ARTICLE_CATEGORY_MAPPING[typeArticle as keyof typeof ARTICLE_CATEGORY_MAPPING] || [] : [];
 
   const createSaleMutation = useMutation({
-    mutationFn: (saleData: any) =>
-      apiRequest('/api/sales', {
+    mutationFn: async (saleData: any) => {
+      const response = await apiRequest('/api/sales', {
         method: 'POST',
         body: JSON.stringify(saleData),
-      }),
+      });
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/sales'] });
       toast({

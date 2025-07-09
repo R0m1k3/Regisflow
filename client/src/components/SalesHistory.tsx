@@ -22,16 +22,19 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
   const [endDate, setEndDate] = useState('');
 
   // Query for sales
-  const { data: sales = [], isLoading } = useQuery<Sale[]>({
+  const { data: salesData, isLoading } = useQuery<Sale[]>({
     queryKey: ['/api/sales', startDate, endDate],
-    queryFn: () => {
+    queryFn: async () => {
       const params = new URLSearchParams();
       if (startDate) params.append('startDate', startDate);
       if (endDate) params.append('endDate', endDate);
       const queryString = params.toString();
-      return apiRequest(`/api/sales${queryString ? `?${queryString}` : ''}`);
+      const response = await apiRequest(`/api/sales${queryString ? `?${queryString}` : ''}`);
+      return response.json();
     },
   });
+
+  const sales = Array.isArray(salesData) ? salesData : [];
 
   // Delete mutation
   const deleteSaleMutation = useMutation({
