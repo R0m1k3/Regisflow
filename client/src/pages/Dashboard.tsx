@@ -118,12 +118,12 @@ function DashboardContent() {
           <div className="mb-6 sm:mb-8 slide-in-up">
             <Card className="modern-card-elevated overflow-hidden">
               <CardContent className="mobile-card-content">
-                <div className="flex items-center gap-4 sm:gap-6">
-                  <div className="relative flex-shrink-0">
-                    <div className="p-3 sm:p-4 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl sm:rounded-2xl shadow-lg">
-                      <Building2 className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
+                <div className="flex items-start gap-4 sm:gap-6">
+                  <div className="relative flex-shrink-0 mt-1">
+                    <div className="p-2 sm:p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg sm:rounded-xl shadow-lg">
+                      <Building2 className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                     </div>
-                    <div className="absolute -inset-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl sm:rounded-2xl blur opacity-20 -z-10"></div>
+                    <div className="absolute -inset-1 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg sm:rounded-xl blur opacity-20 -z-10"></div>
                   </div>
                   <div className="flex-1 min-w-0">
                     <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2 truncate">{selectedStore.name}</h2>

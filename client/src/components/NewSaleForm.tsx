@@ -178,9 +178,9 @@ export default function NewSaleForm() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="mobile-form-responsive">
             {/* Seller Information */}
             <div className="modern-card bg-muted bg-opacity-30 mobile-form-section rounded-xl border-l-4 border-primary">
-              <h3 className="mobile-header-responsive font-semibold text-foreground mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
-                <div className="p-2 sm:p-3 bg-primary bg-opacity-20 rounded-lg flex items-center justify-center">
-                  <User className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+              <h3 className="mobile-header-responsive font-semibold text-foreground mb-4 sm:mb-6 flex items-center gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary rounded-lg flex items-center justify-center shadow-sm">
+                  <User className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                 </div>
                 <span className="truncate">Informations Vendeur</span>
               </h3>
@@ -216,9 +216,9 @@ export default function NewSaleForm() {
 
             {/* Product Information */}
             <div className="modern-card bg-blue-50 bg-opacity-50 mobile-form-section rounded-xl border-l-4 border-blue-500">
-              <h3 className="mobile-header-responsive font-semibold text-foreground mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
-                <div className="p-1.5 sm:p-2 bg-blue-500 bg-opacity-10 rounded-lg">
-                  <Package className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+              <h3 className="mobile-header-responsive font-semibold text-foreground mb-4 sm:mb-6 flex items-center gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-500 rounded-lg flex items-center justify-center shadow-sm">
+                  <Package className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                 </div>
                 <span className="truncate">Informations Produit</span>
               </h3>
@@ -317,10 +317,10 @@ export default function NewSaleForm() {
             </div>
 
             {/* Customer Information */}
-            <div className="modern-card bg-emerald-50/50 mobile-form-section rounded-xl border-l-4 border-emerald-500">
-              <h3 className="mobile-header-responsive font-semibold text-foreground mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
-                <div className="p-1.5 sm:p-2 bg-emerald-500/10 rounded-lg">
-                  <Users className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600" />
+            <div className="modern-card bg-emerald-50 bg-opacity-50 mobile-form-section rounded-xl border-l-4 border-emerald-500">
+              <h3 className="mobile-header-responsive font-semibold text-foreground mb-4 sm:mb-6 flex items-center gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-emerald-500 rounded-lg flex items-center justify-center shadow-sm">
+                  <Users className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                 </div>
                 <span className="truncate">Informations Client</span>
               </h3>
@@ -405,10 +405,10 @@ export default function NewSaleForm() {
             </div>
 
             {/* Identity Information */}
-            <div className="modern-card bg-amber-50/50 mobile-form-section rounded-xl border-l-4 border-amber-500">
-              <h3 className="mobile-header-responsive font-semibold text-foreground mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
-                <div className="p-1.5 sm:p-2 bg-amber-500/10 rounded-lg">
-                  <svg className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="modern-card bg-amber-50 bg-opacity-50 mobile-form-section rounded-xl border-l-4 border-amber-500">
+              <h3 className="mobile-header-responsive font-semibold text-foreground mb-4 sm:mb-6 flex items-center gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-amber-500 rounded-lg flex items-center justify-center shadow-sm">
+                  <svg className="h-4 w-4 sm:h-5 sm:w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
                   </svg>
                 </div>
