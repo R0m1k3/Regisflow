@@ -37,7 +37,8 @@ export function useAuth() {
         method: 'POST', 
         body: JSON.stringify(credentials) 
       });
-      return response.json();
+      const data = await response.json();
+      return data;
     },
     onSuccess: (data) => {
       setUser(data.user);
