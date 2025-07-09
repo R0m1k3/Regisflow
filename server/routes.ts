@@ -294,23 +294,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const currentUser = await storage.getUser(req.session.userId!);
       const userData = insertUserSchema.partial().parse(req.body);
       
-      // Protection : empêcher un admin de changer son propre rôle par accident
-      if (userId === currentUser?.id && userData.role && userData.role !== 'administrator') {
-        return res.status(400).json({ 
-          error: "Vous ne pouvez pas changer votre propre rôle d'administrateur" 
-        });
-      }
-      
-      // Protection : ne pas permettre de changer le rôle du dernier administrateur
-      if (userData.role && userData.role !== 'administrator') {
-        const users = await storage.getAllUsers();
-        const adminUsers = users.filter(u => u.role === 'administrator');
-        const userToUpdate = users.find(u => u.id === userId);
-        
-        if (userToUpdate?.role === 'administrator' && adminUsers.length <= 1) {
+      // Protection spécifique pour le rôle seulement
+      if (userData.role) {
+        // Protection : empêcher un admin de changer son propre rôle par accident
+        if (userId === currentUser?.id && userData.role !== 'administrator') {
           return res.status(400).json({ 
-            error: "Impossible de modifier le rôle du dernier administrateur" 
+            error: "Vous ne pouvez pas changer votre propre rôle d'administrateur" 
           });
+        }
+        
+        // Protection : ne pas permettre de changer le rôle du dernier administrateur
+        if (userData.role !== 'administrator') {
+          const users = await storage.getAllUsers();
+          const adminUsers = users.filter(u => u.role === 'administrator');
+          const userToUpdate = users.find(u => u.id === userId);
+          
+          if (userToUpdate?.role === 'administrator' && adminUsers.length <= 1) {
+            return res.status(400).json({ 
+              error: "Impossible de modifier le rôle du dernier administrateur" 
+            });
+          }
         }
       }
       

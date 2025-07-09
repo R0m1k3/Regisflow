@@ -136,9 +136,12 @@ export default function Administration() {
       toast({ title: "Utilisateur modifié avec succès" });
     },
     onError: (error) => {
-      const errorMessage = error.message.includes("Vous ne pouvez pas changer votre propre rôle") 
-        ? "Vous ne pouvez pas changer votre propre rôle d'administrateur"
-        : "Impossible de modifier l'utilisateur";
+      let errorMessage = "Impossible de modifier l'utilisateur";
+      if (error.message.includes("Vous ne pouvez pas changer votre propre rôle")) {
+        errorMessage = "Vous ne pouvez pas changer votre propre rôle d'administrateur";
+      } else if (error.message.includes("Impossible de modifier le rôle du dernier administrateur")) {
+        errorMessage = "Impossible de modifier le rôle du dernier administrateur";
+      }
       toast({ title: "Erreur", description: errorMessage, variant: "destructive" });
     },
   });
