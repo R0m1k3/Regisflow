@@ -41,6 +41,8 @@ Preferred communication style: Simple, everyday language.
 5. **Sales History**: Complete transaction history with date filtering and search
 6. **Data Export**: CSV export functionality for regulatory reporting
 7. **Role-Based Permissions**: Different access levels for Admin, Manager, and Employee roles
+8. **Automated Data Purge**: Regulatory compliance with automatic deletion of sales data older than 19 months
+9. **Backup & Recovery**: Complete database backup system with import/export capabilities
 
 ### Authentication & Authorization
 - **Administrators**: Full access to all features including user/store management
@@ -181,3 +183,12 @@ Preferred communication style: Simple, everyday language.
 - ✅ Added dynamic credential visibility based on whether default password is still in use
 - ✅ Security warning displayed when default credentials are shown
 - ✅ API endpoint to check default credential status with password hash comparison
+
+### Automatic Data Purge System (January 9, 2025)
+- ✅ Implemented automatic purge system for sales data older than 19 months
+- ✅ Scheduled purge execution on the 1st of each month at 02:00 (Europe/Paris timezone)
+- ✅ Manual purge execution available in administration panel
+- ✅ Comprehensive statistics dashboard showing purge-eligible records
+- ✅ Regulatory compliance with French fireworks sales data retention requirements
+- ✅ Safety confirmation dialogs for manual purge operations
+- ✅ Real-time monitoring of data retention status with visual indicators

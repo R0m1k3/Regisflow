@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { startBackupScheduler } from "./backup-scheduler";
+import { startPurgeScheduler } from "./data-purge";
 
 const app = express();
 app.use(express.json());
@@ -70,5 +71,8 @@ app.use((req, res, next) => {
     
     // Start the automatic backup scheduler
     startBackupScheduler();
+    
+    // Start the data purge scheduler
+    startPurgeScheduler();
   });
 })();

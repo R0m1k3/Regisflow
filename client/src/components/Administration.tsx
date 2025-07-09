@@ -81,6 +81,15 @@ export default function Administration() {
     refetchInterval: 30000, // Refresh every 30 seconds
   });
 
+  const { data: purgeStats } = useQuery({
+    queryKey: ['/api/admin/purge/stats'],
+    queryFn: async () => {
+      const response = await apiRequest('/api/admin/purge/stats');
+      return response.json();
+    },
+    refetchInterval: 30000, // Refresh every 30 seconds
+  });
+
   // User mutations
   const createUserMutation = useMutation({
     mutationFn: async (userData: CreateUserData) => {
@@ -386,6 +395,34 @@ export default function Administration() {
     input.click();
   };
 
+  const executePurgeMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest('/api/admin/purge/execute', {
+        method: 'POST',
+      });
+      return response.json();
+    },
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/purge/stats'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/sales'] });
+      toast({ 
+        title: "Purge exécutée avec succès", 
+        description: result.message || `${result.deletedCount} vente(s) supprimée(s)`
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erreur de purge",
+        description: error.message || "Impossible d'exécuter la purge",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleExecutePurge = () => {
+    executePurgeMutation.mutate();
+  };
+
   const getRoleBadge = (role: string) => {
     const variants = {
       administrator: "destructive" as const,
@@ -418,6 +455,7 @@ export default function Administration() {
             <TabsTrigger value="users">Utilisateurs</TabsTrigger>
             <TabsTrigger value="stores">Magasins</TabsTrigger>
             <TabsTrigger value="backup">Sauvegarde</TabsTrigger>
+            <TabsTrigger value="purge">Purge</TabsTrigger>
           </TabsList>
 
           {/* Users Tab */}
@@ -1234,6 +1272,134 @@ export default function Administration() {
                   <div>
                     <strong>Recommandation :</strong> Les sauvegardes automatiques couvrent la plupart des besoins, mais vous pouvez créer des sauvegardes manuelles avant des modifications importantes.
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Data Purge Tab */}
+          <TabsContent value="purge" className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <Clock className="h-5 w-5" />
+                Purge des Données
+              </h3>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    Statistiques de Purge
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">Total des ventes :</span>
+                    <span className="font-medium">{purgeStats?.totalSales || 0}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">Ventes anciennes (&gt;19 mois) :</span>
+                    <span className="font-medium text-orange-600">{purgeStats?.oldSales || 0}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">Date limite :</span>
+                    <span className="font-medium text-xs">
+                      {purgeStats?.cutoffDate ? new Date(purgeStats.cutoffDate).toLocaleDateString('fr-FR') : '-'}
+                    </span>
+                  </div>
+                  <div className="pt-2 border-t">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-3 h-3 rounded-full ${purgeStats?.purgeEligible ? 'bg-orange-500' : 'bg-green-500'}`}></div>
+                      <span className="text-sm">
+                        {purgeStats?.purgeEligible ? 'Purge nécessaire' : 'Aucune purge nécessaire'}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Settings className="h-4 w-4" />
+                    Configuration
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-sm">Purge Automatique</h4>
+                    <p className="text-xs text-muted-foreground">
+                      Exécutée automatiquement le 1er de chaque mois à 02:00
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-sm">Rétention des Données</h4>
+                    <p className="text-xs text-muted-foreground">
+                      19 mois maximum (conforme à la réglementation)
+                    </p>
+                  </div>
+                  <div className="pt-2 border-t">
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button 
+                          variant="destructive" 
+                          size="sm" 
+                          className="w-full"
+                          disabled={!purgeStats?.purgeEligible || executePurgeMutation.isPending}
+                        >
+                          {executePurgeMutation.isPending ? 'Purge en cours...' : 'Exécuter Purge Manuelle'}
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Confirmer la Purge</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Cette action va supprimer définitivement {purgeStats?.oldSales || 0} vente(s) 
+                            datant de plus de 19 mois. Cette opération est irréversible.
+                            <br/><br/>
+                            <strong>Ventes concernées :</strong> antérieures au {purgeStats?.cutoffDate ? new Date(purgeStats.cutoffDate).toLocaleDateString('fr-FR') : '-'}
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Annuler</AlertDialogCancel>
+                          <AlertDialogAction onClick={handleExecutePurge} className="bg-destructive hover:bg-destructive/90">
+                            Confirmer la Purge
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Information sur la Purge</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                  <h4 className="font-medium text-sm text-blue-900 mb-2">📋 Réglementation</h4>
+                  <p className="text-xs text-blue-700">
+                    Les données de ventes de feux d'artifice doivent être conservées pendant 19 mois maximum 
+                    conformément à la réglementation française sur les articles pyrotechniques.
+                  </p>
+                </div>
+                <div className="bg-green-50 p-3 rounded-lg border border-green-200">
+                  <h4 className="font-medium text-sm text-green-900 mb-2">🔄 Automatisation</h4>
+                  <p className="text-xs text-green-700">
+                    La purge s'exécute automatiquement chaque mois pour maintenir la conformité. 
+                    Vous pouvez également l'exécuter manuellement si nécessaire.
+                  </p>
+                </div>
+                <div className="bg-orange-50 p-3 rounded-lg border border-orange-200">
+                  <h4 className="font-medium text-sm text-orange-900 mb-2">⚠️ Attention</h4>
+                  <p className="text-xs text-orange-700">
+                    La purge supprime définitivement les données. Assurez-vous d'avoir effectué 
+                    une sauvegarde récente avant d'exécuter une purge manuelle.
+                  </p>
                 </div>
               </CardContent>
             </Card>

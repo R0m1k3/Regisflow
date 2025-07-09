@@ -6,6 +6,7 @@ import connectPg from "connect-pg-simple";
 import { loginSchema, insertUserSchema, insertStoreSchema, insertSaleSchema } from "@shared/schema";
 import { z } from "zod";
 import { createAutomaticBackup, getBackupStats } from "./backup-scheduler";
+import { executePurgeManually, getPurgeStats } from "./data-purge";
 
 declare module 'express-session' {
   interface SessionData {
@@ -532,6 +533,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Backup stats error:', error);
       res.status(500).json({ error: "Failed to get backup statistics" });
+    }
+  });
+
+  // Admin routes - Data Purge
+  app.get('/api/admin/purge/stats', requireRole(['admin']), async (req, res) => {
+    try {
+      const stats = await getPurgeStats();
+      res.json(stats);
+    } catch (error) {
+      console.error('Get purge stats error:', error);
+      res.status(500).json({ error: "Failed to get purge stats" });
+    }
+  });
+
+  app.post('/api/admin/purge/execute', requireRole(['admin']), async (req, res) => {
+    try {
+      const result = await executePurgeManually();
+      res.json(result);
+    } catch (error) {
+      console.error('Execute purge error:', error);
+      res.status(500).json({ error: "Failed to execute purge" });
     }
   });
 
