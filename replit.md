@@ -122,6 +122,15 @@ Preferred communication style: Simple, everyday language.
 - **Sessions**: Secure session storage in PostgreSQL sessions table
 - **Environment Variables**: DATABASE_URL, SESSION_SECRET (optional)
 
+### Docker Deployment
+- **Container Strategy**: Multi-stage Docker build for optimized production images
+- **Service Architecture**: Docker Compose with PostgreSQL, Nginx, and application containers
+- **Database**: PostgreSQL 15 with persistent volumes and automated initialization
+- **Reverse Proxy**: Nginx with compression, caching, and security headers
+- **Health Monitoring**: Health checks for all services with automatic recovery
+- **Volume Management**: Persistent storage for database and backup data
+- **Environment**: Complete environment variable configuration with security templates
+
 ### Security Configuration
 - **Password Hashing**: bcrypt with appropriate salt rounds
 - **Session Security**: HTTP-only cookies with configurable expiration
@@ -192,3 +201,13 @@ Preferred communication style: Simple, everyday language.
 - ✅ Regulatory compliance with French fireworks sales data retention requirements
 - ✅ Safety confirmation dialogs for manual purge operations
 - ✅ Real-time monitoring of data retention status with visual indicators
+
+### Docker Configuration (January 9, 2025)
+- ✅ Complete Docker setup with multi-stage build for production optimization
+- ✅ Docker Compose configuration with PostgreSQL, Nginx, and application services
+- ✅ Automated database initialization and migration scripts
+- ✅ Health checks and proper container orchestration
+- ✅ Production-ready configuration with security best practices
+- ✅ Persistent volumes for database and backup data
+- ✅ Environment variable configuration with .env.example template
+- ✅ Comprehensive Docker documentation with deployment instructions

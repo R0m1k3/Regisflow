@@ -1,0 +1,66 @@
+# Fichiers et répertoires à ignorer lors de la construction Docker
+
+# Dépendances
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Fichiers de développement
+.env
+.env.local
+.env.development
+.env.test
+
+# Fichiers de cache
+.cache/
+.parcel-cache/
+.vite/
+
+# Fichiers de construction
+dist/
+build/
+
+# Fichiers de logs
+logs/
+*.log
+
+# Fichiers temporaires
+tmp/
+temp/
+
+# Fichiers de système
+.DS_Store
+Thumbs.db
+
+# Fichiers d'éditeur
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Fichiers de test
+coverage/
+.nyc_output/
+
+# Fichiers de sauvegarde
+backups/
+*.backup
+
+# Fichiers Git
+.git/
+.gitignore
+
+# Fichiers Docker
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# Fichiers de documentation
+README.md
+docs/
+
+# Fichiers de configuration locale
+.replit
+replit.nix
