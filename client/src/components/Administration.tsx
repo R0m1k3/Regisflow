@@ -867,12 +867,11 @@ export default function Administration() {
                             );
                           }}
                         />
-                        <FormField
-                          control={editUserForm.control}
-                          name="storeId"
-                          render={({ field }) => {
-                            const isEditingSelf = editingUser?.id === currentUser?.id;
-                            return (
+                        {editingUser?.id !== currentUser?.id && (
+                          <FormField
+                            control={editUserForm.control}
+                            name="storeId"
+                            render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Magasin</FormLabel>
                                 <Select value={field.value?.toString() || "none"} onValueChange={(value) => field.onChange(value === "none" ? undefined : parseInt(value))}>
@@ -890,16 +889,11 @@ export default function Administration() {
                                     ))}
                                   </SelectContent>
                                 </Select>
-                                {isEditingSelf && (
-                                  <p className="text-sm text-muted-foreground">
-                                    En tant qu'administrateur, vous pouvez accéder à tous les magasins
-                                  </p>
-                                )}
                                 <FormMessage />
                               </FormItem>
-                            );
-                          }}
-                        />
+                            )}
+                          />
+                        )}
                       </div>
                       <div className="flex justify-end space-x-2">
                         <Button type="button" variant="outline" onClick={() => setEditingUser(null)}>
