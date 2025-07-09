@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { useStoreContext } from '@/hooks/useStoreContext';
 import { apiRequest } from '@/lib/queryClient';
 import { validateRequiredFields, validateEAN13, ARTICLE_CATEGORY_MAPPING, IDENTITY_TYPES } from '@/lib/validation';
 import { Package, User, Users, Save, X } from 'lucide-react';
@@ -32,6 +34,8 @@ interface FormData {
 export default function NewSaleForm() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const { selectedStoreId } = useStoreContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<FormData>({
@@ -58,9 +62,15 @@ export default function NewSaleForm() {
 
   const createSaleMutation = useMutation({
     mutationFn: async (saleData: any) => {
+      const dataToSend = {
+        ...saleData,
+        // Include storeId for admin users
+        ...(user?.role === 'admin' && selectedStoreId && { storeId: selectedStoreId })
+      };
+      
       const response = await apiRequest('/api/sales', {
         method: 'POST',
-        body: JSON.stringify(saleData),
+        body: JSON.stringify(dataToSend),
       });
       return response.json();
     },

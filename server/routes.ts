@@ -117,6 +117,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Store routes for users
+  app.get('/api/stores', requireAuth, async (req, res) => {
+    try {
+      const user = await storage.getUser(req.session.userId!);
+      if (!user || !user.storeId) {
+        return res.status(404).json({ error: "User store not found" });
+      }
+
+      const store = await storage.getStore(user.storeId);
+      if (!store) {
+        return res.status(404).json({ error: "Store not found" });
+      }
+      
+      res.json([store]); // Return as array to match admin endpoint format
+    } catch (error) {
+      console.error('Get user stores error:', error);
+      res.status(500).json({ error: "Failed to get stores" });
+    }
+  });
+
   // Sales routes
   app.get('/api/sales', requireAuth, async (req, res) => {
     try {
@@ -125,9 +145,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "User not found" });
       }
 
-      const { startDate, endDate } = req.query;
+      const { startDate, endDate, storeId } = req.query;
+      
+      // Determine which store to query
+      let targetStoreId: number;
+      if (user.role === 'admin' && storeId) {
+        // Admin can query any store
+        targetStoreId = parseInt(storeId as string);
+      } else {
+        // Non-admin users can only query their own store
+        if (!user.storeId) {
+          return res.status(400).json({ error: "User has no assigned store" });
+        }
+        targetStoreId = user.storeId;
+      }
+
       const sales = await storage.getSalesByStore(
-        user.storeId!,
+        targetStoreId,
         startDate as string,
         endDate as string
       );
@@ -145,9 +179,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "User not found" });
       }
 
+      // Determine which store to use for the sale
+      let targetStoreId: number;
+      if (user.role === 'admin' && req.body.storeId) {
+        // Admin can create sales for any store
+        targetStoreId = req.body.storeId;
+      } else {
+        // Non-admin users can only create sales for their assigned store
+        if (!user.storeId) {
+          return res.status(400).json({ error: "User has no assigned store" });
+        }
+        targetStoreId = user.storeId;
+      }
+
       const saleData = insertSaleSchema.parse({
         ...req.body,
-        storeId: user.storeId,
+        storeId: targetStoreId,
         userId: user.id
       });
 

@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { useStoreContext } from '@/hooks/useStoreContext';
+import { useAuth } from '@/hooks/useAuth';
 import { apiRequest } from '@/lib/queryClient';
 import type { Sale } from '@shared/schema';
 import { History, Download, Trash2, Eye, Filter } from 'lucide-react';
@@ -17,21 +19,30 @@ interface SalesHistoryProps {
 export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const { selectedStoreId } = useStoreContext();
   const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
   // Query for sales
   const { data: salesData, isLoading } = useQuery<Sale[]>({
-    queryKey: ['/api/sales', startDate, endDate],
+    queryKey: ['/api/sales', startDate, endDate, selectedStoreId],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (startDate) params.append('startDate', startDate);
       if (endDate) params.append('endDate', endDate);
+      
+      // Add storeId for admin users
+      if (user?.role === 'admin' && selectedStoreId) {
+        params.append('storeId', selectedStoreId.toString());
+      }
+      
       const queryString = params.toString();
       const response = await apiRequest(`/api/sales${queryString ? `?${queryString}` : ''}`);
       return response.json();
     },
+    enabled: !!selectedStoreId, // Only run query when store is selected
   });
 
   const sales = Array.isArray(salesData) ? salesData : [];
