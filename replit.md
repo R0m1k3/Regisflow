@@ -167,3 +167,11 @@ Preferred communication style: Simple, everyday language.
 - ✅ Automatic ID remapping during import to handle database constraints
 - ✅ Security measures: passwords excluded from backups, admin account protected during restore
 - ✅ User-friendly interface with clear warnings for destructive operations
+
+### Automatic Backup Scheduler (January 9, 2025)
+- ✅ Implemented automatic backup system with node-cron running every 12 hours (00:00 and 12:00)
+- ✅ Automatic cleanup maintaining only the 10 most recent backups to prevent disk space issues
+- ✅ Backup files stored in server/backups/ directory with timestamped filenames
+- ✅ Enhanced administration interface showing backup statistics and manual backup creation
+- ✅ Real-time backup status monitoring with automatic stats refresh every 30 seconds
+- ✅ Initial backup creation on server startup if no backups exist

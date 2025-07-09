@@ -5,6 +5,7 @@ import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { loginSchema, insertUserSchema, insertStoreSchema, insertSaleSchema } from "@shared/schema";
 import { z } from "zod";
+import { createAutomaticBackup, getBackupStats } from "./backup-scheduler";
 
 declare module 'express-session' {
   interface SessionData {
@@ -483,13 +484,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "Backup imported successfully",
         imported: {
           stores: backupData.data.stores.length,
-          users: backupData.data.users.filter(u => u.username !== 'admin').length,
+          users: backupData.data.users.filter((u: any) => u.username !== 'admin').length,
           sales: backupData.data.sales.length
         }
       });
     } catch (error) {
       console.error('Import backup error:', error);
-      res.status(500).json({ error: "Failed to import backup", details: error.message });
+      res.status(500).json({ error: "Failed to import backup", details: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  });
+
+  // Manual backup trigger route
+  app.post('/api/admin/backup/create', requireRole(['admin']), async (req, res) => {
+    try {
+      const result = await createAutomaticBackup();
+      if (result.success) {
+        res.json({
+          message: "Manual backup created successfully",
+          filename: result.filename,
+          stats: result.stats
+        });
+      } else {
+        res.status(500).json({ error: "Failed to create backup", details: result.error });
+      }
+    } catch (error) {
+      console.error('Manual backup error:', error);
+      res.status(500).json({ error: "Failed to create backup" });
+    }
+  });
+
+  // Backup statistics route
+  app.get('/api/admin/backup/stats', requireRole(['admin']), async (req, res) => {
+    try {
+      const stats = getBackupStats();
+      res.json(stats);
+    } catch (error) {
+      console.error('Backup stats error:', error);
+      res.status(500).json({ error: "Failed to get backup statistics" });
     }
   });
 

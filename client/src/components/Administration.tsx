@@ -15,7 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { insertUserSchema, insertStoreSchema, type User, type Store } from "@shared/schema";
-import { Users, Building2, Plus, Edit, Trash2, Settings, Download, Upload, Database } from "lucide-react";
+import { Users, Building2, Plus, Edit, Trash2, Settings, Download, Upload, Database, Clock, Calendar } from "lucide-react";
 import { z } from "zod";
 
 const createUserSchema = insertUserSchema.extend({
@@ -70,6 +70,15 @@ export default function Administration() {
       const response = await apiRequest('/api/admin/stores');
       return response.json();
     },
+  });
+
+  const { data: backupStats } = useQuery({
+    queryKey: ['/api/admin/backup/stats'],
+    queryFn: async () => {
+      const response = await apiRequest('/api/admin/backup/stats');
+      return response.json();
+    },
+    refetchInterval: 30000, // Refresh every 30 seconds
   });
 
   // User mutations
@@ -319,6 +328,29 @@ export default function Administration() {
       toast({
         title: "Erreur",
         description: "Impossible d'importer la sauvegarde",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const createManualBackupMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest('/api/admin/backup/create', {
+        method: 'POST',
+      });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/backup/stats'] });
+      toast({
+        title: "Sauvegarde créée",
+        description: `Sauvegarde automatique créée: ${data.filename}`,
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Erreur de sauvegarde",
+        description: error.message || "Impossible de créer la sauvegarde",
         variant: "destructive",
       });
     },
@@ -1057,6 +1089,51 @@ export default function Administration() {
               </h3>
             </div>
 
+            {/* Automatic Backup Status */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="h-5 w-5" />
+                  Sauvegarde Automatique
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-600">
+                      {backupStats?.totalBackups || 0}
+                    </div>
+                    <div className="text-sm text-muted-foreground">Sauvegardes disponibles</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-600">12h</div>
+                    <div className="text-sm text-muted-foreground">Intervalle automatique</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-purple-600">10</div>
+                    <div className="text-sm text-muted-foreground">Maximum conservées</div>
+                  </div>
+                </div>
+                <div className="mt-4 p-3 bg-muted rounded-lg">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Calendar className="h-4 w-4" />
+                    <span>Prochaine sauvegarde automatique : 00:00 ou 12:00</span>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <Button 
+                    onClick={() => createManualBackupMutation.mutate()}
+                    disabled={createManualBackupMutation.isPending}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    <Clock className="h-4 w-4 mr-2" />
+                    {createManualBackupMutation.isPending ? "Création en cours..." : "Créer une Sauvegarde Manuelle"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Export Backup */}
               <Card>
@@ -1143,6 +1220,9 @@ export default function Administration() {
               <CardContent>
                 <div className="space-y-3 text-sm">
                   <div>
+                    <strong>Sauvegarde automatique :</strong> Le système crée automatiquement une sauvegarde toutes les 12 heures (00:00 et 12:00) et conserve les 10 plus récentes.
+                  </div>
+                  <div>
                     <strong>Format des fichiers :</strong> Les sauvegardes sont au format JSON et contiennent toutes les données de l'application.
                   </div>
                   <div>
@@ -1152,7 +1232,7 @@ export default function Administration() {
                     <strong>Sécurité :</strong> Les mots de passe sont hachés et ne peuvent pas être récupérés depuis une sauvegarde.
                   </div>
                   <div>
-                    <strong>Recommandation :</strong> Effectuez des sauvegardes régulières et stockez-les en lieu sûr.
+                    <strong>Recommandation :</strong> Les sauvegardes automatiques couvrent la plupart des besoins, mais vous pouvez créer des sauvegardes manuelles avant des modifications importantes.
                   </div>
                 </div>
               </CardContent>
