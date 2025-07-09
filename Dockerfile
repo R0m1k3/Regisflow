@@ -48,6 +48,9 @@ COPY --from=builder --chown=regisflow:nodejs /build/server/prod-start.js ./serve
 COPY --from=builder --chown=regisflow:nodejs /build/drizzle.config.ts ./
 COPY --from=builder --chown=regisflow:nodejs /build/node_modules ./node_modules
 
+# Copier les assets client au bon endroit pour serveStatic
+COPY --from=builder --chown=regisflow:nodejs /build/dist/public ./public
+
 # Les dépendances sont déjà copiées depuis le builder
 # Nettoyer le cache npm uniquement
 RUN npm cache clean --force && \
