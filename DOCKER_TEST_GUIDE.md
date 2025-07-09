@@ -2,17 +2,18 @@
 
 ## ✅ Problème Résolu
 
-Le problème `TypeError [ERR_INVALID_ARG_TYPE]: The "paths[0]" argument must be of type string. Received undefined` a été résolu en utilisant `npm run start` au lieu d'appeler directement `node dist/index.js`.
+Le problème `TypeError [ERR_INVALID_ARG_TYPE]: The "paths[0]" argument must be of type string. Received undefined` a été résolu avec un script de compatibilité Node.js 18.
 
 ### Cause du Problème
-- Node.js 18 ne supporte pas complètement `import.meta.dirname`
-- Le code dans `server/vite.ts` utilisait cette fonctionnalité non disponible
-- Le script `npm run start` gère automatiquement ces problèmes de compatibilité
+- Node.js 18 ne supporte pas `import.meta.dirname` 
+- Le code compilé dans `dist/index.js` utilise cette fonctionnalité non disponible
+- L'erreur se produit lors de la résolution des chemins (ligne 955 dans dist/index.js)
 
 ### Solution Appliquée
-- Modification du script Docker d'entrée pour utiliser `npm run start`
-- Ajout des variables d'environnement appropriées
-- Conservation de la structure existante du projet
+- Création d'un script `server/prod-start.js` qui remplace `import.meta.dirname` par des valeurs statiques
+- Modification du script Docker d'entrée pour utiliser ce script de compatibilité
+- Le script lit le fichier compilé et remplace les références undefined par des chemins absolus
+- Création automatique du répertoire `public` pour les fichiers statiques
 
 ## Test du Déploiement Docker
 
@@ -89,10 +90,16 @@ PORT=5000
 ✅ PostgreSQL prêt!
 ✅ Base de données configurée
 🎯 Démarrage de RegisFlow...
+✅ Node.js 18 compatibility fix applied
 serving on port 5000
 📅 Automatic backup scheduler started
 🕐 Planificateur de purge des ventes démarré
 ```
+
+### Fichiers de Solution
+- `server/prod-start.js` : Script de compatibilité Node.js 18
+- `docker-entrypoint-simple.sh` : Script d'entrée Docker simplifié
+- `Dockerfile` : Configuration optimisée pour production
 
 ## Compte par Défaut
 - **Utilisateur** : admin

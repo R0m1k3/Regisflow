@@ -44,6 +44,7 @@ RUN mkdir -p /app/backups /app/logs /app/data && \
 COPY --from=builder --chown=regisflow:nodejs /build/package*.json ./
 COPY --from=builder --chown=regisflow:nodejs /build/dist ./dist
 COPY --from=builder --chown=regisflow:nodejs /build/shared ./shared
+COPY --from=builder --chown=regisflow:nodejs /build/server/prod-start.js ./server/
 COPY --from=builder --chown=regisflow:nodejs /build/drizzle.config.ts ./
 COPY --from=builder --chown=regisflow:nodejs /build/node_modules ./node_modules
 
