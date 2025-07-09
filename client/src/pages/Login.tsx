@@ -70,7 +70,7 @@ export default function Login() {
           </div>
           <div className="space-y-2">
             <CardTitle className="text-3xl font-bold gradient-text">RegisFlow</CardTitle>
-            <p className="text-muted-foreground text-lg">Gestion moderne des feux d'artifice</p>
+            <p className="text-muted-foreground text-lg">Registre des ventes des Feux d'artifice</p>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">

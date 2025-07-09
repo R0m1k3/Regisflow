@@ -52,7 +52,7 @@ function DashboardContent() {
               </div>
               <div>
                 <h1 className="text-xl font-bold gradient-text">RegisFlow</h1>
-                <p className="text-sm text-muted-foreground">Gestion moderne des feux d'artifice</p>
+                <p className="text-sm text-muted-foreground">Registre des ventes des Feux d'artifice</p>
               </div>
             </div>
             
