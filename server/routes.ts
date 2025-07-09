@@ -118,13 +118,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Health check endpoint for Docker
-  app.get('/health', (req, res) => {
-    res.status(200).json({
-      status: 'healthy',
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-      environment: process.env.NODE_ENV || 'development'
-    });
+  app.get('/health', async (req, res) => {
+    try {
+      // Test de connexion à la base de données
+      await storage.initializeDefaults();
+      res.status(200).json({
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        database: 'connected',
+        environment: process.env.NODE_ENV || 'development'
+      });
+    } catch (error) {
+      console.error('Health check failed:', error);
+      res.status(503).json({
+        status: 'unhealthy',
+        timestamp: new Date().toISOString(),
+        database: 'disconnected',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
   });
 
   app.get('/api/auth/me', requireAuth, async (req, res) => {
