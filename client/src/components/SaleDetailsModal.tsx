@@ -1,0 +1,119 @@
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { X } from 'lucide-react';
+import { Sale } from '@/types/sale';
+import { formatDate, formatDateTime } from '@/lib/export';
+
+interface SaleDetailsModalProps {
+  isOpen: boolean;
+  sale: Sale | null;
+  onClose: () => void;
+}
+
+export default function SaleDetailsModal({ isOpen, sale, onClose }: SaleDetailsModalProps) {
+  if (!sale) return null;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Détails de la Vente</DialogTitle>
+        </DialogHeader>
+        
+        <div className="space-y-6">
+          {/* Seller Information */}
+          <div className="border-l-4 border-primary pl-4">
+            <h4 className="font-medium text-gray-900 mb-2">Informations Vendeur</h4>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div><span className="font-medium">Vendeur:</span> {sale.vendeur}</div>
+              <div><span className="font-medium">Date de vente:</span> {formatDate(sale.dateVente)}</div>
+            </div>
+          </div>
+          
+          {/* Product Information */}
+          <div className="border-l-4 border-info pl-4">
+            <h4 className="font-medium text-gray-900 mb-2">Informations Produit</h4>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div><span className="font-medium">Type d'article:</span> {sale.typeArticle}</div>
+              <div>
+                <span className="font-medium">Catégorie:</span>{' '}
+                <Badge variant={sale.categorie === 'F2' ? 'secondary' : 'destructive'}>
+                  {sale.categorie}
+                </Badge>
+              </div>
+              <div><span className="font-medium">Quantité:</span> {sale.quantite}</div>
+              <div><span className="font-medium">Code produit:</span> {sale.gencode || 'Non spécifié'}</div>
+            </div>
+          </div>
+          
+          {/* Customer Information */}
+          <div className="border-l-4 border-success pl-4">
+            <h4 className="font-medium text-gray-900 mb-2">Informations Client</h4>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div><span className="font-medium">Nom:</span> {sale.nom}</div>
+              <div><span className="font-medium">Prénom:</span> {sale.prenom}</div>
+              <div>
+                <span className="font-medium">Date de naissance:</span>{' '}
+                {sale.dateNaissance ? formatDate(sale.dateNaissance) : 'Non spécifiée'}
+              </div>
+              <div><span className="font-medium">Lieu de naissance:</span> {sale.lieuNaissance || 'Non spécifié'}</div>
+            </div>
+          </div>
+          
+          {/* Identity Document */}
+          <div className="border-l-4 border-yellow-500 pl-4">
+            <h4 className="font-medium text-gray-900 mb-2">Pièce d'Identité</h4>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div><span className="font-medium">Type:</span> {sale.typeIdentite || 'Non spécifié'}</div>
+              <div><span className="font-medium">Autorité de délivrance:</span> {sale.autoriteDelivrance || 'Non spécifiée'}</div>
+              <div>
+                <span className="font-medium">Date de délivrance:</span>{' '}
+                {sale.dateDelivrance ? formatDate(sale.dateDelivrance) : 'Non spécifiée'}
+              </div>
+            </div>
+          </div>
+          
+          {/* Photos */}
+          <div className="border-l-4 border-purple-500 pl-4">
+            <h4 className="font-medium text-gray-900 mb-2">Photos de la Pièce d'Identité</h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <span className="text-sm font-medium">Photo Recto:</span>
+                {sale.photoRecto ? (
+                  <img src={sale.photoRecto} alt="Photo recto" className="mt-2 w-32 h-auto rounded border" />
+                ) : (
+                  <p className="text-sm text-gray-500 mt-2">Aucune photo</p>
+                )}
+              </div>
+              <div>
+                <span className="text-sm font-medium">Photo Verso:</span>
+                {sale.photoVerso ? (
+                  <img src={sale.photoVerso} alt="Photo verso" className="mt-2 w-32 h-auto rounded border" />
+                ) : (
+                  <p className="text-sm text-gray-500 mt-2">Aucune photo</p>
+                )}
+              </div>
+            </div>
+          </div>
+          
+          {/* System Information */}
+          <div className="border-l-4 border-gray-400 pl-4">
+            <h4 className="font-medium text-gray-900 mb-2">Informations Système</h4>
+            <div className="text-sm">
+              <div><span className="font-medium">Timestamp:</span> {formatDateTime(sale.timestamp)}</div>
+              <div><span className="font-medium">ID:</span> {sale.id}</div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="flex justify-end pt-4 border-t border-gray-200">
+          <Button onClick={onClose} variant="outline">
+            <X className="h-4 w-4 mr-2" />
+            Fermer
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
