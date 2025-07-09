@@ -25,7 +25,15 @@ fi
 # Créer les répertoires nécessaires
 mkdir -p /app/backups /app/logs
 
-# Initialiser la base de données (les tables seront créées automatiquement par l'application)
+# Créer les tables de la base de données
+echo "📦 Création des tables de la base de données..."
+if npx drizzle-kit push --config=./drizzle.config.ts; then
+  echo "✅ Tables créées avec succès"
+else
+  echo "❌ Erreur lors de la création des tables"
+  exit 1
+fi
+
 echo "✅ Base de données configurée"
 
 # Démarrer l'application avec le script de polyfill Node.js 18

@@ -1,0 +1,95 @@
+    at async DatabaseStorage.getAllUsers (file:///app/dist/index.js:187:12)
+    at async DatabaseStorage.initializeDefaults (file:///app/dist/index.js:258:27)
+    at async registerRoutes (file:///app/dist/index.js:510:22)
+    at async file:///app/dist/index.js:1071:18 {
+  length: 105,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '139',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1392',
+  routine: 'parserOpenTable'
+}
+Node.js v18.20.8
+🚀 Démarrage de RegisFlow (mode simplifié)...
+📡 Attente de la base de données...
+✅ PostgreSQL prêt!
+✅ Base de données configurée
+🎯 Démarrage de RegisFlow...
+✅ Node.js 18 compatibility fix applied
+/app/node_modules/pg-pool/index.js:45
+    Error.captureStackTrace(err)
+          ^
+error: relation "users" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async DatabaseStorage.getAllUsers (file:///app/dist/index.js:187:12)
+    at async DatabaseStorage.initializeDefaults (file:///app/dist/index.js:258:27)
+    at async registerRoutes (file:///app/dist/index.js:510:22)
+    at async file:///app/dist/index.js:1071:18 {
+  length: 105,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '139',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1392',
+  routine: 'parserOpenTable'
+}
+Node.js v18.20.8
+🚀 Démarrage de RegisFlow (mode simplifié)...
+📡 Attente de la base de données...
+✅ PostgreSQL prêt!
+✅ Base de données configurée
+🎯 Démarrage de RegisFlow...
+✅ Node.js 18 compatibility fix applied
+/app/node_modules/pg-pool/index.js:45
+    Error.captureStackTrace(err)
+          ^
+error: relation "users" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async DatabaseStorage.getAllUsers (file:///app/dist/index.js:187:12)
+    at async DatabaseStorage.initializeDefaults (file:///app/dist/index.js:258:27)
+    at async registerRoutes (file:///app/dist/index.js:510:22)
+    at async file:///app/dist/index.js:1071:18 {
+  length: 105,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '139',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1392',
+  routine: 'parserOpenTable'
+}
+Node.js v18.20.8

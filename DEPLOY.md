@@ -43,15 +43,14 @@ ALLOWED_DOMAIN=votre-domaine.com
 ## 3. Déploiement
 
 ```bash
-# Télécharger les images
-docker-compose pull
-
-# Démarrer les services
-docker-compose up -d
+# Construire et démarrer les services
+docker-compose up -d --build
 
 # Vérifier le statut
 docker-compose ps
 docker-compose logs -f regisflow
+
+# Les tables sont créées automatiquement au premier démarrage
 ```
 
 ## 4. Vérification
