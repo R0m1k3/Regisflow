@@ -1,0 +1,61 @@
+# Configuration Docker Compose spécifique PRODUCTION
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+version: '3.8'
+
+services:
+  regisflow-db:
+    # Configuration production PostgreSQL
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
+    environment:
+      # Variables supplémentaires pour production
+      POSTGRES_SHARED_PRELOAD_LIBRARIES: "pg_stat_statements"
+    volumes:
+      # Logs PostgreSQL
+      - postgres_logs:/var/log/postgresql
+    # Limites strictes en production
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    # Politique de redémarrage agressive
+    restart: always
+
+  regisflow:
+    # Configuration production application
+    environment:
+      # Mode strict en production
+      NODE_ENV: production
+      # Optimisations Node.js
+      NODE_OPTIONS: "--max-old-space-size=512 --unhandled-rejections=strict"
+      # Logs structurés
+      LOG_LEVEL: info
+      LOG_FORMAT: json
+    # Limites strictes en production
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
+        reservations:
+          cpus: '1.0'
+          memory: 512M
+    # Politique de redémarrage agressive
+    restart: always
+    # Configuration ulimits pour production
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+
+volumes:
+  postgres_logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/data/postgres-logs
