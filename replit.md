@@ -175,3 +175,9 @@ Preferred communication style: Simple, everyday language.
 - ✅ Enhanced administration interface showing backup statistics and manual backup creation
 - ✅ Real-time backup status monitoring with automatic stats refresh every 30 seconds
 - ✅ Initial backup creation on server startup if no backups exist
+
+### Security Improvements (January 9, 2025)
+- ✅ Enhanced login page to hide default admin credentials (admin/admin123) once password is changed
+- ✅ Added dynamic credential visibility based on whether default password is still in use
+- ✅ Security warning displayed when default credentials are shown
+- ✅ API endpoint to check default credential status with password hash comparison

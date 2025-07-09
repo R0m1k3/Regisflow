@@ -105,6 +105,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Check if default admin credentials are still in use
+  app.get('/api/auth/default-credentials-status', async (req, res) => {
+    try {
+      const isUsingDefault = await storage.isUsingDefaultPassword();
+      res.json({ showDefaultCredentials: isUsingDefault });
+    } catch (error) {
+      console.error('Default credentials check error:', error);
+      res.status(500).json({ error: "Failed to check default credentials status" });
+    }
+  });
+
   app.get('/api/auth/me', requireAuth, async (req, res) => {
     try {
       const user = await storage.getUser(req.session.userId!);

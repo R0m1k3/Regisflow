@@ -39,6 +39,7 @@ export interface IStorage {
   authenticateUser(username: string, password: string): Promise<User | null>;
   hashPassword(password: string): Promise<string>;
   initializeDefaults(): Promise<{ defaultAdminCredentials?: { username: string; password: string } }>;
+  isUsingDefaultPassword(): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -166,6 +167,17 @@ export class DatabaseStorage implements IStorage {
 
   async hashPassword(password: string): Promise<string> {
     return await bcrypt.hash(password, 12);
+  }
+
+  // Check if admin still uses default password
+  async isUsingDefaultPassword(): Promise<boolean> {
+    const adminUser = await this.getUserByUsername('admin');
+    if (!adminUser) {
+      return false;
+    }
+    
+    // Check if the stored password hash matches the default password "admin123"
+    return await bcrypt.compare('admin123', adminUser.password);
   }
 
   // Initialize default admin user and store if none exist

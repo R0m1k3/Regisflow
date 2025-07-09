@@ -1,18 +1,30 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { loginSchema, type LoginData } from "@shared/schema";
-import { LogIn, Sparkles } from "lucide-react";
+import { LogIn, Sparkles, Info } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function Login() {
   const { login, isLoggingIn } = useAuth();
   const { toast } = useToast();
+
+  // Check if default credentials should be shown
+  const { data: credentialsStatus } = useQuery({
+    queryKey: ['/api/auth/default-credentials-status'],
+    queryFn: async () => {
+      const response = await apiRequest('/api/auth/default-credentials-status');
+      return response.json();
+    },
+  });
 
   const form = useForm<LoginData>({
     resolver: zodResolver(loginSchema),
@@ -86,13 +98,23 @@ export default function Login() {
             </form>
           </Form>
           
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <h4 className="font-medium text-blue-900 mb-2">Compte par défaut :</h4>
-            <div className="text-sm text-blue-700 space-y-1">
-              <p><strong>Utilisateur :</strong> admin</p>
-              <p><strong>Mot de passe :</strong> admin123</p>
-            </div>
-          </div>
+          {credentialsStatus?.showDefaultCredentials && (
+            <Alert className="mt-6">
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                <div className="space-y-2">
+                  <p className="font-medium">Compte administrateur par défaut :</p>
+                  <div className="text-sm space-y-1">
+                    <p><strong>Utilisateur :</strong> admin</p>
+                    <p><strong>Mot de passe :</strong> admin123</p>
+                  </div>
+                  <p className="text-xs text-orange-600 mt-2">
+                    ⚠️ Changez ce mot de passe après votre première connexion pour sécuriser l'application.
+                  </p>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
         </CardContent>
       </Card>
     </div>
