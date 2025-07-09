@@ -162,18 +162,7 @@ export default function NewSaleForm() {
 
   return (
     <Card className="modern-card-elevated">
-      <CardHeader className="mobile-card-header">
-        <CardTitle className="flex items-center gap-2 sm:gap-3 responsive-title">
-          <div className="p-1.5 sm:p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg sm:rounded-xl">
-            <Package className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
-          </div>
-          <span className="truncate">Nouvelle Vente</span>
-        </CardTitle>
-        <p className="text-muted-foreground mt-2 responsive-body">
-          Enregistrement d'une vente de feux d'artifice
-        </p>
-      </CardHeader>
-      <CardContent className="mobile-card-content">
+      <CardContent className="mobile-card-content pt-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="mobile-form-responsive">
             {/* Seller Information */}
