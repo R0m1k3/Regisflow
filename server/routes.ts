@@ -217,6 +217,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete('/api/admin/users/:id', requireRole(['admin']), async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      
+      // Don't allow deletion of the last administrator
+      const users = await storage.getAllUsers();
+      const adminUsers = users.filter(u => u.role === 'administrator');
+      const userToDelete = users.find(u => u.id === userId);
+      
+      if (userToDelete?.role === 'administrator' && adminUsers.length <= 1) {
+        return res.status(400).json({ error: "Cannot delete the last administrator" });
+      }
+      
+      await storage.deleteUser(userId);
+      res.json({ message: "User deleted successfully" });
+    } catch (error) {
+      console.error('Delete user error:', error);
+      res.status(500).json({ error: "Failed to delete user" });
+    }
+  });
+
   // Admin routes - Stores
   app.get('/api/admin/stores', requireRole(['admin']), async (req, res) => {
     try {
@@ -257,6 +278,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid input", details: error.errors });
       }
       res.status(500).json({ error: "Failed to update store" });
+    }
+  });
+
+  app.delete('/api/admin/stores/:id', requireRole(['admin']), async (req, res) => {
+    try {
+      const storeId = parseInt(req.params.id);
+      
+      // Check if there are users assigned to this store
+      const users = await storage.getAllUsers();
+      const usersInStore = users.filter(u => u.storeId === storeId);
+      
+      if (usersInStore.length > 0) {
+        return res.status(400).json({ 
+          error: "Cannot delete store with assigned users", 
+          details: `${usersInStore.length} user(s) are assigned to this store` 
+        });
+      }
+      
+      await storage.deleteStore(storeId);
+      res.json({ message: "Store deleted successfully" });
+    } catch (error) {
+      console.error('Delete store error:', error);
+      res.status(500).json({ error: "Failed to delete store" });
     }
   });
 

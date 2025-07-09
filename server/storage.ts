@@ -19,6 +19,7 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, user: Partial<InsertUser>): Promise<User | undefined>;
+  deleteUser(id: number): Promise<void>;
   getAllUsers(): Promise<User[]>;
   
   // Store operations
@@ -26,6 +27,7 @@ export interface IStorage {
   createStore(store: InsertStore): Promise<Store>;
   getAllStores(): Promise<Store[]>;
   updateStore(id: number, store: Partial<InsertStore>): Promise<Store | undefined>;
+  deleteStore(id: number): Promise<void>;
   
   // Sale operations
   getSale(id: number): Promise<Sale | undefined>;
@@ -82,6 +84,10 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(users).orderBy(desc(users.createdAt));
   }
 
+  async deleteUser(id: number): Promise<void> {
+    await db.delete(users).where(eq(users.id, id));
+  }
+
   // Store operations
   async getStore(id: number): Promise<Store | undefined> {
     const [store] = await db.select().from(stores).where(eq(stores.id, id));
@@ -107,6 +113,10 @@ export class DatabaseStorage implements IStorage {
       .where(eq(stores.id, id))
       .returning();
     return store;
+  }
+
+  async deleteStore(id: number): Promise<void> {
+    await db.delete(stores).where(eq(stores.id, id));
   }
 
   // Sale operations
