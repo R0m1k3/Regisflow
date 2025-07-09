@@ -28,6 +28,9 @@ mkdir -p /app/backups /app/logs
 # Initialiser la base de données (les tables seront créées automatiquement par l'application)
 echo "✅ Base de données configurée"
 
-# Démarrer l'application
+# Démarrer l'application avec npm start pour éviter les problèmes de paths
 echo "🎯 Démarrage de RegisFlow..."
-exec node dist/index.js
+export NODE_ENV=production
+export PORT=5000
+cd /app
+exec npm run start
