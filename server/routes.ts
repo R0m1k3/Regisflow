@@ -1,15 +1,265 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import session from "express-session";
+import connectPg from "connect-pg-simple";
+import { loginSchema, insertUserSchema, insertStoreSchema, insertSaleSchema } from "@shared/schema";
+import { z } from "zod";
+
+declare module 'express-session' {
+  interface SessionData {
+    userId?: number;
+  }
+}
+
+// Authentication middleware
+const requireAuth = (req: Request, res: Response, next: NextFunction) => {
+  if (!req.session?.userId) {
+    return res.status(401).json({ error: "Authentication required" });
+  }
+  next();
+};
+
+// Role-based authorization middleware
+const requireRole = (roles: string[]) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.session?.userId) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+
+    const user = await storage.getUser(req.session.userId);
+    if (!user || !roles.includes(user.role)) {
+      return res.status(403).json({ error: "Insufficient permissions" });
+    }
+
+    req.user = user;
+    next();
+  };
+};
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: any;
+    }
+  }
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // put application routes here
-  // prefix all routes with /api
+  // Session configuration with PostgreSQL store
+  const pgStore = connectPg(session);
+  app.use(session({
+    store: new pgStore({
+      conString: process.env.DATABASE_URL,
+      createTableIfMissing: false,
+      tableName: 'sessions',
+    }),
+    secret: process.env.SESSION_SECRET || 'fireworks-secret-key-2024',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: false, // Set to true in production with HTTPS
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+  }));
 
-  // use storage to perform CRUD operations on the storage interface
-  // e.g. storage.insertUser(user) or storage.getUserByUsername(username)
+  // Initialize default admin if needed
+  const initResult = await storage.initializeDefaults();
+  if (initResult.defaultAdminCredentials) {
+    console.log('\n=== DEFAULT ADMIN CREATED ===');
+    console.log('Username:', initResult.defaultAdminCredentials.username);
+    console.log('Password:', initResult.defaultAdminCredentials.password);
+    console.log('Please change this password after first login!');
+    console.log('==============================\n');
+  }
+
+  // Auth routes
+  app.post('/api/auth/login', async (req, res) => {
+    try {
+      const { username, password } = loginSchema.parse(req.body);
+      
+      const user = await storage.authenticateUser(username, password);
+      if (!user) {
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+
+      req.session.userId = user.id;
+      res.json({ user: { ...user, password: undefined } });
+    } catch (error) {
+      console.error('Login error:', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid input", details: error.errors });
+      }
+      res.status(500).json({ error: "Login failed" });
+    }
+  });
+
+  app.post('/api/auth/logout', (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        console.error('Logout error:', err);
+        return res.status(500).json({ error: "Logout failed" });
+      }
+      res.json({ message: "Logged out successfully" });
+    });
+  });
+
+  app.get('/api/auth/me', requireAuth, async (req, res) => {
+    try {
+      const user = await storage.getUser(req.session.userId!);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      res.json({ ...user, password: undefined });
+    } catch (error) {
+      console.error('Get user error:', error);
+      res.status(500).json({ error: "Failed to get user info" });
+    }
+  });
+
+  // Sales routes
+  app.get('/api/sales', requireAuth, async (req, res) => {
+    try {
+      const user = await storage.getUser(req.session.userId!);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const { startDate, endDate } = req.query;
+      const sales = await storage.getSalesByStore(
+        user.storeId!,
+        startDate as string,
+        endDate as string
+      );
+      res.json(sales);
+    } catch (error) {
+      console.error('Get sales error:', error);
+      res.status(500).json({ error: "Failed to get sales" });
+    }
+  });
+
+  app.post('/api/sales', requireAuth, async (req, res) => {
+    try {
+      const user = await storage.getUser(req.session.userId!);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const saleData = insertSaleSchema.parse({
+        ...req.body,
+        storeId: user.storeId,
+        userId: user.id
+      });
+
+      const sale = await storage.createSale(saleData);
+      res.status(201).json(sale);
+    } catch (error) {
+      console.error('Create sale error:', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid input", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create sale" });
+    }
+  });
+
+  app.delete('/api/sales/:id', requireRole(['admin', 'manager']), async (req, res) => {
+    try {
+      const saleId = parseInt(req.params.id);
+      await storage.deleteSale(saleId);
+      res.json({ message: "Sale deleted successfully" });
+    } catch (error) {
+      console.error('Delete sale error:', error);
+      res.status(500).json({ error: "Failed to delete sale" });
+    }
+  });
+
+  // Admin routes - Users
+  app.get('/api/admin/users', requireRole(['admin']), async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      const safeUsers = users.map(user => ({ ...user, password: undefined }));
+      res.json(safeUsers);
+    } catch (error) {
+      console.error('Get users error:', error);
+      res.status(500).json({ error: "Failed to get users" });
+    }
+  });
+
+  app.post('/api/admin/users', requireRole(['admin']), async (req, res) => {
+    try {
+      const userData = insertUserSchema.parse(req.body);
+      const user = await storage.createUser(userData);
+      res.status(201).json({ ...user, password: undefined });
+    } catch (error) {
+      console.error('Create user error:', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid input", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create user" });
+    }
+  });
+
+  app.put('/api/admin/users/:id', requireRole(['admin']), async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const userData = insertUserSchema.partial().parse(req.body);
+      const user = await storage.updateUser(userId, userData);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      res.json({ ...user, password: undefined });
+    } catch (error) {
+      console.error('Update user error:', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid input", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update user" });
+    }
+  });
+
+  // Admin routes - Stores
+  app.get('/api/admin/stores', requireRole(['admin']), async (req, res) => {
+    try {
+      const stores = await storage.getAllStores();
+      res.json(stores);
+    } catch (error) {
+      console.error('Get stores error:', error);
+      res.status(500).json({ error: "Failed to get stores" });
+    }
+  });
+
+  app.post('/api/admin/stores', requireRole(['admin']), async (req, res) => {
+    try {
+      const storeData = insertStoreSchema.parse(req.body);
+      const store = await storage.createStore(storeData);
+      res.status(201).json(store);
+    } catch (error) {
+      console.error('Create store error:', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid input", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create store" });
+    }
+  });
+
+  app.put('/api/admin/stores/:id', requireRole(['admin']), async (req, res) => {
+    try {
+      const storeId = parseInt(req.params.id);
+      const storeData = insertStoreSchema.partial().parse(req.body);
+      const store = await storage.updateStore(storeId, storeData);
+      if (!store) {
+        return res.status(404).json({ error: "Store not found" });
+      }
+      res.json(store);
+    } catch (error) {
+      console.error('Update store error:', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid input", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update store" });
+    }
+  });
 
   const httpServer = createServer(app);
-
   return httpServer;
 }
