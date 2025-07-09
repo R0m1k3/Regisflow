@@ -47,6 +47,14 @@ TZ=Europe/Paris
 
 ### 3. Lancer l'application
 
+**Option 1 : Script automatique (recommandé)**
+```bash
+# Utiliser le script de déploiement automatique
+chmod +x deploy.sh
+./deploy.sh
+```
+
+**Option 2 : Commandes manuelles**
 ```bash
 # Construire et démarrer tous les services
 docker-compose up -d
@@ -61,7 +69,8 @@ docker-compose logs -f
 ## 📋 Services Inclus
 
 ### 1. PostgreSQL (Base de données)
-- **Port**: 5432
+- **Port externe**: 5433 (pour éviter les conflits)
+- **Port interne**: 5432 (communication entre containers)
 - **Database**: regisflow
 - **Utilisateur**: regisflow
 - **Données persistantes**: Volume `postgres_data`
@@ -106,6 +115,9 @@ docker-compose exec -T postgres psql -U regisflow regisflow < backup.sql
 
 # Accéder à la base de données
 docker-compose exec postgres psql -U regisflow regisflow
+
+# Ou depuis l'hôte (port 5433)
+psql -h localhost -p 5433 -U regisflow regisflow
 ```
 
 ### Maintenance
