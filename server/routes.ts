@@ -357,6 +357,142 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Backup routes
+  app.get('/api/admin/backup/export', requireRole(['admin']), async (req, res) => {
+    try {
+      // Get all data from the database
+      const users = await storage.getAllUsers();
+      const stores = await storage.getAllStores();
+      
+      // Get all sales from all stores
+      const allSales = [];
+      for (const store of stores) {
+        const storeSales = await storage.getSalesByStore(store.id);
+        allSales.push(...storeSales);
+      }
+
+      const backupData = {
+        timestamp: new Date().toISOString(),
+        version: "1.0",
+        data: {
+          users: users.map(user => ({
+            ...user,
+            // Don't include the password hash in backup for security
+            password: undefined
+          })),
+          stores,
+          sales: allSales
+        },
+        metadata: {
+          totalUsers: users.length,
+          totalStores: stores.length,
+          totalSales: allSales.length,
+          exportedBy: req.user.username
+        }
+      };
+
+      res.json(backupData);
+    } catch (error) {
+      console.error('Export backup error:', error);
+      res.status(500).json({ error: "Failed to export backup" });
+    }
+  });
+
+  app.post('/api/admin/backup/import', requireRole(['admin']), async (req, res) => {
+    try {
+      const backupData = req.body;
+      
+      // Validate backup structure
+      if (!backupData.data || !backupData.data.users || !backupData.data.stores || !backupData.data.sales) {
+        return res.status(400).json({ error: "Invalid backup file format" });
+      }
+
+      // Clear existing data (in reverse order due to foreign keys)
+      // First delete all sales
+      const existingSales = [];
+      const existingStores = await storage.getAllStores();
+      for (const store of existingStores) {
+        const storeSales = await storage.getSalesByStore(store.id);
+        existingSales.push(...storeSales);
+      }
+      
+      for (const sale of existingSales) {
+        await storage.deleteSale(sale.id);
+      }
+
+      // Then delete users (except admin to avoid locking out)
+      const existingUsers = await storage.getAllUsers();
+      for (const user of existingUsers) {
+        if (user.role !== 'administrator' || user.username !== 'admin') {
+          await storage.deleteUser(user.id);
+        }
+      }
+
+      // Then delete stores
+      for (const store of existingStores) {
+        await storage.deleteStore(store.id);
+      }
+
+      // Import new data
+      // First import stores
+      const storeIdMapping = new Map();
+      for (const storeData of backupData.data.stores) {
+        const { id, ...storeWithoutId } = storeData;
+        const newStore = await storage.createStore(storeWithoutId);
+        storeIdMapping.set(id, newStore.id);
+      }
+
+      // Then import users (excluding admin and users with passwords)
+      const userIdMapping = new Map();
+      for (const userData of backupData.data.users) {
+        if (userData.username === 'admin') continue; // Skip admin user
+        
+        const { id, password, ...userWithoutIdAndPassword } = userData;
+        
+        // Map store ID if it exists
+        if (userData.storeId && storeIdMapping.has(userData.storeId)) {
+          userWithoutIdAndPassword.storeId = storeIdMapping.get(userData.storeId);
+        }
+        
+        // Set a default password since we can't restore the original
+        const userWithPassword = {
+          ...userWithoutIdAndPassword,
+          password: 'restored123' // Users will need to change this
+        };
+        
+        const newUser = await storage.createUser(userWithPassword);
+        userIdMapping.set(id, newUser.id);
+      }
+
+      // Finally import sales
+      for (const saleData of backupData.data.sales) {
+        const { id, ...saleWithoutId } = saleData;
+        
+        // Map store and user IDs
+        if (saleData.storeId && storeIdMapping.has(saleData.storeId)) {
+          saleWithoutId.storeId = storeIdMapping.get(saleData.storeId);
+        }
+        if (saleData.userId && userIdMapping.has(saleData.userId)) {
+          saleWithoutId.userId = userIdMapping.get(saleData.userId);
+        }
+        
+        await storage.createSale(saleWithoutId);
+      }
+
+      res.json({ 
+        message: "Backup imported successfully",
+        imported: {
+          stores: backupData.data.stores.length,
+          users: backupData.data.users.filter(u => u.username !== 'admin').length,
+          sales: backupData.data.sales.length
+        }
+      });
+    } catch (error) {
+      console.error('Import backup error:', error);
+      res.status(500).json({ error: "Failed to import backup", details: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -15,7 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { insertUserSchema, insertStoreSchema, type User, type Store } from "@shared/schema";
-import { Users, Building2, Plus, Edit, Trash2, Settings } from "lucide-react";
+import { Users, Building2, Plus, Edit, Trash2, Settings, Download, Upload, Database } from "lucide-react";
 import { z } from "zod";
 
 const createUserSchema = insertUserSchema.extend({
@@ -267,6 +267,93 @@ export default function Administration() {
     deleteStoreMutation.mutate(store.id);
   };
 
+  // Backup mutations
+  const exportBackupMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest('/api/admin/backup/export');
+      return response.json();
+    },
+    onSuccess: (data) => {
+      // Créer et télécharger le fichier JSON
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `backup_${new Date().toISOString().split('T')[0]}_${Date.now()}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Sauvegarde exportée",
+        description: "Le fichier de sauvegarde a été téléchargé",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erreur",
+        description: "Impossible d'exporter la sauvegarde",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const importBackupMutation = useMutation({
+    mutationFn: async (backupData: any) => {
+      const response = await apiRequest('/api/admin/backup/import', {
+        method: 'POST',
+        body: JSON.stringify(backupData),
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      // Invalider toutes les queries pour forcer un refresh
+      queryClient.clear();
+      toast({
+        title: "Sauvegarde importée",
+        description: "Les données ont été restaurées avec succès",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erreur",
+        description: "Impossible d'importer la sauvegarde",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleExportBackup = () => {
+    exportBackupMutation.mutate();
+  };
+
+  const handleImportBackup = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (event) => {
+      const file = (event.target as HTMLInputElement).files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const backupData = JSON.parse(e.target?.result as string);
+            importBackupMutation.mutate(backupData);
+          } catch (error) {
+            toast({
+              title: "Erreur",
+              description: "Fichier de sauvegarde invalide",
+              variant: "destructive",
+            });
+          }
+        };
+        reader.readAsText(file);
+      }
+    };
+    input.click();
+  };
+
   const getRoleBadge = (role: string) => {
     const variants = {
       administrator: "destructive" as const,
@@ -298,6 +385,7 @@ export default function Administration() {
           <TabsList>
             <TabsTrigger value="users">Utilisateurs</TabsTrigger>
             <TabsTrigger value="stores">Magasins</TabsTrigger>
+            <TabsTrigger value="backup">Sauvegarde</TabsTrigger>
           </TabsList>
 
           {/* Users Tab */}
@@ -958,6 +1046,117 @@ export default function Administration() {
                 )}
               </DialogContent>
             </Dialog>
+          </TabsContent>
+
+          {/* Backup Tab */}
+          <TabsContent value="backup" className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <Database className="h-5 w-5" />
+                Gestion des Sauvegardes
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Export Backup */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Download className="h-5 w-5" />
+                    Exporter la Base de Données
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Téléchargez une sauvegarde complète de toutes les données (utilisateurs, magasins, ventes).
+                  </p>
+                  <Button 
+                    onClick={handleExportBackup} 
+                    disabled={exportBackupMutation.isPending}
+                    className="w-full"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    {exportBackupMutation.isPending ? "Export en cours..." : "Télécharger la Sauvegarde"}
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Import Backup */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Upload className="h-5 w-5" />
+                    Importer une Sauvegarde
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Restaurez les données à partir d'un fichier de sauvegarde. 
+                    <strong className="text-red-600"> Attention : cette action remplacera toutes les données existantes.</strong>
+                  </p>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button 
+                        variant="destructive" 
+                        disabled={importBackupMutation.isPending}
+                        className="w-full"
+                      >
+                        <Upload className="h-4 w-4 mr-2" />
+                        {importBackupMutation.isPending ? "Import en cours..." : "Restaurer depuis un Fichier"}
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Confirmer la restauration</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Êtes-vous sûr de vouloir restaurer les données depuis un fichier de sauvegarde ?
+                          <br /><br />
+                          <strong className="text-red-600">
+                            ⚠️ ATTENTION : Cette action supprimera définitivement toutes les données actuelles 
+                            (utilisateurs, magasins, ventes) et les remplacera par celles du fichier de sauvegarde.
+                          </strong>
+                          <br /><br />
+                          Cette action est irréversible. Assurez-vous d'avoir une sauvegarde des données actuelles 
+                          si vous souhaitez pouvoir les récupérer.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Annuler</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={handleImportBackup}
+                          className="bg-red-600 hover:bg-red-700"
+                        >
+                          Confirmer la Restauration
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Info Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Informations sur les Sauvegardes</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3 text-sm">
+                  <div>
+                    <strong>Format des fichiers :</strong> Les sauvegardes sont au format JSON et contiennent toutes les données de l'application.
+                  </div>
+                  <div>
+                    <strong>Contenu inclus :</strong> Utilisateurs, magasins, ventes, et toutes les relations entre ces données.
+                  </div>
+                  <div>
+                    <strong>Sécurité :</strong> Les mots de passe sont hachés et ne peuvent pas être récupérés depuis une sauvegarde.
+                  </div>
+                  <div>
+                    <strong>Recommandation :</strong> Effectuez des sauvegardes régulières et stockez-les en lieu sûr.
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </CardContent>
