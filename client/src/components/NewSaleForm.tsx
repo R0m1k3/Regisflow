@@ -85,10 +85,13 @@ export default function NewSaleForm({ onSaveSale }: NewSaleFormProps) {
   const onSubmit = async (data: FormData) => {
     try {
       setIsSubmitting(true);
+      console.log('Form data being submitted:', data);
+      console.log('Form errors:', form.formState.errors);
 
       // Validate required fields
       const missingFields = validateRequiredFields(data);
       if (missingFields.length > 0) {
+        console.log('Missing fields found:', missingFields);
         toast({
           title: "Champs manquants",
           description: `Veuillez remplir: ${missingFields.join(', ')}`,
@@ -527,13 +530,31 @@ export default function NewSaleForm({ onSaveSale }: NewSaleFormProps) {
                 </div>
               </div>
 
-              {/* Form Actions */}
-              <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
-                <Button type="button" variant="outline">
+              {/* Form Actions - Always visible */}
+              <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200 bg-white">
+                <Button type="button" variant="outline" onClick={() => {
+                  form.reset({
+                    vendeur: '',
+                    dateVente: new Date().toISOString().split('T')[0],
+                    typeArticle: '',
+                    categorie: '',
+                    quantite: '',
+                    gencode: '',
+                    nom: '',
+                    prenom: '',
+                    dateNaissance: '',
+                    lieuNaissance: '',
+                    typeIdentite: '',
+                    numeroIdentite: '',
+                    autoriteDelivrance: '',
+                    dateDelivrance: '',
+                  });
+                  setPhotos({});
+                }}>
                   <X className="h-4 w-4 mr-2" />
                   Annuler
                 </Button>
-                <Button type="submit" disabled={isSubmitting} className="bg-success hover:bg-success/90">
+                <Button type="submit" disabled={isSubmitting} className="bg-green-600 hover:bg-green-700 text-white">
                   <Save className="h-4 w-4 mr-2" />
                   {isSubmitting ? 'Enregistrement...' : 'Enregistrer la Vente'}
                 </Button>
