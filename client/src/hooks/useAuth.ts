@@ -43,6 +43,8 @@ export function useAuth() {
     onSuccess: (data) => {
       setUser(data.user);
       queryClient.clear();
+      // Force a page reload to ensure proper state update
+      window.location.reload();
     },
   });
 
