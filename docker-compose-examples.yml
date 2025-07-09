@@ -1,61 +1,69 @@
-# Exemples de configurations réseau pour RegisFlow
-# Copiez et adaptez selon vos besoins
+# Guide pour changer de réseau dans Portainer
+# RegisFlow - Configuration réseau flexible
 
 # ==========================================
-# EXEMPLE 1 : RÉSEAU BRIDGE PERSONNALISÉ
+# INSTALLATION STANDARD
 # ==========================================
-# Dans .env :
-# NETWORK_DRIVER=bridge
-# NETWORK_SUBNET=192.168.100.0/24
-# NETWORK_BRIDGE_NAME=regisflow-net
+# 1. Déployez RegisFlow avec docker-compose up -d
+# 2. Dans Portainer, allez dans Stacks > regisflow
+# 3. Utilisez "Migrate" ou "Redeploy" pour changer de réseau
 
 # ==========================================
-# EXEMPLE 2 : RÉSEAU HOST (sans isolation)
+# CHANGER DE RÉSEAU DANS PORTAINER
 # ==========================================
-# Dans .env :
-# NETWORK_DRIVER=host
-# Supprimez les ports mappings dans docker-compose.yml
+# Option 1 : Via l'interface Portainer
+# 1. Containers > regisflow-app/regisflow-db
+# 2. "Disconnect" du réseau actuel
+# 3. "Connect" au nouveau réseau
+# 4. Redémarrer les containers
 
-# Pour utiliser le réseau host, modifiez docker-compose.yml :
-# services:
-#   regisflow-db:
-#     network_mode: host
-#   regisflow:
-#     network_mode: host
-
-# ==========================================
-# EXEMPLE 3 : RÉSEAU EXISTANT
-# ==========================================
-# Pour utiliser un réseau Docker existant :
-# networks:
-#   default:
-#     external: true
-#     name: mon-reseau-existant
+# Option 2 : Via la Stack Portainer
+# 1. Stacks > votre-stack-regisflow
+# 2. Editor > Modifier la section networks
+# 3. Deploy the stack
 
 # ==========================================
-# EXEMPLE 4 : MACVLAN (IP dédiée)
+# RÉSEAUX COMPATIBLES PORTAINER
 # ==========================================
-# Dans .env :
-# NETWORK_DRIVER=macvlan
-# NETWORK_SUBNET=192.168.1.0/24
 
-# Puis ajoutez dans docker-compose.yml networks :
-# driver_opts:
-#   parent: eth0  # Interface réseau de l'hôte
+# Bridge par défaut (installation standard)
+networks:
+  default:
+    driver: bridge
+
+# Réseau existant (créé dans Portainer)
+networks:
+  default:
+    external: true
+    name: nom-reseau-existant
+
+# Réseau macvlan (IP directe)
+networks:
+  default:
+    driver: macvlan
+    driver_opts:
+      parent: eth0
+
+# Réseau host (sans isolation)
+# Supprimez la section networks et ajoutez :
+# network_mode: host dans chaque service
 
 # ==========================================
-# EXEMPLE 5 : DOCKER SWARM (OVERLAY)
+# PROCÉDURE MIGRATION PORTAINER
 # ==========================================
-# Pour Docker Swarm avec réseau overlay :
-# networks:
-#   default:
-#     driver: overlay
-#     attachable: true
+# 1. Arrêter la stack dans Portainer
+# 2. Modifier le docker-compose.yml si nécessaire  
+# 3. Redéployer la stack
+# 4. Vérifier la connectivité réseau
 
 # ==========================================
-# COMMENT CHANGER DE RÉSEAU
+# DÉPANNAGE RÉSEAU
 # ==========================================
-# 1. Arrêtez les services : docker-compose down
-# 2. Modifiez les variables dans .env
-# 3. Redémarrez : docker-compose up -d
-# 4. Vérifiez : docker network ls
+# Vérifier les réseaux Docker :
+# docker network ls
+# 
+# Inspecter un réseau :
+# docker network inspect nom-du-reseau
+#
+# Connecter manuellement un container :
+# docker network connect nom-reseau nom-container

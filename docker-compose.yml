@@ -61,13 +61,8 @@ volumes:
   backup_data:
   logs_data:
 
-# Configuration réseau flexible
-# Vous pouvez changer NETWORK_DRIVER dans .env selon vos besoins
+# Configuration réseau flexible (sans IP prédéfinies)
+# Vous pouvez changer de réseau dans Portainer après installation
 networks:
   default:
     driver: ${NETWORK_DRIVER:-bridge}
-    driver_opts:
-      com.docker.network.bridge.name: ${NETWORK_BRIDGE_NAME:-docker0}
-    ipam:
-      config:
-        - subnet: ${NETWORK_SUBNET:-172.20.0.0/16}
