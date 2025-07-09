@@ -118,7 +118,7 @@ function DashboardContent() {
           <div className="mb-6 sm:mb-8 slide-in-up">
             <Card className="modern-card-elevated overflow-hidden">
               <CardContent className="mobile-card-content">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+                <div className="flex items-center gap-4 sm:gap-6">
                   <div className="relative flex-shrink-0">
                     <div className="p-3 sm:p-4 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl sm:rounded-2xl shadow-lg">
                       <Building2 className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
@@ -158,7 +158,7 @@ function DashboardContent() {
 
         <div className="fade-in">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mobile-form-responsive">
-            <TabsList className={`grid w-full ${canAccessAdmin ? 'grid-cols-3' : 'grid-cols-2'} max-w-full sm:max-w-2xl h-12 sm:h-14 bg-muted/50 p-1.5 sm:p-2 rounded-xl sm:rounded-2xl border border-border/50`}>
+            <TabsList className={`grid w-full ${canAccessAdmin ? 'grid-cols-3' : 'grid-cols-2'} max-w-full sm:max-w-2xl h-12 sm:h-14 bg-muted bg-opacity-50 p-1.5 sm:p-2 rounded-xl sm:rounded-2xl border border-border border-opacity-50`}>
               <TabsTrigger 
                 value="new-sale" 
                 className="h-9 sm:h-10 rounded-lg sm:rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-md smooth-transition font-medium text-xs sm:text-sm"

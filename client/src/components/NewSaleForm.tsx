@@ -179,8 +179,8 @@ export default function NewSaleForm() {
             {/* Seller Information */}
             <div className="modern-card bg-muted bg-opacity-30 mobile-form-section rounded-xl border-l-4 border-primary">
               <h3 className="mobile-header-responsive font-semibold text-foreground mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
-                <div className="p-1.5 sm:p-2 bg-primary bg-opacity-10 rounded-lg">
-                  <User className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                <div className="p-2 sm:p-3 bg-primary bg-opacity-20 rounded-lg flex items-center justify-center">
+                  <User className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                 </div>
                 <span className="truncate">Informations Vendeur</span>
               </h3>
