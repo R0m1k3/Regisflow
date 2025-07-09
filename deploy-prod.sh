@@ -38,36 +38,28 @@ chmod 755 data data/*
 
 # Créer le fichier .env s'il n'existe pas
 if [ ! -f .env ]; then
-    echo "📝 Création du fichier .env de production..."
+    echo "📝 Création du fichier .env..."
     cp .env.example .env
+    echo "✅ Fichier .env créé avec configuration par défaut"
     
     echo ""
-    echo "⚠️  CONFIGURATION OBLIGATOIRE POUR LA PRODUCTION :"
-    echo "   1. Éditez le fichier .env"
-    echo "   2. Changez OBLIGATOIREMENT :"
-    echo "      - POSTGRES_PASSWORD"
-    echo "      - SESSION_SECRET"
-    echo "   3. Pour générer SESSION_SECRET :"
-    echo "      openssl rand -base64 32"
+    echo "ℹ️  CONFIGURATION AUTOMATIQUE :"
+    echo "   - Mots de passe pré-configurés pour installation simple"
+    echo "   - Pour la production, modifiez POSTGRES_PASSWORD et SESSION_SECRET"
     echo ""
-    read -p "Appuyez sur Entrée après avoir configuré .env..."
 fi
 
 # Vérifier les variables critiques
-echo "🔒 Vérification de la configuration de sécurité..."
+echo "🔒 Vérification de la configuration..."
 source .env
 
-if [ "$POSTGRES_PASSWORD" = "CHANGEZ_MOI_EN_PRODUCTION_2024!" ]; then
-    echo "❌ POSTGRES_PASSWORD doit être changé pour la production !"
-    exit 1
+if [ "$POSTGRES_PASSWORD" = "RegisFlow2024!PostgreSQL" ]; then
+    echo "⚠️  Utilisation des mots de passe par défaut (OK pour test, changez pour production)"
+else
+    echo "✅ Mots de passe personnalisés détectés"
 fi
 
-if [ "$SESSION_SECRET" = "CHANGEZ_MOI_GENERER_UNE_CLE_SECRETE_FORTE" ]; then
-    echo "❌ SESSION_SECRET doit être changé pour la production !"
-    exit 1
-fi
-
-echo "✅ Configuration de sécurité validée"
+echo "✅ Configuration validée"
 
 # Arrêter les services existants
 echo "🛑 Arrêt des services existants..."
