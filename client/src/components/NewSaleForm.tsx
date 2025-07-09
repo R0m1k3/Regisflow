@@ -120,8 +120,8 @@ export default function NewSaleForm({ onSaveSale }: NewSaleFormProps) {
         lieuNaissance: data.lieuNaissance || undefined,
         typeIdentite: data.typeIdentite,
         numeroIdentite: data.numeroIdentite,
-        autoriteDelivrance: data.autoriteDelivrance || undefined,
-        dateDelivrance: data.dateDelivrance || undefined,
+        autoriteDelivrance: data.autoriteDelivrance,
+        dateDelivrance: data.dateDelivrance,
         photoRecto: photos.recto,
         photoVerso: photos.verso,
       };
@@ -424,7 +424,7 @@ export default function NewSaleForm({ onSaveSale }: NewSaleFormProps) {
                     name="autoriteDelivrance"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Autorité de délivrance</FormLabel>
+                        <FormLabel>Autorité de délivrance <span className="text-destructive">*</span></FormLabel>
                         <FormControl>
                           <Input placeholder="Préfecture, Mairie, etc." {...field} />
                         </FormControl>
@@ -437,7 +437,7 @@ export default function NewSaleForm({ onSaveSale }: NewSaleFormProps) {
                     name="dateDelivrance"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Date de délivrance</FormLabel>
+                        <FormLabel>Date de délivrance <span className="text-destructive">*</span></FormLabel>
                         <FormControl>
                           <Input type="date" {...field} />
                         </FormControl>

@@ -21,8 +21,8 @@ export interface Sale {
   // Identité
   typeIdentite: string;
   numeroIdentite: string;
-  autoriteDelivrance?: string;
-  dateDelivrance?: string;
+  autoriteDelivrance: string;
+  dateDelivrance: string;
   
   // Photos
   photoRecto?: string;
