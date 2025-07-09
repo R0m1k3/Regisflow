@@ -1,13 +1,34 @@
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Shield, Flame } from 'lucide-react';
+import { Shield, Flame, Plus, History } from 'lucide-react';
 import NewSaleForm from './NewSaleForm';
 import SalesHistory from './SalesHistory';
-import { useIndexedDB } from '@/hooks/useIndexedDB';
+import { useAuth } from '@/hooks/useAuth';
+import { useStoreContext } from '@/hooks/useStoreContext';
+import { apiRequest } from '@/lib/queryClient';
+import type { Sale } from '@shared/schema';
 
 export default function FireworksApp() {
   const [activeTab, setActiveTab] = useState('nouvelle-vente');
-  const { sales, isLoading, error, saveSale, deleteSale } = useIndexedDB();
+  const { user } = useAuth();
+  const { selectedStoreId } = useStoreContext();
+
+  // Query for sales count
+  const { data: salesData } = useQuery<Sale[]>({
+    queryKey: ['/api/sales', selectedStoreId],
+    queryFn: async () => {
+      if (!selectedStoreId) return [];
+      const params = new URLSearchParams();
+      params.append('storeId', selectedStoreId.toString());
+      const response = await apiRequest(`/api/sales?${params.toString()}`);
+      return response.json();
+    },
+    enabled: !!selectedStoreId && !!user,
+    refetchOnWindowFocus: false,
+  });
+
+  const sales = Array.isArray(salesData) ? salesData : [];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -18,8 +39,11 @@ export default function FireworksApp() {
             <div className="flex items-center space-x-3">
               <Flame className="h-8 w-8 text-primary" />
               <h1 className="text-2xl font-bold text-gray-900">
-                Registre des Ventes de Pétards
+                RegisFlow
               </h1>
+              <span className="text-sm text-gray-500">
+                Registre des ventes de Feux d'artifice
+              </span>
             </div>
             <div className="text-sm text-gray-500 flex items-center">
               <Shield className="h-4 w-4 mr-1" />
@@ -34,30 +58,21 @@ export default function FireworksApp() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-6">
             <TabsTrigger value="nouvelle-vente" className="flex items-center gap-2">
-              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
+              <Plus className="h-4 w-4" />
               Nouvelle Vente
             </TabsTrigger>
             <TabsTrigger value="historique" className="flex items-center gap-2">
-              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+              <History className="h-4 w-4" />
               Historique ({sales.length} vente{sales.length !== 1 ? 's' : ''})
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="nouvelle-vente">
-            <NewSaleForm onSaveSale={saveSale} />
+            <NewSaleForm />
           </TabsContent>
 
           <TabsContent value="historique">
-            <SalesHistory 
-              sales={sales}
-              isLoading={isLoading}
-              error={error}
-              onDeleteSale={deleteSale}
-            />
+            <SalesHistory canDelete={user?.role === 'admin'} />
           </TabsContent>
         </Tabs>
       </main>
