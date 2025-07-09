@@ -69,11 +69,12 @@ docker-compose logs -f
 ## 📋 Services Inclus
 
 ### 1. PostgreSQL (Base de données)
-- **Port externe**: 5433 (pour éviter les conflits)
-- **Port interne**: 5432 (communication entre containers)
+- **Port externe**: 5433 (pour éviter les conflits avec PostgreSQL local)
+- **Port interne**: 5432 (communication entre containers Docker)
 - **Database**: regisflow
 - **Utilisateur**: regisflow
 - **Données persistantes**: Volume `postgres_data`
+- **Note**: L'application se connecte via le réseau Docker interne sur le port 5432
 
 ### 2. RegisFlow (Application)
 - **Port**: 5000
