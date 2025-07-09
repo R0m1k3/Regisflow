@@ -42,7 +42,7 @@ docker-compose down 2>/dev/null || true
 echo "🔨 Construction des images..."
 docker-compose build
 
-# Démarrer les services
+# Démarrer les services avec configuration simple
 echo "🚀 Démarrage des services..."
 docker-compose up -d
 

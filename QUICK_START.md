@@ -1,119 +1,99 @@
-# Démarrage Rapide RegisFlow - Production Docker
+# Démarrage Rapide RegisFlow
 
-## 🚀 Déploiement en 5 minutes
+## 🚀 Installation Ultra-Simple
 
-### 1. Préparer l'environnement
+RegisFlow est maintenant configuré pour une installation sans aucune configuration réseau complexe.
+
+### Installation en 1 Minute
+
 ```bash
-# Cloner le projet
-git clone <votre-repo>
+# Télécharger le projet
+git clone [url-du-projet]
 cd regisflow
 
-# Configurer l'environnement
-cp .env.example .env
-nano .env  # Changer POSTGRES_PASSWORD et SESSION_SECRET
-
-# Créer les répertoires
-mkdir -p data/{postgres,backups,logs}
+# Installer immédiatement
+docker-compose up -d
 ```
 
-### 2. Déployer
-```bash
-# Déploiement automatique
-chmod +x deploy-prod.sh
-./deploy-prod.sh
+**C'est tout !** L'application est accessible sur http://localhost:5000
 
-# OU déploiement manuel
-docker-compose build
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
-```
+## ✅ Configuration Automatique
 
-### 3. Accéder à l'application
-- **URL** : http://localhost:5000
+- **Mots de passe** : Pré-configurés dans le fichier `.env`
+- **Base de données** : PostgreSQL configurée automatiquement
+- **Réseau** : Utilise le réseau par défaut Docker (aucun conflit)
+- **Volumes** : Gérés automatiquement par Docker
+- **Migrations** : Exécutées automatiquement au démarrage
+
+## 🎯 Accès Immédiat
+
+- **Application** : http://localhost:5000
 - **Utilisateur** : admin
 - **Mot de passe** : admin123
+- **PostgreSQL** : localhost:5433
 
-### 4. Configuration initiale
-1. Connectez-vous avec admin/admin123
-2. Changez le mot de passe administrateur
-3. Créez vos magasins et utilisateurs
-
-## ⚡ Commandes essentielles
+## 🔧 Commandes Utiles
 
 ```bash
-# Vérifier le statut
-docker-compose ps
-
 # Voir les logs
 docker-compose logs -f
 
-# Arrêter/démarrer
+# Redémarrer
+docker-compose restart
+
+# Arrêter
+docker-compose down
+
+# Statut
+docker-compose ps
+```
+
+## 🛠️ Problèmes Courants
+
+### Application ne démarre pas
+```bash
+# Vérifier Docker
+docker --version
+docker-compose --version
+
+# Nettoyer et redémarrer
 docker-compose down
 docker-compose up -d
-
-# Sauvegarde
-docker-compose exec regisflow-db pg_dump -U regisflow regisflow > backup.sql
 ```
 
-## 🔧 Variables obligatoires (.env)
-
+### Port 5000 déjà utilisé
 ```bash
-# À changer OBLIGATOIREMENT
-POSTGRES_PASSWORD=VotreMotDePasseSecurise2024!
-SESSION_SECRET=$(openssl rand -base64 32)
-
-# Configuration de base
-NODE_ENV=production
-PORT=5000
-TZ=Europe/Paris
+# Changer le port dans docker-compose.yml
+ports:
+  - "5001:5000"  # Utiliser port 5001 au lieu de 5000
 ```
 
-## 📊 Monitoring
-
+### Conflit PostgreSQL
 ```bash
-# Script de monitoring
-./monitoring.sh
-
-# Santé des services
-curl http://localhost:5000/health
-
-# Ressources utilisées
-docker stats
+# Changer le port PostgreSQL
+ports:
+  - "5434:5432"  # Utiliser port 5434 au lieu de 5433
 ```
 
-## 🔒 Sécurité
+## 🔒 Sécurité pour Production
 
-Pour la production, configurez HTTPS avec Nginx :
+Une fois testé, pour la production :
 
-```bash
-# Copier la configuration
-sudo cp nginx-reverse-proxy.conf /etc/nginx/sites-available/regisflow
-sudo ln -s /etc/nginx/sites-available/regisflow /etc/nginx/sites-enabled/
+1. **Changer les mots de passe** dans `.env`
+2. **Configurer HTTPS** si nécessaire
+3. **Changer le mot de passe admin** dans l'application
 
-# Certificat SSL
-sudo certbot --nginx -d votre-domaine.com
-```
+## 📱 Fonctionnalités Disponibles
 
-## 🚨 Dépannage
-
-```bash
-# Si un service ne démarre pas
-docker-compose logs regisflow
-
-# Si problème de base de données
-docker-compose exec regisflow-db psql -U regisflow -d regisflow
-
-# Redémarrer tout
-docker-compose restart
-```
-
-## 📱 Fonctionnalités
-
-- Multi-utilisateur (Admin/Manager/Employee)
-- Multi-magasins avec isolation
+- Multi-utilisateur avec rôles
+- Multi-magasins
+- Enregistrement des ventes
+- Historique complet
 - Sauvegardes automatiques
 - Purge automatique (19 mois)
 - Export PDF/CSV
-- Validation EAN-13
-- Interface mobile responsive
+- Interface mobile
 
-**🎯 L'application est maintenant prête pour la production !**
+## 🎉 Prêt !
+
+L'application RegisFlow est maintenant prête à l'emploi sans aucune configuration supplémentaire.

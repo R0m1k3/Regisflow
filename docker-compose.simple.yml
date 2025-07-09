@@ -1,7 +1,7 @@
 version: '3.8'
 
 # Configuration Docker Compose SIMPLE pour RegisFlow
-# Installation sans configuration réseau complexe
+# Installation sans intervention avec réseau automatique
 services:
   # Base de données PostgreSQL
   regisflow-db:
@@ -56,13 +56,13 @@ services:
       retries: 3
       start_period: 90s
 
-# Volumes persistants (Docker gère automatiquement)
+# Volumes persistants (création automatique)
 volumes:
   postgres_data:
   backup_data:
   logs_data:
 
-# Réseau par défaut (pas de configuration IP)
+# Réseau par défaut (pas de sous-réseau spécifique)
 networks:
   default:
     driver: bridge
