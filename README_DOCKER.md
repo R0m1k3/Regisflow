@@ -139,17 +139,17 @@ docker-compose ps
 ### Gestion des données
 
 ```bash
-# Sauvegarder la base de données
-docker-compose exec postgres pg_dump -U regisflow regisflow > backup.sql
+# Sauvegarder la base de données externe
+pg_dump -h IP_SERVEUR -p 5433 -U regisflow regisflow > backup.sql
 
-# Restaurer la base de données
-docker-compose exec -T postgres psql -U regisflow regisflow < backup.sql
+# Restaurer la base de données externe
+psql -h IP_SERVEUR -p 5433 -U regisflow regisflow < backup.sql
 
-# Accéder à la base de données
-docker-compose exec postgres psql -U regisflow regisflow
+# Accéder à la base de données externe
+psql -h IP_SERVEUR -p 5433 -U regisflow regisflow
 
-# Ou depuis l'hôte (port 5433)
-psql -h localhost -p 5433 -U regisflow regisflow
+# Connexion à la base externe
+psql -h IP_SERVEUR -p 5433 -U regisflow regisflow
 ```
 
 ### Maintenance
@@ -164,7 +164,7 @@ docker system prune -f
 
 # Voir l'utilisation des volumes
 docker volume ls
-docker volume inspect regisflow_postgres_data
+docker volume inspect regisflow_backup_data
 ```
 
 ## 🛡️ Sécurité
@@ -222,17 +222,17 @@ docker system df
    # Vérifier les logs
    docker-compose logs regisflow
    
-   # Vérifier la base de données
-   docker-compose logs postgres
+   # Vérifier la connexion à la base externe
+   docker-compose exec regisflow pg_isready -h IP_SERVEUR -p 5433 -U regisflow
    ```
 
 2. **Erreur de connexion à la base** :
    ```bash
-   # Vérifier que PostgreSQL est démarré
-   docker-compose ps postgres
+   # Vérifier que PostgreSQL externe est accessible
+   docker-compose exec regisflow pg_isready -h IP_SERVEUR -p 5433 -U regisflow
    
-   # Tester la connexion
-   docker-compose exec postgres pg_isready -U regisflow
+   # Tester la connectivité réseau
+   docker-compose exec regisflow nc -zv IP_SERVEUR 5433
    ```
 
 3. **Problème de permissions** :
@@ -289,7 +289,7 @@ Si vous souhaitez ajouter un reverse proxy (Nginx, Apache, etc.) :
 
 ```env
 # Base de données
-DATABASE_URL=postgresql://regisflow:password@postgres:5432/regisflow
+DATABASE_URL=postgresql://regisflow:RegisFlow2024!@IP_SERVEUR:5433/regisflow
 POSTGRES_PASSWORD=password
 
 # Application

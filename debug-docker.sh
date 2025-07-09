@@ -1,42 +1,37 @@
 #!/bin/bash
 
-# Script de debug pour Docker RegisFlow
-echo "🔍 Debug Docker RegisFlow"
+# Script de debug pour Docker RegisFlow (Base de données EXTERNE)
+echo "🔍 Debug Docker RegisFlow - Base PostgreSQL externe"
 
 echo "1. État des containers:"
 docker-compose ps
 
 echo ""
-echo "2. Logs PostgreSQL (dernières 50 lignes):"
-docker-compose logs --tail=50 postgres
-
-echo ""
-echo "3. Logs Application (dernières 50 lignes):"
+echo "2. Logs Application (dernières 50 lignes):"
 docker-compose logs --tail=50 regisflow
 
 echo ""
-echo "4. Test de connectivité réseau:"
-echo "   - Test ping postgres depuis regisflow:"
-docker-compose exec regisflow ping -c 3 postgres 2>/dev/null || echo "❌ Ping échoué"
+echo "3. Variables d'environnement dans l'application:"
+docker-compose exec regisflow env | grep -E "(DATABASE_URL|NODE_ENV|TZ)"
 
 echo ""
-echo "5. Variables d'environnement dans l'application:"
-docker-compose exec regisflow env | grep -E "(DATABASE_URL|POSTGRES|NODE_ENV)"
+echo "4. Test de connexion à la base externe:"
+echo "   - Extraction des paramètres de connexion:"
+docker-compose exec regisflow sh -c 'echo "Host: $(echo $DATABASE_URL | sed -n \"s|.*@\([^:]*\):.*|\1|p\")"'
+docker-compose exec regisflow sh -c 'echo "Port: $(echo $DATABASE_URL | sed -n \"s|.*:\([0-9]*\)/.*|\1|p\")"'
+docker-compose exec regisflow sh -c 'echo "User: $(echo $DATABASE_URL | sed -n \"s|.*://\([^:]*\):.*|\1|p\")"'
 
 echo ""
-echo "6. Test manuel de connexion PostgreSQL:"
-echo "   - Test depuis le container postgres:"
-docker-compose exec postgres pg_isready -U regisflow -d regisflow
-echo "   - Test depuis le container regisflow vers postgres:5432:"
-docker-compose exec regisflow pg_isready -h postgres -p 5432 -U regisflow
+echo "5. Test de connectivité vers la base externe:"
+docker-compose exec regisflow sh -c 'pg_isready -h $(echo $DATABASE_URL | sed -n "s|.*@\([^:]*\):.*|\1|p") -p $(echo $DATABASE_URL | sed -n "s|.*:\([0-9]*\)/.*|\1|p") -U regisflow'
 
 echo ""
-echo "7. Processus dans le container PostgreSQL:"
-docker-compose exec postgres ps aux
+echo "6. Test de résolution DNS:"
+docker-compose exec regisflow sh -c 'nslookup $(echo $DATABASE_URL | sed -n "s|.*@\([^:]*\):.*|\1|p") || echo "❌ DNS échoué"'
 
 echo ""
-echo "8. Test de port PostgreSQL depuis l'hôte:"
-timeout 5 bash -c "</dev/tcp/localhost/5433" && echo "✅ Port 5433 accessible" || echo "❌ Port 5433 inaccessible"
+echo "7. Test de port depuis le container:"
+docker-compose exec regisflow sh -c 'nc -zv $(echo $DATABASE_URL | sed -n "s|.*@\([^:]*\):.*|\1|p") $(echo $DATABASE_URL | sed -n "s|.*:\([0-9]*\)/.*|\1|p") 2>&1 || echo "❌ Port inaccessible"'
 
 echo ""
-echo "🏁 Debug terminé"
+echo "🏁 Debug terminé - Base PostgreSQL externe"
