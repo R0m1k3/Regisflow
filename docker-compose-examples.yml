@@ -1,0 +1,61 @@
+# Exemples de configurations réseau pour RegisFlow
+# Copiez et adaptez selon vos besoins
+
+# ==========================================
+# EXEMPLE 1 : RÉSEAU BRIDGE PERSONNALISÉ
+# ==========================================
+# Dans .env :
+# NETWORK_DRIVER=bridge
+# NETWORK_SUBNET=192.168.100.0/24
+# NETWORK_BRIDGE_NAME=regisflow-net
+
+# ==========================================
+# EXEMPLE 2 : RÉSEAU HOST (sans isolation)
+# ==========================================
+# Dans .env :
+# NETWORK_DRIVER=host
+# Supprimez les ports mappings dans docker-compose.yml
+
+# Pour utiliser le réseau host, modifiez docker-compose.yml :
+# services:
+#   regisflow-db:
+#     network_mode: host
+#   regisflow:
+#     network_mode: host
+
+# ==========================================
+# EXEMPLE 3 : RÉSEAU EXISTANT
+# ==========================================
+# Pour utiliser un réseau Docker existant :
+# networks:
+#   default:
+#     external: true
+#     name: mon-reseau-existant
+
+# ==========================================
+# EXEMPLE 4 : MACVLAN (IP dédiée)
+# ==========================================
+# Dans .env :
+# NETWORK_DRIVER=macvlan
+# NETWORK_SUBNET=192.168.1.0/24
+
+# Puis ajoutez dans docker-compose.yml networks :
+# driver_opts:
+#   parent: eth0  # Interface réseau de l'hôte
+
+# ==========================================
+# EXEMPLE 5 : DOCKER SWARM (OVERLAY)
+# ==========================================
+# Pour Docker Swarm avec réseau overlay :
+# networks:
+#   default:
+#     driver: overlay
+#     attachable: true
+
+# ==========================================
+# COMMENT CHANGER DE RÉSEAU
+# ==========================================
+# 1. Arrêtez les services : docker-compose down
+# 2. Modifiez les variables dans .env
+# 3. Redémarrez : docker-compose up -d
+# 4. Vérifiez : docker network ls

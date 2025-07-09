@@ -1,7 +1,7 @@
 version: '3.8'
 
 # Configuration Docker Compose pour RegisFlow
-# Installation simple sans configuration réseau
+# Réseau configurable via variables d'environnement
 services:
   # Base de données PostgreSQL
   regisflow-db:
@@ -61,7 +61,13 @@ volumes:
   backup_data:
   logs_data:
 
-# Réseau par défaut (pas de configuration IP)
+# Configuration réseau flexible
+# Vous pouvez changer NETWORK_DRIVER dans .env selon vos besoins
 networks:
   default:
-    driver: bridge
+    driver: ${NETWORK_DRIVER:-bridge}
+    driver_opts:
+      com.docker.network.bridge.name: ${NETWORK_BRIDGE_NAME:-docker0}
+    ipam:
+      config:
+        - subnet: ${NETWORK_SUBNET:-172.20.0.0/16}
