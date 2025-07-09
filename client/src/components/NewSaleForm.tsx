@@ -281,7 +281,7 @@ export default function NewSaleForm({ onSaveSale }: NewSaleFormProps) {
                       <FormItem>
                         <FormLabel>Quantité <span className="text-destructive">*</span></FormLabel>
                         <FormControl>
-                          <Input type="number" min="1" placeholder="1" {...field} />
+                          <Input type="number" min="1" placeholder="Entrez la quantité" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

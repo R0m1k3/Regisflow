@@ -30,7 +30,15 @@ export function validateRequiredFields(formData: any): string[] {
   ];
   
   return requiredFields
-    .filter(field => !formData[field.key] || formData[field.key].toString().trim() === '')
+    .filter(field => {
+      const value = formData[field.key];
+      // Pour la quantité, accepter 0 comme valeur valide
+      if (field.key === 'quantite') {
+        return value === '' || value === null || value === undefined;
+      }
+      // Pour les autres champs, vérifier si vide ou juste des espaces
+      return !value || value.toString().trim() === '';
+    })
     .map(field => field.label);
 }
 
