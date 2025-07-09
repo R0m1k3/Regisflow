@@ -26,14 +26,15 @@
 # RÉSEAUX COMPATIBLES PORTAINER
 # ==========================================
 
-# Bridge par défaut (installation standard)
+# Réseau RegisFlow dédié (configuration actuelle)
 networks:
-  default:
+  regisflow_network:
     driver: bridge
+    name: regisflow_network
 
 # Réseau existant (créé dans Portainer)
 networks:
-  default:
+  regisflow_network:
     external: true
     name: nom-reseau-existant
 
