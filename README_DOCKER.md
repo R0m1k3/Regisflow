@@ -55,8 +55,7 @@ docker-compose up -d
 docker-compose logs -f
 
 # Accéder à l'application
-# http://localhost (avec nginx)
-# ou http://localhost:5000 (accès direct)
+# http://localhost:5000
 ```
 
 ## 📋 Services Inclus
@@ -73,11 +72,7 @@ docker-compose logs -f
 - **Sauvegardes**: Volume `backup_data`
 - **Health check**: `/health`
 
-### 3. Nginx (Reverse Proxy)
-- **Port**: 80 (HTTP)
-- **Port**: 443 (HTTPS - à configurer)
-- **Compression**: Gzip activée
-- **Cache**: Optimisé pour les assets statiques
+
 
 ## 🔧 Commandes Utiles
 
@@ -239,12 +234,12 @@ L'application gère automatiquement les migrations de base de données au démar
 
 ## 📝 Configuration Avancée
 
-### Personnalisation de Nginx
+### Accès via Reverse Proxy (Optionnel)
 
-Éditez le fichier `nginx.conf` pour :
-- Configurer SSL/TLS
-- Ajouter des règles de sécurité
-- Optimiser les performances
+Si vous souhaitez ajouter un reverse proxy (Nginx, Apache, etc.) :
+- Configurez le proxy pour pointer vers `localhost:5000`
+- Ajoutez la configuration SSL/TLS si nécessaire
+- Optimisez les performances selon vos besoins
 
 ### Variables d'environnement complètes
 
