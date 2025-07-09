@@ -16,25 +16,25 @@ export default function SaleDetailsModal({ isOpen, sale, onClose }: SaleDetailsM
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Détails de la Vente</DialogTitle>
+      <DialogContent className="mobile-modal-content max-w-4xl max-h-[90vh] overflow-y-auto slide-in-up">
+        <DialogHeader className="mobile-padding">
+          <DialogTitle className="responsive-title">Détails de la Vente</DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-6">
+        <div className="mobile-spacing mobile-padding">
           {/* Seller Information */}
-          <div className="border-l-4 border-primary pl-4">
-            <h4 className="font-medium text-gray-900 mb-2">Informations Vendeur</h4>
-            <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="mobile-form-section border-l-4 border-primary pl-4">
+            <h4 className="responsive-subtitle text-gray-900 mb-3">Informations Vendeur</h4>
+            <div className="mobile-form-row responsive-body">
               <div><span className="font-medium">Vendeur:</span> {sale.vendeur}</div>
               <div><span className="font-medium">Date de vente:</span> {formatDate(sale.dateVente)}</div>
             </div>
           </div>
           
           {/* Product Information */}
-          <div className="border-l-4 border-info pl-4">
-            <h4 className="font-medium text-gray-900 mb-2">Informations Produit</h4>
-            <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="mobile-form-section border-l-4 border-blue-500 pl-4">
+            <h4 className="responsive-subtitle text-gray-900 mb-3">Informations Produit</h4>
+            <div className="mobile-form-row responsive-body">
               <div><span className="font-medium">Type d'article:</span> {sale.typeArticle}</div>
               <div>
                 <span className="font-medium">Catégorie:</span>{' '}
@@ -48,9 +48,9 @@ export default function SaleDetailsModal({ isOpen, sale, onClose }: SaleDetailsM
           </div>
           
           {/* Customer Information */}
-          <div className="border-l-4 border-success pl-4">
-            <h4 className="font-medium text-gray-900 mb-2">Informations Client</h4>
-            <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="mobile-form-section border-l-4 border-green-500 pl-4">
+            <h4 className="responsive-subtitle text-gray-900 mb-3">Informations Client</h4>
+            <div className="mobile-form-row responsive-body">
               <div><span className="font-medium">Nom:</span> {sale.nom}</div>
               <div><span className="font-medium">Prénom:</span> {sale.prenom}</div>
               <div>
@@ -63,9 +63,9 @@ export default function SaleDetailsModal({ isOpen, sale, onClose }: SaleDetailsM
           </div>
           
           {/* Identity Document */}
-          <div className="border-l-4 border-yellow-500 pl-4">
-            <h4 className="font-medium text-gray-900 mb-2">Pièce d'Identité</h4>
-            <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="mobile-form-section border-l-4 border-yellow-500 pl-4">
+            <h4 className="responsive-subtitle text-gray-900 mb-3">Pièce d'Identité</h4>
+            <div className="mobile-form-row responsive-body">
               <div><span className="font-medium">Type:</span> {sale.typeIdentite || 'Non spécifié'}</div>
               <div><span className="font-medium">Numéro:</span> {sale.numeroIdentite || 'Non spécifié'}</div>
               <div><span className="font-medium">Autorité de délivrance:</span> {sale.autoriteDelivrance || 'Non spécifiée'}</div>
@@ -77,9 +77,9 @@ export default function SaleDetailsModal({ isOpen, sale, onClose }: SaleDetailsM
           </div>
           
           {/* Photos */}
-          <div className="border-l-4 border-purple-500 pl-4">
-            <h4 className="font-medium text-gray-900 mb-2">Photos de la Pièce d'Identité</h4>
-            <div className="grid grid-cols-2 gap-4">
+          <div className="mobile-form-section border-l-4 border-purple-500 pl-4">
+            <h4 className="responsive-subtitle text-gray-900 mb-3">Photos de la Pièce d'Identité</h4>
+            <div className="mobile-form-row">
               <div>
                 <span className="text-sm font-medium">Photo Recto:</span>
                 {sale.photoRecto ? (

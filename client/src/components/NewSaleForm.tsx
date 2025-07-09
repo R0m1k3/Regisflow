@@ -177,9 +177,9 @@ export default function NewSaleForm() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="mobile-form-responsive">
             {/* Seller Information */}
-            <div className="modern-card bg-muted/30 mobile-form-section rounded-xl border-l-4 border-primary">
+            <div className="modern-card bg-muted bg-opacity-30 mobile-form-section rounded-xl border-l-4 border-primary">
               <h3 className="mobile-header-responsive font-semibold text-foreground mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
-                <div className="p-1.5 sm:p-2 bg-primary/10 rounded-lg">
+                <div className="p-1.5 sm:p-2 bg-primary bg-opacity-10 rounded-lg">
                   <User className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 </div>
                 <span className="truncate">Informations Vendeur</span>
@@ -215,9 +215,9 @@ export default function NewSaleForm() {
             </div>
 
             {/* Product Information */}
-            <div className="modern-card bg-blue-50/50 mobile-form-section rounded-xl border-l-4 border-blue-500">
+            <div className="modern-card bg-blue-50 bg-opacity-50 mobile-form-section rounded-xl border-l-4 border-blue-500">
               <h3 className="mobile-header-responsive font-semibold text-foreground mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
-                <div className="p-1.5 sm:p-2 bg-blue-500/10 rounded-lg">
+                <div className="p-1.5 sm:p-2 bg-blue-500 bg-opacity-10 rounded-lg">
                   <Package className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
                 </div>
                 <span className="truncate">Informations Produit</span>

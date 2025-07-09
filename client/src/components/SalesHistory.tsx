@@ -264,7 +264,7 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
       </CardHeader>
       <CardContent className="mobile-card-content mobile-form-responsive">
         {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-end mobile-form-section bg-muted/30 rounded-xl border border-border/50">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-end mobile-form-section bg-muted bg-opacity-30 rounded-xl border border-border border-opacity-50">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 flex-1 w-full">
             <div>
               <label className="responsive-caption font-medium">Date de début</label>
