@@ -17,6 +17,7 @@ export interface Sale {
   prenom: string;
   dateNaissance: string;
   lieuNaissance?: string;
+  modePaiement: string;
   
   // Identité
   typeIdentite: string;
@@ -40,6 +41,7 @@ export interface FormData {
   prenom: string;
   dateNaissance: string;
   lieuNaissance: string;
+  modePaiement: string;
   typeIdentite: string;
   numeroIdentite: string;
   autoriteDelivrance: string;

@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useStoreContext } from '@/hooks/useStoreContext';
 import { apiRequest } from '@/lib/queryClient';
-import { validateRequiredFields, validateEAN13, ARTICLE_CATEGORY_MAPPING, IDENTITY_TYPES } from '@/lib/validation';
+import { validateRequiredFields, validateEAN13, ARTICLE_CATEGORY_MAPPING, IDENTITY_TYPES, PAYMENT_METHODS } from '@/lib/validation';
 import { Package, User, Users, Save, X } from 'lucide-react';
 
 interface FormData {
@@ -25,6 +25,7 @@ interface FormData {
   prenom: string;
   dateNaissance: string;
   lieuNaissance: string;
+  modePaiement: string;
   typeIdentite: string;
   numeroIdentite: string;
   autoriteDelivrance: string;
@@ -50,6 +51,7 @@ export default function NewSaleForm() {
       prenom: '',
       dateNaissance: '',
       lieuNaissance: '',
+      modePaiement: 'Espèce',
       typeIdentite: '',
       numeroIdentite: '',
       autoriteDelivrance: '',
@@ -92,6 +94,7 @@ export default function NewSaleForm() {
         prenom: '',
         dateNaissance: '',
         lieuNaissance: '',
+        modePaiement: 'Espèce',
         typeIdentite: '',
         numeroIdentite: '',
         autoriteDelivrance: '',
@@ -374,6 +377,30 @@ export default function NewSaleForm() {
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={form.control}
+                  name="modePaiement"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Mode de paiement <span className="text-destructive">*</span></FormLabel>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Sélectionner le mode de paiement" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {PAYMENT_METHODS.map((method) => (
+                            <SelectItem key={method.value} value={method.value}>
+                              {method.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
             </div>
 
@@ -473,6 +500,7 @@ export default function NewSaleForm() {
                   prenom: '',
                   dateNaissance: '',
                   lieuNaissance: '',
+                  modePaiement: 'Espèce',
                   typeIdentite: '',
                   numeroIdentite: '',
                   autoriteDelivrance: '',

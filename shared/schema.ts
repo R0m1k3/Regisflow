@@ -73,6 +73,7 @@ export const sales = pgTable("sales", {
   prenom: varchar("prenom", { length: 255 }).notNull(),
   dateNaissance: varchar("date_naissance", { length: 10 }).notNull(),
   lieuNaissance: varchar("lieu_naissance", { length: 255 }),
+  modePaiement: varchar("mode_paiement", { length: 50 }).notNull().default("Espèce"),
   
   // Identité
   typeIdentite: varchar("type_identite", { length: 50 }).notNull(),

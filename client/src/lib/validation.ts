@@ -23,6 +23,7 @@ export function validateRequiredFields(formData: any): string[] {
     { key: 'nom', label: 'Nom' },
     { key: 'prenom', label: 'Prénom' },
     { key: 'dateNaissance', label: 'Date de naissance' },
+    { key: 'modePaiement', label: 'Mode de paiement' },
     { key: 'typeIdentite', label: 'Type de pièce d\'identité' },
     { key: 'numeroIdentite', label: 'Numéro de pièce d\'identité' },
     { key: 'autoriteDelivrance', label: 'Autorité de délivrance' },
@@ -59,4 +60,12 @@ export const IDENTITY_TYPES = [
   { value: "CNI", label: "Carte Nationale d'Identité" },
   { value: "Passeport", label: "Passeport" },
   { value: "Permis de conduire", label: "Permis de conduire" }
+] as const;
+
+export const PAYMENT_METHODS = [
+  { value: "Carte Bancaire", label: "Carte Bancaire" },
+  { value: "Espèce", label: "Espèce" },
+  { value: "Chèque", label: "Chèque" },
+  { value: "Carte Cadeau", label: "Carte Cadeau" },
+  { value: "Autre", label: "Autre" }
 ] as const;

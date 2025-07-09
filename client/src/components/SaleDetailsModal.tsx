@@ -58,6 +58,7 @@ export default function SaleDetailsModal({ isOpen, sale, onClose }: SaleDetailsM
                 {sale.dateNaissance ? formatDate(sale.dateNaissance) : 'Non spécifiée'}
               </div>
               <div><span className="font-medium">Lieu de naissance:</span> {sale.lieuNaissance || 'Non spécifié'}</div>
+              <div><span className="font-medium">Mode de paiement:</span> {sale.modePaiement || 'Espèce'}</div>
             </div>
           </div>
           

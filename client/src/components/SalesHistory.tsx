@@ -11,7 +11,7 @@ import { useStoreContext } from '@/hooks/useStoreContext';
 import { useAuth } from '@/hooks/useAuth';
 import { apiRequest } from '@/lib/queryClient';
 import type { Sale } from '@shared/schema';
-import { History, Download, Trash2, Eye, Filter } from 'lucide-react';
+import { History, Download, Trash2, Eye, Filter, FileText } from 'lucide-react';
 
 interface SalesHistoryProps {
   canDelete?: boolean;
@@ -75,6 +75,102 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
     deleteSaleMutation.mutate(sale.id);
   };
 
+  const exportToPDF = async () => {
+    if (sales.length === 0) {
+      toast({
+        title: "Aucune donnée",
+        description: "Aucune vente à exporter",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { default: jsPDF } = await import('jspdf');
+    await import('jspdf-autotable');
+
+    const doc = new jsPDF() as any;
+    
+    // Configuration du document
+    doc.setFont('helvetica');
+    
+    // Titre du document
+    doc.setFontSize(16);
+    doc.text('Historique des Ventes de Feux d\'Artifice', 20, 20);
+    
+    // Informations générales
+    doc.setFontSize(10);
+    doc.text(`Date d'export: ${new Date().toLocaleDateString('fr-FR')}`, 20, 30);
+    doc.text(`Nombre de ventes: ${sales.length}`, 20, 35);
+    
+    if (startDate || endDate) {
+      let periodText = 'Période: ';
+      if (startDate) periodText += `du ${new Date(startDate).toLocaleDateString('fr-FR')} `;
+      if (endDate) periodText += `au ${new Date(endDate).toLocaleDateString('fr-FR')}`;
+      doc.text(periodText, 20, 40);
+    }
+
+    // Données du tableau
+    const tableData = sales.map(sale => [
+      new Date(sale.timestamp!).toLocaleDateString('fr-FR'),
+      sale.vendeur,
+      sale.typeArticle,
+      sale.categorie,
+      sale.quantite.toString(),
+      sale.nom + ' ' + sale.prenom,
+      sale.modePaiement || 'Espèce',
+      sale.typeIdentite,
+      sale.numeroIdentite
+    ]);
+
+    // Configuration du tableau
+    doc.autoTable({
+      head: [['Date', 'Vendeur', 'Article', 'Cat.', 'Qté', 'Client', 'Paiement', 'ID Type', 'N° ID']],
+      body: tableData,
+      startY: startDate || endDate ? 50 : 45,
+      styles: {
+        fontSize: 8,
+        cellPadding: 2,
+      },
+      headStyles: {
+        fillColor: [59, 130, 246],
+        textColor: 255,
+        fontSize: 9,
+      },
+      alternateRowStyles: {
+        fillColor: [248, 250, 252],
+      },
+      columnStyles: {
+        0: { cellWidth: 18 }, // Date
+        1: { cellWidth: 25 }, // Vendeur
+        2: { cellWidth: 35 }, // Article
+        3: { cellWidth: 12 }, // Catégorie
+        4: { cellWidth: 12 }, // Quantité
+        5: { cellWidth: 30 }, // Client
+        6: { cellWidth: 20 }, // Paiement
+        7: { cellWidth: 15 }, // ID Type
+        8: { cellWidth: 25 }, // N° ID
+      },
+      margin: { left: 10, right: 10 },
+    });
+
+    // Pied de page
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.text(`Page ${i} sur ${pageCount}`, doc.internal.pageSize.width - 30, doc.internal.pageSize.height - 10);
+      doc.text('RegisFlow - Registre des ventes de feux d\'artifice', 20, doc.internal.pageSize.height - 10);
+    }
+
+    // Téléchargement
+    doc.save(`historique_ventes_${new Date().toISOString().split('T')[0]}.pdf`);
+
+    toast({
+      title: "Export PDF réussi",
+      description: `${sales.length} ventes exportées en PDF`,
+    });
+  };
+
   const exportToCSV = () => {
     if (sales.length === 0) {
       toast({
@@ -97,6 +193,7 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
       'Prénom client',
       'Date de naissance',
       'Lieu de naissance',
+      'Mode de paiement',
       'Type identité',
       'Numéro identité',
       'Autorité délivrance',
@@ -115,6 +212,7 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
       sale.prenom,
       sale.dateNaissance,
       sale.lieuNaissance || '',
+      sale.modePaiement || 'Espèce',
       sale.typeIdentite,
       sale.numeroIdentite,
       sale.autoriteDelivrance,
@@ -178,11 +276,18 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
               />
             </div>
           </div>
-          <Button onClick={exportToCSV} variant="outline" className="touch-friendly-button w-full sm:w-auto">
-            <Download className="h-4 w-4 mr-2" />
-            <span className="hidden sm:inline">Export CSV</span>
-            <span className="sm:hidden">CSV</span>
-          </Button>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <Button onClick={exportToCSV} variant="outline" className="touch-friendly-button flex-1 sm:flex-none">
+              <Download className="h-4 w-4 mr-2" />
+              <span className="hidden sm:inline">Export CSV</span>
+              <span className="sm:hidden">CSV</span>
+            </Button>
+            <Button onClick={exportToPDF} variant="outline" className="touch-friendly-button flex-1 sm:flex-none">
+              <FileText className="h-4 w-4 mr-2" />
+              <span className="hidden sm:inline">Export PDF</span>
+              <span className="sm:hidden">PDF</span>
+            </Button>
+          </div>
         </div>
 
         {/* Sales Table */}
@@ -204,6 +309,7 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
                   <TableHead className="responsive-caption">Client</TableHead>
                   <TableHead className="responsive-caption">Article</TableHead>
                   <TableHead className="responsive-caption">Quantité</TableHead>
+                  <TableHead className="responsive-caption hidden lg:table-cell">Paiement</TableHead>
                   <TableHead className="responsive-caption hidden sm:table-cell">Gencode</TableHead>
                   <TableHead className="responsive-caption">Actions</TableHead>
                 </TableRow>
@@ -234,7 +340,12 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
                       </div>
                     </TableCell>
                     <TableCell>{sale.quantite}</TableCell>
-                    <TableCell>{sale.gencode}</TableCell>
+                    <TableCell className="hidden lg:table-cell">
+                      <span className="inline-flex px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
+                        {sale.modePaiement || 'Espèce'}
+                      </span>
+                    </TableCell>
+                    <TableCell className="hidden sm:table-cell">{sale.gencode}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
                         <Dialog>
@@ -274,6 +385,7 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
                                   {selectedSale.lieuNaissance && (
                                     <p><strong>Lieu de naissance :</strong> {selectedSale.lieuNaissance}</p>
                                   )}
+                                  <p><strong>Mode de paiement :</strong> {selectedSale.modePaiement || 'Espèce'}</p>
                                 </div>
                                 <div>
                                   <h4 className="font-medium mb-2">Pièce d'identité</h4>
