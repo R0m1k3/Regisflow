@@ -51,7 +51,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center gradient-bg p-4 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center gradient-bg mobile-padding py-4 relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-white/20 to-white/5 rounded-full blur-3xl"></div>
@@ -59,33 +59,33 @@ export default function Login() {
       </div>
       
       <Card className="w-full max-w-md modern-card-elevated backdrop-blur-sm bg-white/90 border-white/20 slide-in-up relative z-10">
-        <CardHeader className="text-center space-y-6 pb-8">
+        <CardHeader className="text-center space-y-4 sm:space-y-6 mobile-card-header">
           <div className="flex justify-center">
             <div className="relative">
-              <div className="p-4 bg-gradient-to-br from-primary to-purple-600 rounded-2xl shadow-lg">
-                <Sparkles className="h-8 w-8 text-white" />
+              <div className="p-3 sm:p-4 bg-gradient-to-br from-primary to-purple-600 rounded-xl sm:rounded-2xl shadow-lg">
+                <Sparkles className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
               </div>
-              <div className="absolute -inset-2 bg-gradient-to-br from-primary to-purple-600 rounded-2xl blur opacity-20 -z-10"></div>
+              <div className="absolute -inset-2 bg-gradient-to-br from-primary to-purple-600 rounded-xl sm:rounded-2xl blur opacity-20 -z-10"></div>
             </div>
           </div>
           <div className="space-y-2">
-            <CardTitle className="text-3xl font-bold gradient-text">RegisFlow</CardTitle>
-            <p className="text-muted-foreground text-lg">Registre des ventes des Feux d'artifice</p>
+            <CardTitle className="responsive-title font-bold gradient-text">RegisFlow</CardTitle>
+            <p className="text-muted-foreground responsive-subtitle">Registre des ventes des Feux d'artifice</p>
           </div>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="mobile-card-content space-y-4 sm:space-y-6">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="mobile-form-responsive">
               <FormField
                 control={form.control}
                 name="username"
                 render={({ field }) => (
-                  <FormItem className="space-y-3">
-                    <FormLabel className="text-sm font-semibold text-foreground">Nom d'utilisateur</FormLabel>
+                  <FormItem className="space-y-2 sm:space-y-3">
+                    <FormLabel className="responsive-body font-semibold text-foreground">Nom d'utilisateur</FormLabel>
                     <FormControl>
                       <Input 
                         placeholder="Votre nom d'utilisateur" 
-                        className="h-12 text-base border-2 border-border/50 focus:border-primary bg-background/50 backdrop-blur-sm smooth-transition" 
+                        className="touch-friendly responsive-body border-2 border-border/50 focus:border-primary bg-background/50 backdrop-blur-sm smooth-transition" 
                         {...field} 
                       />
                     </FormControl>
@@ -97,13 +97,13 @@ export default function Login() {
                 control={form.control}
                 name="password"
                 render={({ field }) => (
-                  <FormItem className="space-y-3">
-                    <FormLabel className="text-sm font-semibold text-foreground">Mot de passe</FormLabel>
+                  <FormItem className="space-y-2 sm:space-y-3">
+                    <FormLabel className="responsive-body font-semibold text-foreground">Mot de passe</FormLabel>
                     <FormControl>
                       <Input 
                         type="password" 
                         placeholder="Votre mot de passe" 
-                        className="h-12 text-base border-2 border-border/50 focus:border-primary bg-background/50 backdrop-blur-sm smooth-transition" 
+                        className="touch-friendly responsive-body border-2 border-border/50 focus:border-primary bg-background/50 backdrop-blur-sm smooth-transition" 
                         {...field} 
                       />
                     </FormControl>
@@ -113,7 +113,7 @@ export default function Login() {
               />
               <Button 
                 type="submit" 
-                className="w-full h-12 text-base font-semibold bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 hover:shadow-lg hover:scale-[1.02] smooth-transition" 
+                className="w-full touch-friendly responsive-body font-semibold bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 hover:shadow-lg hover:scale-[1.02] smooth-transition" 
                 disabled={isLoggingIn}
               >
                 <LogIn className="h-5 w-5 mr-2" />

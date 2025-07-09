@@ -143,37 +143,45 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <History className="h-5 w-5" />
-          Historique des Ventes
+    <Card className="modern-card-elevated">
+      <CardHeader className="mobile-card-header">
+        <CardTitle className="flex items-center gap-2 sm:gap-3 responsive-title">
+          <div className="p-1.5 sm:p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg sm:rounded-xl">
+            <History className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+          </div>
+          <span className="truncate">Historique des Ventes</span>
         </CardTitle>
+        <p className="text-muted-foreground mt-2 responsive-body">
+          Consultation et gestion des ventes enregistrées
+        </p>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="mobile-card-content mobile-form-responsive">
         {/* Filters */}
-        <div className="flex gap-4 items-end">
-          <div className="grid grid-cols-2 gap-4 flex-1">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-end mobile-form-section bg-muted/30 rounded-xl border border-border/50">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 flex-1 w-full">
             <div>
-              <label className="text-sm font-medium">Date de début</label>
+              <label className="responsive-caption font-medium">Date de début</label>
               <Input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
+                className="responsive-body"
               />
             </div>
             <div>
-              <label className="text-sm font-medium">Date de fin</label>
+              <label className="responsive-caption font-medium">Date de fin</label>
               <Input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
+                className="responsive-body"
               />
             </div>
           </div>
-          <Button onClick={exportToCSV} variant="outline">
+          <Button onClick={exportToCSV} variant="outline" className="touch-friendly-button w-full sm:w-auto">
             <Download className="h-4 w-4 mr-2" />
-            Export CSV
+            <span className="hidden sm:inline">Export CSV</span>
+            <span className="sm:hidden">CSV</span>
           </Button>
         </div>
 
@@ -183,21 +191,21 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
         ) : sales.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
+          <div className="text-center py-8 text-muted-foreground responsive-body">
             Aucune vente trouvée
           </div>
         ) : (
-          <div className="rounded-md border">
+          <div className="rounded-md border overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date/Heure</TableHead>
-                  <TableHead>Vendeur</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Article</TableHead>
-                  <TableHead>Quantité</TableHead>
-                  <TableHead>Gencode</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead className="responsive-caption">Date/Heure</TableHead>
+                  <TableHead className="responsive-caption">Vendeur</TableHead>
+                  <TableHead className="responsive-caption">Client</TableHead>
+                  <TableHead className="responsive-caption">Article</TableHead>
+                  <TableHead className="responsive-caption">Quantité</TableHead>
+                  <TableHead className="responsive-caption hidden sm:table-cell">Gencode</TableHead>
+                  <TableHead className="responsive-caption">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

@@ -191,6 +191,74 @@
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   }
 
+  /* Mobile responsive utilities */
+  .mobile-padding {
+    @apply px-3 sm:px-4 md:px-6 lg:px-8;
+  }
+
+  .mobile-text-responsive {
+    @apply text-sm sm:text-base lg:text-lg;
+  }
+
+  .mobile-header-responsive {
+    @apply text-lg sm:text-xl lg:text-2xl;
+  }
+
+  .mobile-button-responsive {
+    @apply text-xs sm:text-sm lg:text-base px-3 sm:px-4 py-2 sm:py-2.5;
+  }
+
+  .mobile-grid-responsive {
+    @apply grid-cols-1 sm:grid-cols-2 lg:grid-cols-3;
+  }
+
+  .mobile-gap-responsive {
+    @apply gap-2 sm:gap-4 lg:gap-6;
+  }
+
+  .mobile-form-responsive {
+    @apply space-y-4 sm:space-y-6 lg:space-y-8;
+  }
+
+  /* Touch-friendly interactive elements */
+  .touch-friendly {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  .touch-friendly-button {
+    @apply h-11 sm:h-10 lg:h-9 px-4 sm:px-3 lg:px-4;
+  }
+
+  /* Responsive text sizes */
+  .responsive-title {
+    @apply text-xl sm:text-2xl lg:text-3xl;
+  }
+
+  .responsive-subtitle {
+    @apply text-sm sm:text-base lg:text-lg;
+  }
+
+  .responsive-body {
+    @apply text-sm sm:text-base;
+  }
+
+  .responsive-caption {
+    @apply text-xs sm:text-sm;
+  }
+
+  /* Mobile-first form improvements */
+  .mobile-form-section {
+    @apply p-4 sm:p-6 lg:p-8;
+  }
+
+  .mobile-card-header {
+    @apply p-4 sm:p-6 lg:p-8;
+  }
+
+  .mobile-card-content {
+    @apply p-4 sm:p-6 lg:p-8;
+  }
+
   /* Animation keyframes */
   @keyframes slideInRight {
     from {

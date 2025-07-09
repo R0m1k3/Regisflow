@@ -159,29 +159,29 @@ export default function NewSaleForm() {
 
   return (
     <Card className="modern-card-elevated">
-      <CardHeader className="pb-6">
-        <CardTitle className="flex items-center gap-3 text-2xl">
-          <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl">
-            <Package className="h-6 w-6 text-white" />
+      <CardHeader className="mobile-card-header">
+        <CardTitle className="flex items-center gap-2 sm:gap-3 responsive-title">
+          <div className="p-1.5 sm:p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg sm:rounded-xl">
+            <Package className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
           </div>
-          Nouvelle Vente
+          <span className="truncate">Nouvelle Vente</span>
         </CardTitle>
-        <p className="text-muted-foreground mt-2">
+        <p className="text-muted-foreground mt-2 responsive-body">
           Enregistrement d'une vente de feux d'artifice
         </p>
       </CardHeader>
-      <CardContent>
+      <CardContent className="mobile-card-content">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="mobile-form-responsive">
             {/* Seller Information */}
-            <div className="modern-card bg-muted/30 p-6 rounded-xl border-l-4 border-primary">
-              <h3 className="text-xl font-semibold text-foreground mb-6 flex items-center gap-3">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <User className="h-5 w-5 text-primary" />
+            <div className="modern-card bg-muted/30 mobile-form-section rounded-xl border-l-4 border-primary">
+              <h3 className="mobile-header-responsive font-semibold text-foreground mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 bg-primary/10 rounded-lg">
+                  <User className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 </div>
-                Informations Vendeur
+                <span className="truncate">Informations Vendeur</span>
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 mobile-gap-responsive">
                 <FormField
                   control={form.control}
                   name="vendeur"
@@ -212,14 +212,14 @@ export default function NewSaleForm() {
             </div>
 
             {/* Product Information */}
-            <div className="modern-card bg-blue-50/50 p-6 rounded-xl border-l-4 border-blue-500">
-              <h3 className="text-xl font-semibold text-foreground mb-6 flex items-center gap-3">
-                <div className="p-2 bg-blue-500/10 rounded-lg">
-                  <Package className="h-5 w-5 text-blue-600" />
+            <div className="modern-card bg-blue-50/50 mobile-form-section rounded-xl border-l-4 border-blue-500">
+              <h3 className="mobile-header-responsive font-semibold text-foreground mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 bg-blue-500/10 rounded-lg">
+                  <Package className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
                 </div>
-                Informations Produit
+                <span className="truncate">Informations Produit</span>
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 mobile-gap-responsive">
                 <FormField
                   control={form.control}
                   name="typeArticle"
@@ -314,14 +314,14 @@ export default function NewSaleForm() {
             </div>
 
             {/* Customer Information */}
-            <div className="modern-card bg-emerald-50/50 p-6 rounded-xl border-l-4 border-emerald-500">
-              <h3 className="text-xl font-semibold text-foreground mb-6 flex items-center gap-3">
-                <div className="p-2 bg-emerald-500/10 rounded-lg">
-                  <Users className="h-5 w-5 text-emerald-600" />
+            <div className="modern-card bg-emerald-50/50 mobile-form-section rounded-xl border-l-4 border-emerald-500">
+              <h3 className="mobile-header-responsive font-semibold text-foreground mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 bg-emerald-500/10 rounded-lg">
+                  <Users className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600" />
                 </div>
-                Informations Client
+                <span className="truncate">Informations Client</span>
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 mobile-gap-responsive">
                 <FormField
                   control={form.control}
                   name="nom"
@@ -378,16 +378,16 @@ export default function NewSaleForm() {
             </div>
 
             {/* Identity Information */}
-            <div className="modern-card bg-amber-50/50 p-6 rounded-xl border-l-4 border-amber-500">
-              <h3 className="text-xl font-semibold text-foreground mb-6 flex items-center gap-3">
-                <div className="p-2 bg-amber-500/10 rounded-lg">
-                  <svg className="h-5 w-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="modern-card bg-amber-50/50 mobile-form-section rounded-xl border-l-4 border-amber-500">
+              <h3 className="mobile-header-responsive font-semibold text-foreground mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 bg-amber-500/10 rounded-lg">
+                  <svg className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
                   </svg>
                 </div>
-                Pièce d'Identité
+                <span className="truncate">Pièce d'Identité</span>
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 mobile-gap-responsive">
                 <FormField
                   control={form.control}
                   name="typeIdentite"
@@ -455,12 +455,12 @@ export default function NewSaleForm() {
             </div>
 
             {/* Form Actions */}
-            <div className="flex justify-end space-x-4 pt-8 mt-8 border-t border-border/50">
+            <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 pt-6 sm:pt-8 mt-6 sm:mt-8 border-t border-border/50">
               <Button 
                 type="button" 
                 variant="outline" 
                 size="lg"
-                className="border-2 hover:bg-muted smooth-transition"
+                className="border-2 hover:bg-muted smooth-transition touch-friendly-button order-2 sm:order-1"
                 onClick={() => {
                 form.reset({
                   vendeur: '',
@@ -486,10 +486,11 @@ export default function NewSaleForm() {
                 type="submit" 
                 size="lg"
                 disabled={isSubmitting || createSaleMutation.isPending}
-                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-[1.02] smooth-transition"
+                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-[1.02] smooth-transition touch-friendly-button order-1 sm:order-2"
               >
                 <Save className="h-5 w-5 mr-2" />
-                {isSubmitting || createSaleMutation.isPending ? 'Enregistrement...' : 'Enregistrer la Vente'}
+                <span className="hidden sm:inline">{isSubmitting || createSaleMutation.isPending ? 'Enregistrement...' : 'Enregistrer la Vente'}</span>
+                <span className="sm:hidden">{isSubmitting || createSaleMutation.isPending ? 'Enregistrement...' : 'Enregistrer'}</span>
               </Button>
             </div>
           </form>
