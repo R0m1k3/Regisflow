@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useStoreContext } from '@/hooks/useStoreContext';
 import { useAuth } from '@/hooks/useAuth';
@@ -70,10 +71,8 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
     },
   });
 
-  const handleDeleteSale = async (sale: Sale) => {
-    if (confirm(`Êtes-vous sûr de vouloir supprimer cette vente ?`)) {
-      deleteSaleMutation.mutate(sale.id);
-    }
+  const handleDeleteSale = (sale: Sale) => {
+    deleteSaleMutation.mutate(sale.id);
   };
 
   const exportToCSV = () => {
@@ -280,14 +279,38 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
                           </DialogContent>
                         </Dialog>
                         {canDelete && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteSale(sale)}
-                            disabled={deleteSaleMutation.isPending}
-                          >
-                            <Trash2 className="h-4 w-4 text-red-600" />
-                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                disabled={deleteSaleMutation.isPending}
+                              >
+                                <Trash2 className="h-4 w-4 text-red-600" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Êtes-vous sûr de vouloir supprimer cette vente ? Cette action est irréversible.
+                                  <br /><br />
+                                  <strong>Client :</strong> {sale.nom} {sale.prenom}<br />
+                                  <strong>Article :</strong> {sale.typeArticle}<br />
+                                  <strong>Date :</strong> {formatDateTime(sale.timestamp!)}
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDeleteSale(sale)}
+                                  className="bg-red-600 hover:bg-red-700"
+                                >
+                                  Supprimer
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         )}
                       </div>
                     </TableCell>
