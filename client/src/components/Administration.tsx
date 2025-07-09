@@ -253,7 +253,15 @@ export default function Administration() {
   };
 
   const onEditUser = async (data: EditUserData) => {
-    await updateUserMutation.mutateAsync(data);
+    const isEditingSelf = editingUser?.id === currentUser?.id;
+    
+    // Si on modifie son propre profil, on ne doit pas envoyer le champ role
+    if (isEditingSelf) {
+      const { role, ...dataWithoutRole } = data;
+      await updateUserMutation.mutateAsync(dataWithoutRole);
+    } else {
+      await updateUserMutation.mutateAsync(data);
+    }
   };
 
   const onCreateStore = async (data: z.infer<typeof insertStoreSchema>) => {
@@ -862,26 +870,35 @@ export default function Administration() {
                         <FormField
                           control={editUserForm.control}
                           name="storeId"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Magasin</FormLabel>
-                              <Select value={field.value?.toString()} onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Sélectionner un magasin" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {stores.map((store) => (
-                                    <SelectItem key={store.id} value={store.id.toString()}>
-                                      {store.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
+                          render={({ field }) => {
+                            const isEditingSelf = editingUser?.id === currentUser?.id;
+                            return (
+                              <FormItem>
+                                <FormLabel>Magasin</FormLabel>
+                                <Select value={field.value?.toString() || "none"} onValueChange={(value) => field.onChange(value === "none" ? undefined : parseInt(value))}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Sélectionner un magasin" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="none">Aucun magasin (accès à tous)</SelectItem>
+                                    {stores.map((store) => (
+                                      <SelectItem key={store.id} value={store.id.toString()}>
+                                        {store.name}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                {isEditingSelf && (
+                                  <p className="text-sm text-muted-foreground">
+                                    En tant qu'administrateur, vous pouvez accéder à tous les magasins
+                                  </p>
+                                )}
+                                <FormMessage />
+                              </FormItem>
+                            );
+                          }}
                         />
                       </div>
                       <div className="flex justify-end space-x-2">

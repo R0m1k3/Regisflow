@@ -295,7 +295,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userData = insertUserSchema.partial().parse(req.body);
       
       // Protection spécifique pour le rôle seulement
-      if (userData.role) {
+      if (userData.role !== undefined) {
         // Protection : empêcher un admin de changer son propre rôle par accident
         if (userId === currentUser?.id && userData.role !== 'administrator') {
           return res.status(400).json({ 
