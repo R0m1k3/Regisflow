@@ -18,7 +18,7 @@ export async function purgeSalesData() {
     // Supprimer les ventes antérieures à la date limite
     const result = await db
       .delete(sales)
-      .where(lt(sales.timestamp, cutoffDate.toISOString()))
+      .where(lt(sales.timestamp, cutoffDate))
       .returning({ id: sales.id });
     
     const deletedCount = result.length;
@@ -58,7 +58,7 @@ export async function getPurgeStats() {
     const oldSales = await db
       .select({ id: sales.id })
       .from(sales)
-      .where(lt(sales.timestamp, cutoffDate.toISOString()));
+      .where(lt(sales.timestamp, cutoffDate));
     
     // Compter le total des ventes
     const totalSales = await db
