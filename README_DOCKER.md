@@ -30,12 +30,8 @@ nano .env
 Éditez le fichier `.env` avec votre serveur PostgreSQL externe :
 
 ```env
-# Configuration de la base de données EXTERNE
-DATABASE_URL=postgresql://username:password@IP_SERVEUR:5432/regisflow
-
-# Exemples :
-# DATABASE_URL=postgresql://postgres:motdepasse@192.168.1.100:5432/regisflow
-# DATABASE_URL=postgresql://regisflow:secret@10.0.0.50:5432/regisflow
+# Configuration de la base de données EXTERNE (PRÉCONFIGURÉE)
+DATABASE_URL=postgresql://regisflow:RegisFlow2024!@VOTRE_IP_POSTGRES:5432/regisflow
 
 # Configuration de l'application
 NODE_ENV=production
@@ -48,7 +44,38 @@ SESSION_SECRET=votre-cle-secrete-super-longue-et-complexe
 TZ=Europe/Paris
 ```
 
-**Important**: Remplacez `IP_SERVEUR`, `username`, `password` par les vraies valeurs de votre serveur PostgreSQL.
+### Préparation de votre serveur PostgreSQL
+
+**1. Se connecter à PostgreSQL :**
+```sql
+sudo -u postgres psql
+```
+
+**2. Créer l'utilisateur et la base (préconfigurés) :**
+```sql
+CREATE USER regisflow WITH PASSWORD 'RegisFlow2024!';
+CREATE DATABASE regisflow OWNER regisflow;
+GRANT ALL PRIVILEGES ON DATABASE regisflow TO regisflow;
+\q
+```
+
+**3. Configuration réseau PostgreSQL :**
+Éditez `/etc/postgresql/*/main/postgresql.conf` :
+```
+listen_addresses = '*'
+```
+
+Éditez `/etc/postgresql/*/main/pg_hba.conf` :
+```
+host regisflow regisflow 0.0.0.0/0 md5
+```
+
+**4. Redémarrer PostgreSQL :**
+```bash
+sudo systemctl restart postgresql
+```
+
+**SEULE MODIFICATION NÉCESSAIRE** : Remplacer `VOTRE_IP_POSTGRES` par l'IP réelle de votre serveur.
 
 ### 3. Lancer l'application
 

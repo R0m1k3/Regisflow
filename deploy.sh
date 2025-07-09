@@ -28,10 +28,11 @@ docker system prune -f
 if [ ! -f .env ]; then
     echo "📝 Création du fichier .env..."
     cp .env.example .env
-    echo "⚠️  IMPORTANT: Vérifiez le fichier .env :"
-    echo "   - DATABASE_URL doit utiliser 'postgres:5432' (réseau Docker interne)"
-    echo "   - Changez POSTGRES_PASSWORD et SESSION_SECRET pour la sécurité"
-    echo "   - L'accès externe à PostgreSQL se fait via localhost:5433"
+    echo "⚠️  IMPORTANT: Configurez l'IP de votre serveur PostgreSQL :"
+    echo "   - Remplacez 192.168.1.100 par l'IP de votre serveur PostgreSQL"
+    echo "   - Utilisateur/mot de passe préconfigurés : regisflow / RegisFlow2024!"
+    echo "   - Exécutez setup-postgres.sql sur votre serveur PostgreSQL"
+    echo "   - Changez SESSION_SECRET pour la sécurité"
     read -p "Appuyez sur Entrée pour continuer..."
 fi
 
