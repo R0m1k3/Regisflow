@@ -23,6 +23,7 @@ export function validateRequiredFields(formData: any): string[] {
     { key: 'nom', label: 'Nom' },
     { key: 'prenom', label: 'Prénom' },
     { key: 'dateNaissance', label: 'Date de naissance' },
+    { key: 'lieuNaissance', label: 'Lieu de naissance' },
     { key: 'modePaiement', label: 'Mode de paiement' },
     { key: 'typeIdentite', label: 'Type de pièce d\'identité' },
     { key: 'numeroIdentite', label: 'Numéro de pièce d\'identité' },

@@ -176,6 +176,7 @@ Preferred communication style: Simple, everyday language.
 - ✅ Improved admin interface - "Tous" displayed for admin store access, no redundant store selector for admin profiles
 - ✅ Cleaned up new sale page interface by removing unnecessary store information display
 - ✅ Streamlined dashboard layout for better user experience
+- ✅ Made "Lieu de naissance" field mandatory in new sale form for regulatory compliance
 
 ### Database Backup & Recovery System (January 9, 2025)
 - ✅ Added complete database backup and restore functionality in administration panel

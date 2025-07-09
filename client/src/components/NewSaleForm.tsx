@@ -145,7 +145,7 @@ export default function NewSaleForm() {
         nom: data.nom,
         prenom: data.prenom,
         dateNaissance: data.dateNaissance,
-        lieuNaissance: data.lieuNaissance || undefined,
+        lieuNaissance: data.lieuNaissance,
         typeIdentite: data.typeIdentite,
         numeroIdentite: data.numeroIdentite,
         autoriteDelivrance: data.autoriteDelivrance,
@@ -369,7 +369,7 @@ export default function NewSaleForm() {
                   name="lieuNaissance"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Lieu de naissance</FormLabel>
+                      <FormLabel>Lieu de naissance <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
                         <Input placeholder="Ville de naissance" {...field} />
                       </FormControl>
