@@ -37,6 +37,7 @@ export default function NewSaleForm({ onSaveSale }: NewSaleFormProps) {
       dateNaissance: '',
       lieuNaissance: '',
       typeIdentite: '',
+      numeroIdentite: '',
       autoriteDelivrance: '',
       dateDelivrance: '',
     }
@@ -96,11 +97,11 @@ export default function NewSaleForm({ onSaveSale }: NewSaleFormProps) {
         return;
       }
 
-      // Validate EAN13 if provided
-      if (data.gencode && !validateEAN13(data.gencode)) {
+      // Validate EAN13 (now required)
+      if (!validateEAN13(data.gencode)) {
         toast({
           title: "Code EAN13 invalide",
-          description: "Le code produit doit être un code EAN13 valide à 13 chiffres",
+          description: "Le gencode doit être un code EAN13 valide à 13 chiffres",
           variant: "destructive",
         });
         return;
@@ -112,12 +113,13 @@ export default function NewSaleForm({ onSaveSale }: NewSaleFormProps) {
         typeArticle: data.typeArticle,
         categorie: data.categorie as 'F2' | 'F3',
         quantite: parseInt(data.quantite),
-        gencode: data.gencode || undefined,
+        gencode: data.gencode,
         nom: data.nom,
         prenom: data.prenom,
-        dateNaissance: data.dateNaissance || undefined,
+        dateNaissance: data.dateNaissance,
         lieuNaissance: data.lieuNaissance || undefined,
-        typeIdentite: data.typeIdentite || undefined,
+        typeIdentite: data.typeIdentite,
+        numeroIdentite: data.numeroIdentite,
         autoriteDelivrance: data.autoriteDelivrance || undefined,
         dateDelivrance: data.dateDelivrance || undefined,
         photoRecto: photos.recto,
@@ -139,6 +141,7 @@ export default function NewSaleForm({ onSaveSale }: NewSaleFormProps) {
         dateNaissance: '',
         lieuNaissance: '',
         typeIdentite: '',
+        numeroIdentite: '',
         autoriteDelivrance: '',
         dateDelivrance: '',
       });
@@ -186,9 +189,9 @@ export default function NewSaleForm({ onSaveSale }: NewSaleFormProps) {
                     name="vendeur"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Nom du vendeur <span className="text-destructive">*</span></FormLabel>
+                        <FormLabel>Vendeur <span className="text-destructive">*</span></FormLabel>
                         <FormControl>
-                          <Input placeholder="Nom et prénom du vendeur" {...field} />
+                          <Input placeholder="Vendeur" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -286,9 +289,9 @@ export default function NewSaleForm({ onSaveSale }: NewSaleFormProps) {
                     name="gencode"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Code produit (EAN13)</FormLabel>
+                        <FormLabel>Gencode (EAN13) <span className="text-destructive">*</span></FormLabel>
                         <FormControl>
-                          <Input placeholder="Ex: 1234567890123" {...field} />
+                          <Input placeholder="Code EAN13 à 13 chiffres" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -348,7 +351,7 @@ export default function NewSaleForm({ onSaveSale }: NewSaleFormProps) {
                     name="dateNaissance"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Date de naissance</FormLabel>
+                        <FormLabel>Date de naissance <span className="text-destructive">*</span></FormLabel>
                         <FormControl>
                           <Input type="date" {...field} />
                         </FormControl>
@@ -384,7 +387,7 @@ export default function NewSaleForm({ onSaveSale }: NewSaleFormProps) {
                     name="typeIdentite"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Type de pièce d'identité</FormLabel>
+                        <FormLabel>Type de pièce d'identité <span className="text-destructive">*</span></FormLabel>
                         <Select value={field.value} onValueChange={field.onChange}>
                           <FormControl>
                             <SelectTrigger>
@@ -399,6 +402,19 @@ export default function NewSaleForm({ onSaveSale }: NewSaleFormProps) {
                             ))}
                           </SelectContent>
                         </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="numeroIdentite"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Numéro de pièce d'identité <span className="text-destructive">*</span></FormLabel>
+                        <FormControl>
+                          <Input placeholder="Numéro de la pièce d'identité" {...field} />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}

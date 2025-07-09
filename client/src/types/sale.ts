@@ -10,16 +10,17 @@ export interface Sale {
   typeArticle: string;
   categorie: 'F2' | 'F3';
   quantite: number;
-  gencode?: string;
+  gencode: string;
   
   // Client
   nom: string;
   prenom: string;
-  dateNaissance?: string;
+  dateNaissance: string;
   lieuNaissance?: string;
   
   // Identité
-  typeIdentite?: string;
+  typeIdentite: string;
+  numeroIdentite: string;
   autoriteDelivrance?: string;
   dateDelivrance?: string;
   
@@ -40,6 +41,7 @@ export interface FormData {
   dateNaissance: string;
   lieuNaissance: string;
   typeIdentite: string;
+  numeroIdentite: string;
   autoriteDelivrance: string;
   dateDelivrance: string;
   photoRecto?: string;

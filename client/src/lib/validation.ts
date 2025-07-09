@@ -19,8 +19,12 @@ export function validateRequiredFields(formData: any): string[] {
     { key: 'typeArticle', label: 'Type d\'article' },
     { key: 'categorie', label: 'Catégorie' },
     { key: 'quantite', label: 'Quantité' },
+    { key: 'gencode', label: 'Gencode' },
     { key: 'nom', label: 'Nom' },
-    { key: 'prenom', label: 'Prénom' }
+    { key: 'prenom', label: 'Prénom' },
+    { key: 'dateNaissance', label: 'Date de naissance' },
+    { key: 'typeIdentite', label: 'Type de pièce d\'identité' },
+    { key: 'numeroIdentite', label: 'Numéro de pièce d\'identité' }
   ];
   
   return requiredFields

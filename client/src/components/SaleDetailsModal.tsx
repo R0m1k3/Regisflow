@@ -66,6 +66,7 @@ export default function SaleDetailsModal({ isOpen, sale, onClose }: SaleDetailsM
             <h4 className="font-medium text-gray-900 mb-2">Pièce d'Identité</h4>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div><span className="font-medium">Type:</span> {sale.typeIdentite || 'Non spécifié'}</div>
+              <div><span className="font-medium">Numéro:</span> {sale.numeroIdentite || 'Non spécifié'}</div>
               <div><span className="font-medium">Autorité de délivrance:</span> {sale.autoriteDelivrance || 'Non spécifiée'}</div>
               <div>
                 <span className="font-medium">Date de délivrance:</span>{' '}
