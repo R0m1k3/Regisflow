@@ -306,8 +306,8 @@ export default function NewSaleForm() {
                 <AlertDescription>
                   <strong>Information réglementaire :</strong>
                   <ul className="mt-1 space-y-1 text-sm">
-                    <li>• <strong>F2</strong> : Feux d'artifice de catégorie F2 - Vente libre aux majeurs</li>
-                    <li>• <strong>F3</strong> : Feux d'artifice de catégorie F3 - Vente soumise à autorisation préfectorale</li>
+                    <li>• <strong>F1</strong> : petits artifices (clac-doigts, mini-fontaines), accessibles dès 12 ans.</li>
+                    <li>• <strong>F2, F3</strong> : artifices plus puissants, vente et utilisation réservées aux majeurs.</li>
                   </ul>
                 </AlertDescription>
               </Alert>
