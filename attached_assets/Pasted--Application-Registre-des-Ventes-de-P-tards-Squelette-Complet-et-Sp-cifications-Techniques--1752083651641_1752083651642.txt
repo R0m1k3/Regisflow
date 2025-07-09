@@ -1,0 +1,868 @@
+# 🎆 Application Registre des Ventes de Pétards
+## Squelette Complet et Spécifications Techniques
+
+---
+
+## 📋 **Vue d'ensemble de l'Application**
+
+### **Objectif**
+Application web React pour la gestion et le suivi réglementaire des ventes de feux d'artifice et pétards, conforme à la législation française.
+
+### **Utilisateurs cibles**
+- Commerçants vendant des feux d'artifice
+- Responsables de magasins spécialisés
+- Contrôleurs réglementaires
+
+
+
+## 🎮 **Interface Utilisateur**
+
+### **Navigation Principale**
+```
+Header: "Registre des Ventes de Pétards"
+└── Onglets Navigation:
+    ├── 📝 Nouvelle Vente
+    └── 📊 Historique (X ventes)
+```
+
+### **Palette de Couleurs**
+- **Primaire**: Bleu (#2563EB)
+- **Succès**: Vert (#16A34A)
+- **Erreur**: Rouge (#DC2626)
+- **Info**: Bleu clair (#3B82F6)
+- **Arrière-plan**: Gris clair (#F9FAFB)
+
+---
+
+## 📝 **Section 1: Nouvelle Vente**
+
+### **Formulaire Complet**
+
+#### **🧑‍💼 Informations Vendeur**
+```javascript
+{
+  vendeur: {
+    type: "string",
+    required: true,
+    placeholder: "Nom et prénom du vendeur",
+    validation: "Non vide"
+  },
+  dateVente: {
+    type: "date",
+    default: "Date du jour",
+    format: "YYYY-MM-DD"
+  }
+}
+```
+
+#### **📦 Informations Produit**
+```javascript
+{
+  typeArticle: {
+    type: "select",
+    required: true,
+    options: [
+      "Pétard à mèche",
+      "Batterie", 
+      "Batterie nécessitant un support externe",
+      "Combinaison",
+      "Combinaison nécessitant un support externe", 
+      "Pétard aérien",
+      "Pétard à composition flash",
+      "Fusée",
+      "Chandelle romaine",
+      "Chandelle monocoup"
+    ]
+  },
+  categorie: {
+    type: "select",
+    required: true,
+    dependsOn: "typeArticle",
+    mapping: {
+      "Pétard à mèche": ["F3"],
+      "Batterie": ["F3"],
+      "Batterie nécessitant un support externe": ["F3"],
+      "Combinaison": ["F3"],
+      "Combinaison nécessitant un support externe": ["F3"],
+      "Pétard aérien": ["F2", "F3"],
+      "Pétard à composition flash": ["F3"],
+      "Fusée": ["F2", "F3"],
+      "Chandelle romaine": ["F2", "F3"],
+      "Chandelle monocoup": ["F2", "F3"]
+    }
+  },
+  quantite: {
+    type: "number",
+    required: true,
+    min: 1,
+    validation: "Entier positif"
+  },
+  gencode: {
+    type: "string",
+    required: false,
+    placeholder: "Code produit (optionnel)"
+  }
+}
+```
+
+#### **🧑‍🤝‍🧑 Informations Client**
+```javascript
+{
+  nom: {
+    type: "string",
+    required: true,
+    placeholder: "Nom de famille"
+  },
+  prenom: {
+    type: "string", 
+    required: true,
+    placeholder: "Prénom"
+  },
+  dateNaissance: {
+    type: "date",
+    required: false,
+    placeholder: "Date de naissance"
+  },
+  lieuNaissance: {
+    type: "string",
+    required: false,
+    placeholder: "Ville de naissance"
+  }
+}
+```
+
+#### **🆔 Pièce d'Identité**
+```javascript
+{
+  typeIdentite: {
+    type: "string",
+    required: false,
+    placeholder: "Ex: CNI 123456789",
+    examples: ["CNI", "Passeport", "Permis de conduire"]
+  },
+  autoriteDelivrance: {
+    type: "string",
+    required: false,
+    placeholder: "Préfecture, Mairie, etc."
+  },
+  dateDelivrance: {
+    type: "date",
+    required: false
+  }
+}
+```
+
+#### **📷 Photos de la Pièce d'Identité**
+```javascript
+{
+  photoRecto: {
+    type: "image",
+    format: "base64",
+    source: "camera",
+    required: false,
+    compression: 0.8,
+    maxSize: "5MB"
+  },
+  photoVerso: {
+    type: "image", 
+    format: "base64",
+    source: "camera",
+    required: false,
+    compression: 0.8,
+    maxSize: "5MB"
+  }
+}
+```
+
+### **Informations Réglementaires**
+```
+ℹ️ Information réglementaire :
+• F2 : Feux d'artifice de catégorie F2 - Vente libre aux majeurs
+• F3 : Feux d'artifice de catégorie F3 - Vente soumise à autorisation préfectorale
+```
+
+### **Actions du Formulaire**
+- **💾 Enregistrer la Vente** (bouton principal)
+- **📸 Prendre photo Recto/Verso** (boutons caméra)
+- **❌ Supprimer photo** (boutons X sur images)
+
+---
+
+## 📊 **Section 2: Historique des Ventes**
+
+### **Actions Globales**
+```javascript
+{
+  exportCSV: {
+    label: "📥 Exporter CSV (X)",
+    function: "exportToCSV()",
+    disabled: "si aucune vente",
+    format: "UTF-8 avec BOM"
+  },
+  backupAuto: {
+    label: "💾 Backup Auto", 
+    function: "downloadAutoBackup()",
+    source: "localStorage"
+  },
+  diagnostic: {
+    label: "🔍 Debug",
+    function: "Diagnostic complet console"
+  },
+  testSuppression: {
+    label: "🧪 Test Suppression",
+    function: "Test sur première vente"
+  },
+  testBackup: {
+    label: "🧪 Test Backup",
+    function: "Test création + téléchargement"
+  }
+}
+```
+
+### **Informations de Status**
+```
+📊 Données stockées localement (X vente(s)) • Export CSV compatible Excel • Sauvegarde automatique à chaque ajout
+Dernier backup: DD/MM/YYYY HH:MM (X enreg.)
+```
+
+### **Tableau des Ventes**
+```javascript
+{
+  colonnes: [
+    {
+      nom: "Date",
+      champ: "dateVente", 
+      format: "DD/MM/YYYY",
+      tri: "DESC par défaut"
+    },
+    {
+      nom: "Vendeur",
+      champ: "vendeur",
+      fallback: "Non spécifié"
+    },
+    {
+      nom: "Client", 
+      champ: "nom + prenom",
+      sousChamp: "typeIdentite"
+    },
+    {
+      nom: "Produit",
+      champ: "typeArticle",
+      sousChamp: "gencode (si présent)"
+    },
+    {
+      nom: "Catégorie",
+      champ: "categorie",
+      style: {
+        "F2": "badge jaune",
+        "F3": "badge rouge"
+      }
+    },
+    {
+      nom: "Quantité",
+      champ: "quantite"
+    },
+    {
+      nom: "Actions",
+      boutons: ["👁️ Voir", "🗑️ Supprimer"]
+    }
+  ]
+}
+```
+
+### **Actions par Ligne**
+```javascript
+{
+  voirDetails: {
+    icon: "👁️",
+    action: "Ouvrir modal détails",
+    tooltip: "Voir les détails"
+  },
+  supprimer: {
+    icon: "🗑️", 
+    action: "Suppression avec confirmation",
+    tooltip: "Supprimer la vente",
+    confirmation: "Supprimer définitivement la vente de {nom} {prenom} ?\n\n⚠️ Cette action est irréversible !\n\nID: {id}"
+  }
+}
+```
+
+---
+
+## 🔍 **Modal de Détails**
+
+### **Structure Complète**
+```javascript
+{
+  titre: "Détails de la Vente",
+  sections: [
+    {
+      nom: "Informations Vendeur",
+      champs: ["vendeur", "dateVente"]
+    },
+    {
+      nom: "Informations Produit", 
+      champs: ["typeArticle", "categorie", "quantite", "gencode"]
+    },
+    {
+      nom: "Informations Client",
+      champs: ["nom", "prenom", "dateNaissance", "lieuNaissance"]
+    },
+    {
+      nom: "Pièce d'Identité",
+      champs: ["typeIdentite", "autoriteDelivrance", "dateDelivrance"]
+    },
+    {
+      nom: "Photos de la Pièce d'Identité",
+      champs: ["photoRecto", "photoVerso"],
+      affichage: "Images 128px ou placeholder"
+    },
+    {
+      nom: "Informations Système",
+      champs: ["timestamp"],
+      format: "DD/MM/YYYY HH:MM:SS"
+    }
+  ],
+  actions: ["Fermer"]
+}
+```
+
+---
+
+## 📸 **Modal Caméra**
+
+### **Interface Caméra**
+```javascript
+{
+  titre: "Photo {Recto|Verso}",
+  elements: [
+    {
+      videoStream: {
+        source: "navigator.mediaDevices.getUserMedia",
+        constraints: { 
+          video: { facingMode: 'environment' } 
+        },
+        autoPlay: true,
+        playsInline: true
+      }
+    },
+    {
+      canvas: {
+        hidden: true,
+        purpose: "Capture image"
+      }
+    }
+  ],
+  actions: [
+    {
+      nom: "📸 Prendre la photo",
+      function: "takePhoto()"
+    },
+    {
+      nom: "❌ Fermer",
+      function: "stopCamera()"
+    }
+  ]
+}
+```
+
+### **Processus de Capture**
+1. **Demande permission caméra**
+2. **Affichage flux vidéo temps réel**
+3. **Capture frame sur canvas**
+4. **Conversion en blob JPEG (80% qualité)**
+5. **Conversion en base64**
+6. **Stockage dans formData**
+7. **Arrêt du flux caméra**
+
+---
+
+## 🎯 **Système de Notifications (Toast)**
+
+### **Types de Notifications**
+```javascript
+{
+  success: {
+    couleur: "Vert",
+    icon: "✅ CheckCircle",
+    duree: 4000,
+    exemples: [
+      "Vente enregistrée avec succès",
+      "Photo recto capturée avec succès", 
+      "Export réussi ! X vente(s) exportée(s)",
+      "Vente de {nom} {prenom} supprimée"
+    ]
+  },
+  error: {
+    couleur: "Rouge",
+    icon: "❌ AlertCircle", 
+    duree: 4000,
+    exemples: [
+      "Veuillez remplir tous les champs obligatoires",
+      "Impossible d'accéder à la caméra",
+      "Erreur lors de l'enregistrement"
+    ]
+  },
+  info: {
+    couleur: "Bleu",
+    icon: "ℹ️ Info",
+    duree: 4000,
+    exemples: [
+      "Caméra activée, positionnez la carte d'identité",
+      "Photo recto supprimée",
+      "Aucune vente à exporter"
+    ]
+  }
+}
+```
+
+### **Positionnement et Animation**
+```css
+{
+  position: "fixed bottom-4 right-4",
+  zIndex: 50,
+  animation: "slideInRight 0.3s ease-out",
+  autoRemove: "4 secondes",
+  manualClose: "Bouton X"
+}
+```
+
+---
+
+## 🗄️ **Base de Données (IndexedDB)**
+
+### **Configuration**
+```javascript
+{
+  nom: "VentesPetardsDB",
+  version: 1,
+  objectStore: {
+    nom: "ventes",
+    keyPath: "id",
+    autoIncrement: true,
+    index: [
+      { nom: "nom", unique: false },
+      { nom: "dateVente", unique: false }
+    ]
+  }
+}
+```
+
+### **Structure d'un Enregistrement**
+```javascript
+{
+  id: "number (auto-increment)",
+  
+  // Vendeur
+  vendeur: "string",
+  dateVente: "string (YYYY-MM-DD)",
+  
+  // Produit  
+  typeArticle: "string",
+  categorie: "string (F2|F3)",
+  quantite: "number",
+  gencode: "string|null",
+  
+  // Client
+  nom: "string", 
+  prenom: "string",
+  dateNaissance: "string|null",
+  lieuNaissance: "string|null",
+  
+  // Identité
+  typeIdentite: "string|null",
+  numeroIdentite: "string|null",
+  autoriteDelivrance: "string|null", 
+  dateDelivrance: "string|null",
+  
+  // Photos
+  photoRecto: "string (base64)|null",
+  photoVerso: "string (base64)|null",
+  
+  // Système
+  timestamp: "string (ISO 8601)"
+}
+```
+
+### **Opérations CRUD**
+```javascript
+{
+  create: "saveVente(venteData)",
+  read: "loadVentes() -> Array",
+  update: "Non implémenté",
+  delete: "deleteVente(id)"
+}
+```
+
+---
+
+## 💾 **Système de Sauvegarde**
+
+### **Sauvegarde Automatique (localStorage)**
+```javascript
+{
+  clé: "petards_backup_csv",
+  déclencheurs: [
+    "Après ajout vente",
+    "Après suppression vente"
+  ],
+  contenu: {
+    timestamp: "ISO 8601",
+    csvContent: "string (avec BOM UTF-8)",
+    recordCount: "number"
+  }
+}
+```
+
+### **Export CSV Manuel**
+```javascript
+{
+  format: "CSV délimité par ';'",
+  encodage: "UTF-8 avec BOM (\uFEFF)",
+  colonnes: [
+    "Date de vente",
+    "Vendeur", 
+    "Type d'article",
+    "Catégorie",
+    "Quantité",
+    "Code générique",
+    "Nom client",
+    "Prénom client", 
+    "Date de naissance",
+    "Lieu de naissance",
+    "Type et n° identité",
+    "Autorité de délivrance",
+    "Date de délivrance",
+    "Photo recto (Oui/Non)",
+    "Photo verso (Oui/Non)",
+    "Horodatage"
+  ],
+  méthodes: [
+    "Data URL (principal)",
+    "Blob + createObjectURL (fallback)",
+    "Nouvelle fenêtre (fallback final)"
+  ]
+}
+```
+
+---
+
+## ⚙️ **États et Gestion des Données**
+
+### **État Principal (useState)**
+```javascript
+{
+  activeTab: "string ('nouvelle-vente'|'historique')",
+  ventes: "Array<VenteObject>",
+  showCamera: "boolean",
+  currentPhotoType: "string ('photoRecto'|'photoVerso')",
+  toasts: "Array<ToastObject>",
+  showDetailsModal: "boolean", 
+  selectedVente: "VenteObject|null",
+  formData: "VenteObject (form state)"
+}
+```
+
+### **Références (useRef)**
+```javascript
+{
+  videoRef: "HTMLVideoElement",
+  canvasRef: "HTMLCanvasElement", 
+  streamRef: "MediaStream"
+}
+```
+
+### **Effets (useEffect)**
+```javascript
+{
+  componentDidMount: [
+    "initDB()",
+    "loadVentes()"
+  ]
+}
+```
+
+---
+
+## 🔧 **Fonctions Principales**
+
+### **Base de Données**
+```javascript
+{
+  initDB: "Initialisation IndexedDB",
+  saveVente: "Ajout nouvelle vente",
+  loadVentes: "Chargement toutes ventes", 
+  deleteVente: "Suppression vente par ID"
+}
+```
+
+### **Caméra et Photos**
+```javascript
+{
+  startCamera: "Démarrage flux caméra",
+  takePhoto: "Capture photo sur canvas",
+  stopCamera: "Arrêt flux caméra"
+}
+```
+
+### **Formulaire**
+```javascript
+{
+  handleInputChange: "Gestion changements inputs",
+  handleSubmit: "Soumission formulaire complet"
+}
+```
+
+### **Export et Sauvegarde**
+```javascript
+{
+  exportToCSV: "Export CSV manuel",
+  createAutoBackup: "Création backup auto",
+  downloadAutoBackup: "Téléchargement backup"
+}
+```
+
+### **Interface Utilisateur**
+```javascript
+{
+  showToast: "Affichage notification",
+  removeToast: "Suppression notification",
+  ToastContainer: "Container notifications",
+  DetailsModal: "Modal détails vente"
+}
+```
+
+---
+
+## 🎛️ **Configuration et Options**
+
+### **Paramètres Généraux**
+```javascript
+{
+  autoBackup: true,
+  toastDuration: 4000,
+  photoCompression: 0.8,
+  csvDelimiter: ';',
+  dateFormat: 'fr-FR'
+}
+```
+
+### **Validation des Champs**
+```javascript
+{
+  champsObligatoires: [
+    "vendeur",
+    "nom", 
+    "prenom",
+    "typeArticle",
+    "categorie", 
+    "quantite"
+  ],
+  validations: {
+    quantite: "min: 1, type: number",
+    dateVente: "format: YYYY-MM-DD",
+    photos: "maxSize: 5MB, format: JPEG"
+  }
+}
+```
+
+### **Correspondances Produits**
+```javascript
+{
+  articlesTypesCategories: {
+    "Pétard à mèche": ["F3"],
+    "Batterie": ["F3"], 
+    "Batterie nécessitant un support externe": ["F3"],
+    "Combinaison": ["F3"],
+    "Combinaison nécessitant un support externe": ["F3"],
+    "Pétard aérien": ["F2", "F3"],
+    "Pétard à composition flash": ["F3"],
+    "Fusée": ["F2", "F3"],
+    "Chandelle romaine": ["F2", "F3"],
+    "Chandelle monocoup": ["F2", "F3"]
+  }
+}
+```
+
+---
+
+## 🚀 **Flux de Données Complet**
+
+### **Ajout d'une Vente**
+```
+1. Utilisateur remplit formulaire
+2. Validation champs obligatoires
+3. Prise photos (optionnel)
+4. Clic "Enregistrer la Vente"
+5. saveVente() -> IndexedDB
+6. loadVentes() -> Mise à jour état
+7. createAutoBackup() -> localStorage
+8. Toast de succès
+9. Reset formulaire
+```
+
+### **Affichage Historique**
+```
+1. Clic onglet "Historique"
+2. loadVentes() depuis IndexedDB
+3. Tri par date (DESC)
+4. Affichage tableau
+5. Actions disponibles par ligne
+```
+
+### **Export CSV**
+```
+1. Clic "Exporter CSV"
+2. Vérification ventes > 0
+3. Transformation données -> CSV
+4. Création blob avec BOM UTF-8
+5. Déclenchement téléchargement
+6. Toast de confirmation
+```
+
+### **Suppression Vente**
+```
+1. Clic bouton suppression
+2. Confirmation utilisateur
+3. deleteVente(id) -> IndexedDB
+4. loadVentes() -> Mise à jour état
+5. createAutoBackup() -> localStorage
+6. Toast de succès
+```
+
+---
+
+## 🛡️ **Conformité Réglementaire**
+
+### **Exigences Légales Couvertes**
+- ✅ **Identification vendeur** (nom du vendeur)
+- ✅ **Date de vente** (horodatage)
+- ✅ **Type et catégorie produit** (classification F2/F3)
+- ✅ **Quantité vendue** (traçabilité)
+- ✅ **Identité acheteur** (nom, prénom, pièce d'identité)
+- ✅ **Photos pièce d'identité** (preuve visuelle)
+- ✅ **Archivage numérique** (IndexedDB + CSV)
+
+### **Données de Traçabilité**
+```javascript
+{
+  obligatoires: [
+    "Date et heure de vente",
+    "Identité du vendeur", 
+    "Identité de l'acheteur",
+    "Nature et quantité des produits",
+    "Catégorie réglementaire"
+  ],
+  optionnelles: [
+    "Photos pièces d'identité",
+    "Code produit fabricant",
+    "Lieu de naissance acheteur"
+  ]
+}
+```
+
+---
+
+## 📱 **Responsive Design**
+
+### **Breakpoints**
+```css
+{
+  mobile: "max-width: 768px",
+  tablet: "768px - 1024px", 
+  desktop: "min-width: 1024px"
+}
+```
+
+### **Adaptations Mobile**
+```javascript
+{
+  navigation: "Onglets empilés",
+  formulaire: "Colonnes -> lignes",
+  tableau: "Scroll horizontal",
+  modal: "Pleine largeur",
+  camera: "Optimisé tactile"
+}
+```
+
+---
+
+## 🔍 **Debugging et Maintenance**
+
+### **Outils de Debug Intégrés**
+```javascript
+{
+  diagnosticComplet: "🔍 Debug (état + IndexedDB + localStorage)",
+  testSuppression: "🧪 Test sur première vente",
+  testBackup: "🧪 Test création + téléchargement",
+  logsDetailles: "Console avec emojis et étapes"
+}
+```
+
+### **Gestion d'Erreurs**
+```javascript
+{
+  camera: "Permissions, compatibilité",
+  indexedDB: "Ouverture, transactions, quotas",
+  export: "Génération, téléchargement",
+  validation: "Champs obligatoires, formats"
+}
+```
+
+---
+
+## 📦 **Déploiement et Installation**
+
+### **Prérequis Navigateur**
+```javascript
+
+  optional: [
+    "Camera access",
+    "Download attribute support"
+  ]
+}
+```
+
+### **Performance**
+```javascript
+{
+  tailleBD: "Illimitée (selon navigateur)",
+  photoCompression: "80% JPEG",
+  chargementLazy: "Images dans modal",
+  memoire: "State minimal en React"
+}
+```
+
+---
+
+## 🎯 **Évolutions Futures Possibles**
+
+### **Fonctionnalités Avancées**
+```javascript
+{
+  authentification: "Login vendeurs",
+  synchronisation: "Multi-appareils",
+  notifications: "Rappels réglementaires",
+  recherche: "Filtres avancés",
+  backup: "Cloud storage",
+}
+```
+
+
+## 📚 **Documentation Utilisateur**
+
+### **Guide d'Utilisation Rapide**
+1. **Nouvelle vente** : Remplir formulaire → Photos (optionnel) → Enregistrer
+2. **Consulter historique** : Onglet Historique → Voir/Supprimer
+3. **Export données** : Bouton "Exporter CSV" → Fichier téléchargé
+4. **Sauvegarde** : Automatique + "Backup Auto" manuel
+
+### **Résolution Problèmes**
+- **Caméra ne marche pas** : Vérifier permissions navigateur
+- **Export CSV vide** : Vérifier qu'il y a des ventes enregistrées  
+- **Suppression ne marche pas** : Utiliser bouton "🧪 Test Suppression"
+- **Données perdues** : Utiliser "Backup Auto" pour récupérer
+
+---
+
+*🎆 Application développée pour la conformité réglementaire française des ventes de feux d'artifice*
