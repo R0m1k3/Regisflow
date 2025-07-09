@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Installation Simple RegisFlow - Aucune configuration requise
+# Installation RegisFlow - Configuration automatique
 # Utilisation: ./install-simple.sh
 
 set -e

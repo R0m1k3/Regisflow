@@ -21,7 +21,7 @@ docker-compose up -d
 
 - **Mots de passe** : Pré-configurés dans le fichier `.env`
 - **Base de données** : PostgreSQL configurée automatiquement
-- **Réseau** : Utilise le réseau par défaut Docker (aucun conflit)
+- **Réseau** : Utilise le réseau par défaut Docker (aucun conflit IP)
 - **Volumes** : Gérés automatiquement par Docker
 - **Migrations** : Exécutées automatiquement au démarrage
 

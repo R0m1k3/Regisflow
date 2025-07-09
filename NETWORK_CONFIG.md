@@ -4,11 +4,11 @@
 
 Le sous-réseau `172.20.0.0/24` peut créer des conflits avec des réseaux existants sur certains systèmes. Pour éviter ces problèmes, RegisFlow propose plusieurs configurations.
 
-## 🔧 Options de Configuration
+## 🔧 Configuration Simplifiée
 
-### Option 1 : Installation Simple (Recommandée)
+### Configuration Unique
 
-**Fichier** : `docker-compose.simple.yml`
+**Fichier** : `docker-compose.yml`
 
 ```yaml
 # Utilise le réseau par défaut de Docker
@@ -21,43 +21,14 @@ networks:
 - Aucun conflit de sous-réseau
 - Docker gère automatiquement les adresses IP
 - Configuration la plus simple
-- Idéal pour tests et développement
+- Compatible avec tous les environnements
 
 **Utilisation** :
 ```bash
-docker-compose -f docker-compose.simple.yml up -d
+docker-compose up -d
 ```
 
-### Option 2 : Configuration Sécurisée
-
-**Fichier** : `docker-compose.yml`
-
-```yaml
-# Réseau personnalisé avec sous-réseau dédié
-networks:
-  regisflow-internal:
-    driver: bridge
-    internal: false
-    ipam:
-      driver: default
-      config:
-        - subnet: 192.168.200.0/24
-          ip_range: 192.168.200.0/28
-          gateway: 192.168.200.1
-```
-
-**Avantages** :
-- Isolement réseau complet
-- Contrôle total des adresses IP
-- Sécurité renforcée
-- Idéal pour production
-
-**Utilisation** :
-```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
-```
-
-### Option 3 : Configuration Personnalisée
+### Configuration Personnalisée (Si Nécessaire)
 
 Si vous avez des exigences spécifiques, modifiez le sous-réseau :
 
@@ -128,25 +99,26 @@ ip addr show
 
 ## 🎯 Recommandations
 
-### Pour Tests/Développement :
-- Utilisez `docker-compose.simple.yml`
+### Pour tous les environnements :
+- Utilisez `docker-compose.yml`
 - Aucune configuration réseau nécessaire
-- Démarrage rapide
+- Démarrage rapide et compatible
 
-### Pour Production :
-- Utilisez `docker-compose.yml` 
-- Vérifiez les conflits avant déploiement
-- Personnalisez le sous-réseau si nécessaire
+### Si vous avez des besoins spécifiques :
+- Modifiez le fichier `docker-compose.yml`
+- Ajoutez une configuration réseau personnalisée
+- Testez avant déploiement
 
 ## 📚 Scripts Inclus
 
-- `install-simple.sh` - Utilise la configuration simple
-- `deploy-prod.sh` - Utilise la configuration sécurisée
-- `monitoring.sh` - Surveille tous les types de réseaux
+- `install-simple.sh` - Installation automatique
+- `deploy-prod.sh` - Déploiement production
+- `monitoring.sh` - Surveillance des services
 
 ## 🔒 Sécurité
 
-Les deux configurations sont sécurisées :
+La configuration est sécurisée :
 - Communications chiffrées entre conteneurs
 - Isolation des services
 - Accès contrôlé aux ports
+- Réseau Docker par défaut isolé du réseau hôte

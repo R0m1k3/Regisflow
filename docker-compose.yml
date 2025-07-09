@@ -1,7 +1,7 @@
 version: '3.8'
 
-# Configuration Docker Compose SIMPLE pour RegisFlow
-# Installation sans configuration réseau complexe
+# Configuration Docker Compose pour RegisFlow
+# Installation simple sans configuration réseau
 services:
   # Base de données PostgreSQL
   regisflow-db:

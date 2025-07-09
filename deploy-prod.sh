@@ -82,7 +82,7 @@ fi
 
 # Démarrer les services avec configuration production
 echo "🚀 Démarrage des services de production..."
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+docker-compose up -d
 
 # Attendre le démarrage
 echo "⏳ Attente du démarrage des services..."

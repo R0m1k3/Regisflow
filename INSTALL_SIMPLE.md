@@ -16,7 +16,7 @@ RegisFlow est maintenant configuré pour une installation complètement automati
 ### Option 2 : Installation manuelle
 
 ```bash
-# Construire et démarrer (configuration simple)
+# Construire et démarrer
 docker-compose build
 docker-compose up -d
 ```
