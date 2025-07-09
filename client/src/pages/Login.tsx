@@ -69,7 +69,7 @@ export default function Login() {
             </div>
           </div>
           <div className="space-y-2">
-            <CardTitle className="text-3xl font-bold gradient-text">Registre des Ventes</CardTitle>
+            <CardTitle className="text-3xl font-bold gradient-text">RegisFlow</CardTitle>
             <p className="text-muted-foreground text-lg">Gestion moderne des feux d'artifice</p>
           </div>
         </CardHeader>

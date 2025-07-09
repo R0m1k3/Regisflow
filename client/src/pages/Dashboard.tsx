@@ -51,7 +51,7 @@ function DashboardContent() {
                 <div className="absolute -inset-1 bg-gradient-to-br from-primary to-purple-600 rounded-xl blur opacity-20 -z-10"></div>
               </div>
               <div>
-                <h1 className="text-xl font-bold gradient-text">Registre des Ventes</h1>
+                <h1 className="text-xl font-bold gradient-text">RegisFlow</h1>
                 <p className="text-sm text-muted-foreground">Gestion moderne des feux d'artifice</p>
               </div>
             </div>
