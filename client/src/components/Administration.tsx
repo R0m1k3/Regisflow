@@ -680,7 +680,7 @@ export default function Administration() {
                       <TableCell>{user.email || "-"}</TableCell>
                       <TableCell>{getRoleBadge(user.role)}</TableCell>
                       <TableCell>
-                        {stores.find(s => s.id === user.storeId)?.name || "-"}
+                        {user.role === 'administrator' ? "Tous" : (stores.find(s => s.id === user.storeId)?.name || "-")}
                       </TableCell>
                       <TableCell>
                         <Badge variant={user.isActive ? "default" : "secondary"}>
@@ -874,14 +874,13 @@ export default function Administration() {
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Magasin</FormLabel>
-                                <Select value={field.value?.toString() || "none"} onValueChange={(value) => field.onChange(value === "none" ? undefined : parseInt(value))}>
+                                <Select value={field.value?.toString()} onValueChange={(value) => field.onChange(parseInt(value))}>
                                   <FormControl>
                                     <SelectTrigger>
                                       <SelectValue placeholder="Sélectionner un magasin" />
                                     </SelectTrigger>
                                   </FormControl>
                                   <SelectContent>
-                                    <SelectItem value="none">Aucun magasin (accès à tous)</SelectItem>
                                     {stores.map((store) => (
                                       <SelectItem key={store.id} value={store.id.toString()}>
                                         {store.name}

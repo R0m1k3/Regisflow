@@ -170,6 +170,10 @@ Preferred communication style: Simple, everyday language.
 - ✅ Enhanced deletion confirmations in sales history and administration panels
 - ✅ Improved visual feedback with detailed confirmation dialogs showing item details
 - ✅ Added proper modal management with shadcn/ui AlertDialog components
+- ✅ Fixed critical admin user permissions bug preventing profile modifications
+- ✅ Added server-side protection against accidental admin role changes
+- ✅ Enhanced UI with disabled role field for self-editing administrators
+- ✅ Improved admin interface - "Tous" displayed for admin store access, no redundant store selector for admin profiles
 
 ### Database Backup & Recovery System (January 9, 2025)
 - ✅ Added complete database backup and restore functionality in administration panel
