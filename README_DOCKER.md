@@ -27,12 +27,15 @@ nano .env
 
 ### 2. Configurer les variables d'environnement
 
-Éditez le fichier `.env` :
+Éditez le fichier `.env` avec votre serveur PostgreSQL externe :
 
 ```env
-# Configuration de la base de données
-DATABASE_URL=postgresql://regisflow:votre_mot_de_passe@postgres:5432/regisflow
-POSTGRES_PASSWORD=votre_mot_de_passe_securise
+# Configuration de la base de données EXTERNE
+DATABASE_URL=postgresql://username:password@IP_SERVEUR:5432/regisflow
+
+# Exemples :
+# DATABASE_URL=postgresql://postgres:motdepasse@192.168.1.100:5432/regisflow
+# DATABASE_URL=postgresql://regisflow:secret@10.0.0.50:5432/regisflow
 
 # Configuration de l'application
 NODE_ENV=production
@@ -44,6 +47,8 @@ SESSION_SECRET=votre-cle-secrete-super-longue-et-complexe
 # Configuration du timezone
 TZ=Europe/Paris
 ```
+
+**Important**: Remplacez `IP_SERVEUR`, `username`, `password` par les vraies valeurs de votre serveur PostgreSQL.
 
 ### 3. Lancer l'application
 
@@ -68,19 +73,17 @@ docker-compose logs -f
 
 ## 📋 Services Inclus
 
-### 1. PostgreSQL (Base de données)
-- **Port externe**: 5433 (pour éviter les conflits avec PostgreSQL local)
-- **Port interne**: 5432 (communication entre containers Docker)
-- **Database**: regisflow
-- **Utilisateur**: regisflow
-- **Données persistantes**: Volume `postgres_data`
-- **Note**: L'application se connecte via le réseau Docker interne sur le port 5432
-
-### 2. RegisFlow (Application)
+### RegisFlow (Application)
 - **Port**: 5000
-- **Dépendances**: PostgreSQL
+- **Base de données**: PostgreSQL externe (configurée via DATABASE_URL)
 - **Sauvegardes**: Volume `backup_data`
 - **Health check**: `/health`
+
+### Configuration PostgreSQL Externe
+- **Prérequis**: Serveur PostgreSQL accessible depuis Docker
+- **Configuration**: Via variable d'environnement DATABASE_URL
+- **Accès réseau**: Le container doit pouvoir accéder à l'IP de votre serveur PostgreSQL
+- **Firewall**: Autoriser les connexions depuis l'IP du container Docker
 
 
 
