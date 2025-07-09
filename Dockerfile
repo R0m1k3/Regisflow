@@ -1,29 +1,8 @@
-# Dockerfile multi-stage pour RegisFlow
-FROM node:18-alpine AS builder
+# Dockerfile pour RegisFlow
+FROM node:18-alpine
 
 # Installer les dépendances système nécessaires
-RUN apk add --no-cache python3 make g++
-
-# Créer le répertoire de l'application
-WORKDIR /app
-
-# Copier les fichiers de dépendances
-COPY package*.json ./
-
-# Installer toutes les dépendances (dev + prod pour la build)
-RUN npm ci
-
-# Copier le code source
-COPY . .
-
-# Construire l'application
-RUN npm run build
-
-# Stage de production
-FROM node:18-alpine AS production
-
-# Installer les dépendances système pour la production
-RUN apk add --no-cache dumb-init postgresql-client
+RUN apk add --no-cache dumb-init postgresql-client wget python3 make g++
 
 # Créer un utilisateur non-root
 RUN addgroup -g 1001 -S nodejs
@@ -35,14 +14,11 @@ WORKDIR /app
 # Copier les fichiers de dépendances
 COPY package*.json ./
 
-# Installer seulement les dépendances de production
-RUN npm ci --only=production && npm cache clean --force
+# Installer toutes les dépendances
+RUN npm ci && npm cache clean --force
 
-# Copier les fichiers construits depuis le stage builder
-COPY --from=builder --chown=regisflow:nodejs /app/dist ./dist
-COPY --from=builder --chown=regisflow:nodejs /app/server ./server
-COPY --from=builder --chown=regisflow:nodejs /app/shared ./shared
-COPY --from=builder --chown=regisflow:nodejs /app/drizzle.config.ts ./drizzle.config.ts
+# Copier le code source
+COPY --chown=regisflow:nodejs . .
 
 # Copier le script d'entrée
 COPY --chown=regisflow:nodejs docker-entrypoint.sh /usr/local/bin/
@@ -64,5 +40,5 @@ ENV PORT=5000
 # Utiliser dumb-init pour gérer les signaux
 ENTRYPOINT ["dumb-init", "--"]
 
-# Démarrer l'application avec le script d'entrée
-CMD ["docker-entrypoint.sh", "node", "dist/index.js"]
+# Démarrer l'application avec tsx pour éviter les problèmes de build
+CMD ["docker-entrypoint.sh", "npx", "tsx", "server/index.ts"]
