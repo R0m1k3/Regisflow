@@ -114,47 +114,6 @@ function DashboardContent() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto mobile-padding py-4 sm:py-6 lg:py-8">
-        {selectedStore && (
-          <div className="mb-6 sm:mb-8 slide-in-up">
-            <Card className="modern-card-elevated overflow-hidden">
-              <CardContent className="p-4 sm:p-6">
-                <div className="flex items-center gap-3 sm:gap-4">
-                  <div className="relative flex-shrink-0">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg shadow-md flex items-center justify-center">
-                      <Building2 className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
-                    </div>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2 truncate">{selectedStore.name}</h2>
-                    <div className="space-y-1 sm:space-y-2">
-                      {selectedStore.address && (
-                        <p className="text-muted-foreground flex items-start gap-2 text-sm sm:text-base">
-                          <span className="w-4 h-4 flex items-center justify-center flex-shrink-0 mt-0.5">📍</span>
-                          <span className="break-words">{selectedStore.address}</span>
-                        </p>
-                      )}
-                      <div className="flex flex-col sm:flex-row gap-2 sm:gap-6 text-sm">
-                        {selectedStore.phone && (
-                          <span className="text-muted-foreground flex items-center gap-2">
-                            <span className="w-4 h-4 flex items-center justify-center flex-shrink-0">📞</span>
-                            <span className="break-all">{selectedStore.phone}</span>
-                          </span>
-                        )}
-                        {selectedStore.email && (
-                          <span className="text-muted-foreground flex items-center gap-2">
-                            <span className="w-4 h-4 flex items-center justify-center flex-shrink-0">✉️</span>
-                            <span className="break-all">{selectedStore.email}</span>
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
         <div className="fade-in">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mobile-form-responsive">
             <TabsList className={`grid w-full ${canAccessAdmin ? 'grid-cols-3' : 'grid-cols-2'} max-w-full sm:max-w-2xl h-12 sm:h-14 bg-muted bg-opacity-50 p-1.5 sm:p-2 rounded-xl sm:rounded-2xl border border-border border-opacity-50`}>
