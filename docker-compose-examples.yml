@@ -26,17 +26,17 @@
 # RÉSEAUX COMPATIBLES PORTAINER
 # ==========================================
 
-# Réseau RegisFlow dédié (configuration actuelle)
+# Réseau nginx_default (configuration actuelle)
 networks:
-  regisflow_network:
-    driver: bridge
-    name: regisflow_network
-
-# Réseau existant (créé dans Portainer)
-networks:
-  regisflow_network:
+  default:
     external: true
-    name: nom-reseau-existant
+    name: nginx_default
+
+# Autres réseaux existants
+networks:
+  default:
+    external: true
+    name: autre-reseau-existant
 
 # Réseau macvlan (IP directe)
 networks:

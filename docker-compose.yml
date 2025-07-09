@@ -7,8 +7,6 @@ services:
   regisflow-db:
     image: postgres:15-alpine
     container_name: regisflow-db
-    networks:
-      - regisflow_network
     environment:
       POSTGRES_DB: regisflow
       POSTGRES_USER: regisflow
@@ -31,8 +29,6 @@ services:
       context: .
       target: production
     container_name: regisflow-app
-    networks:
-      - regisflow_network
     depends_on:
       regisflow-db:
         condition: service_healthy
@@ -65,8 +61,8 @@ volumes:
   backup_data:
   logs_data:
 
-# Réseau dédié RegisFlow pour isolation et facilité de gestion
+# Utilisation du réseau nginx_default existant
 networks:
-  regisflow_network:
-    driver: ${NETWORK_DRIVER:-bridge}
-    name: regisflow_network
+  default:
+    external: true
+    name: nginx_default
