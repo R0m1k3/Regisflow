@@ -1,14 +1,37 @@
 version: '3.8'
 
 services:
-  # Application RegisFlow seule (base de données externe)
+  # Base de données PostgreSQL
+  regisflow-db:
+    image: postgres:15-alpine
+    container_name: regisflow-db
+    environment:
+      POSTGRES_DB: regisflow
+      POSTGRES_USER: regisflow
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-RegisFlow2024!}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5433:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U regisflow -d regisflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Application RegisFlow
   regisflow:
     build: .
     container_name: regisflow-app
+    depends_on:
+      regisflow-db:
+        condition: service_healthy
     environment:
       NODE_ENV: production
       PORT: 5000
-      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL: postgresql://regisflow:${POSTGRES_PASSWORD:-RegisFlow2024!}@regisflow-db:5432/regisflow
       SESSION_SECRET: ${SESSION_SECRET:-your-super-secret-session-key-change-in-production}
       TZ: Europe/Paris
     volumes:
@@ -24,5 +47,7 @@ services:
       start_period: 60s
 
 volumes:
+  postgres_data:
+    driver: local
   backup_data:
     driver: local
