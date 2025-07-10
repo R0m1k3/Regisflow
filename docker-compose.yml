@@ -28,6 +28,7 @@ services:
     build: 
       context: .
       target: production
+    image: regisflow/app:latest
     container_name: regisflow-app
     depends_on:
       regisflow-db:
@@ -58,11 +59,14 @@ services:
 # Volumes persistants (Docker gère automatiquement)
 volumes:
   postgres_data:
+    driver: local
   backup_data:
+    driver: local
   logs_data:
+    driver: local
 
-# Utilisation du réseau nginx_default existant
+# Réseau pour RegisFlow
 networks:
   default:
-    external: true
-    name: nginx_default
+    driver: bridge
+    name: regisflow_network
