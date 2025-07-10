@@ -86,38 +86,7 @@ body {
   transform: translateY(-1px);
 }
 
-/* Sections avec couleurs d'accent */
-.section-vendor {
-  background: linear-gradient(135deg, hsl(var(--vendor-accent) / 0.05) 0%, hsl(var(--vendor-accent) / 0.02) 100%);
-  border-left: 4px solid hsl(var(--vendor-accent));
-  border-radius: 8px;
-  padding: 24px;
-  margin-bottom: 24px;
-}
-
-.section-product {
-  background: linear-gradient(135deg, hsl(var(--product-accent) / 0.05) 0%, hsl(var(--product-accent) / 0.02) 100%);
-  border-left: 4px solid hsl(var(--product-accent));
-  border-radius: 8px;
-  padding: 24px;
-  margin-bottom: 24px;
-}
-
-.section-client {
-  background: linear-gradient(135deg, hsl(var(--client-accent) / 0.05) 0%, hsl(var(--client-accent) / 0.02) 100%);
-  border-left: 4px solid hsl(var(--client-accent));
-  border-radius: 8px;
-  padding: 24px;
-  margin-bottom: 24px;
-}
-
-.section-identity {
-  background: linear-gradient(135deg, hsl(var(--identity-accent) / 0.05) 0%, hsl(var(--identity-accent) / 0.02) 100%);
-  border-left: 4px solid hsl(var(--identity-accent));
-  border-radius: 8px;
-  padding: 24px;
-  margin-bottom: 24px;
-}
+/* Sections avec couleurs d'accent - styles de base (remplacés par les styles plus spécifiques) */
 
 /* En-têtes de section élégants */
 .section-header {
@@ -220,13 +189,15 @@ body {
 }
 
 .modern-button-success {
-  background: hsl(var(--success));
-  color: hsl(var(--success-foreground));
+  background: #059669 !important; /* Vert plus prononcé */
+  color: white !important;
+  border: none !important;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-weight: 600;
 }
 
 .modern-button-success:hover {
-  background: hsl(var(--success) / 0.9);
+  background: #047857 !important; /* Vert foncé au survol */
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
@@ -423,17 +394,37 @@ body {
   animation: slideIn 0.3s ease-out;
 }
 
-/* Sections avec cadres bien visibles */
+/* Sections avec cadres plus fins et fonds colorés */
 .section-vendor,
 .section-product,
 .section-client,
 .section-identity {
-  border: 3px solid #4b5563 !important; /* Bordure épaisse et bien visible */
+  border: 2px solid #6b7280 !important; /* Bordure plus fine */
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 24px;
-  background: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Fonds de couleur très légers pour chaque catégorie */
+.section-vendor {
+  background: linear-gradient(135deg, hsl(var(--vendor-accent) / 0.08) 0%, hsl(var(--vendor-accent) / 0.03) 100%) !important;
+  border-left: 4px solid hsl(var(--vendor-accent)) !important;
+}
+
+.section-product {
+  background: linear-gradient(135deg, hsl(var(--product-accent) / 0.08) 0%, hsl(var(--product-accent) / 0.03) 100%) !important;
+  border-left: 4px solid hsl(var(--product-accent)) !important;
+}
+
+.section-client {
+  background: linear-gradient(135deg, hsl(var(--client-accent) / 0.08) 0%, hsl(var(--client-accent) / 0.03) 100%) !important;
+  border-left: 4px solid hsl(var(--client-accent)) !important;
+}
+
+.section-identity {
+  background: linear-gradient(135deg, hsl(var(--identity-accent) / 0.08) 0%, hsl(var(--identity-accent) / 0.03) 100%) !important;
+  border-left: 4px solid hsl(var(--identity-accent)) !important;
 }
 
 /* Responsive design */
