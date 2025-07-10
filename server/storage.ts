@@ -60,6 +60,11 @@ export class DatabaseStorage implements IStorage {
       userData.password = await this.hashPassword(userData.password);
     }
     
+    // Convert empty email to null to avoid unique constraint issues
+    if (userData.email === "") {
+      userData.email = null;
+    }
+    
     const [user] = await db
       .insert(users)
       .values(userData)
@@ -71,6 +76,11 @@ export class DatabaseStorage implements IStorage {
     // Hash password if provided
     if (userData.password) {
       userData.password = await this.hashPassword(userData.password);
+    }
+    
+    // Convert empty email to null to avoid unique constraint issues
+    if (userData.email === "") {
+      userData.email = null;
     }
     
     const [user] = await db
