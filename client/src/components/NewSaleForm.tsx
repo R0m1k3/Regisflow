@@ -133,7 +133,6 @@ export default function NewSaleForm() {
 
       const saleData = {
         vendeur: data.vendeur,
-        dateVente: data.dateVente,
         typeArticle: data.typeArticle,
         categorie: data.categorie as 'F2' | 'F3',
         quantite: parseInt(data.quantite),
@@ -167,7 +166,7 @@ export default function NewSaleForm() {
                 <User className="h-5 w-5" />
                 <span>Informations Vendeur</span>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <FormField
                   control={form.control}
                   name="vendeur"
@@ -176,19 +175,6 @@ export default function NewSaleForm() {
                       <FormLabel>Vendeur <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
                         <Input placeholder="Nom du vendeur" className="modern-input" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="dateVente"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Date de vente <span className="text-destructive">*</span></FormLabel>
-                      <FormControl>
-                        <Input type="date" className="modern-input" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

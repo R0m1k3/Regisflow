@@ -4,7 +4,6 @@ export interface Sale {
   
   // Vendeur
   vendeur: string;
-  dateVente: string;
   
   // Produit
   typeArticle: string;
@@ -32,7 +31,6 @@ export interface Sale {
 
 export interface FormData {
   vendeur: string;
-  dateVente: string;
   typeArticle: string;
   categorie: string;
   quantite: string;

@@ -60,7 +60,6 @@ export const sales = pgTable("sales", {
   
   // Vendeur
   vendeur: varchar("vendeur", { length: 255 }).notNull(),
-  dateVente: varchar("date_vente", { length: 10 }).notNull(),
   
   // Produit
   typeArticle: varchar("type_article", { length: 255 }).notNull(),
