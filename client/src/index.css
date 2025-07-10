@@ -75,9 +75,9 @@ body {
 /* Cards modernes avec ombres douces */
 .elegant-card {
   background: white;
-  border: 1px solid hsl(var(--border));
+  border: 2px solid #6b7280 !important; /* Bordure bien visible */
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
 }
 
@@ -151,11 +151,11 @@ body {
   color: hsl(var(--identity-accent));
 }
 
-/* Inputs modernes avec bordures très visibles */
+/* Inputs modernes avec bordures bien visibles */
 .modern-input {
   width: 100%;
   padding: 12px 16px;
-  border: 3px solid #374151 !important; /* Bordure grise foncée très visible */
+  border: 2px solid #4b5563 !important; /* Bordure grise foncée bien visible */
   border-radius: 8px;
   background: hsl(var(--background));
   color: hsl(var(--foreground));
@@ -172,7 +172,7 @@ body {
 }
 
 .modern-input:hover:not(:focus) {
-  border-color: #4b5563 !important; /* Bordure encore plus foncée au survol */
+  border-color: #374151 !important; /* Bordure plus foncée au survol */
 }
 
 .modern-input::placeholder {
@@ -266,7 +266,7 @@ body {
 .search-input {
   width: 100%;
   padding: 12px 16px;
-  border: 3px solid #374151 !important; /* Bordure très visible */
+  border: 2px solid #4b5563 !important; /* Bordure bien visible */
   border-radius: 8px;
   background: hsl(var(--background));
   color: hsl(var(--foreground));
@@ -423,12 +423,12 @@ body {
   animation: slideIn 0.3s ease-out;
 }
 
-/* Sections avec cadres très visibles */
+/* Sections avec cadres bien visibles */
 .section-vendor,
 .section-product,
 .section-client,
 .section-identity {
-  border: 4px solid #374151 !important; /* Bordure très épaisse et foncée */
+  border: 3px solid #4b5563 !important; /* Bordure épaisse et bien visible */
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 24px;
