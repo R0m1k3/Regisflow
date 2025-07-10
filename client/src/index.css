@@ -126,7 +126,7 @@ body {
   padding: 12px 16px;
   border: 2px solid #4b5563 !important; /* Bordure grise foncée bien visible */
   border-radius: 4px;
-  background: hsl(var(--background));
+  background: white !important;
   color: hsl(var(--foreground));
   font-size: 14px;
   font-weight: 400;
@@ -242,7 +242,7 @@ body {
   padding: 12px 16px;
   border: 2px solid #4b5563 !important; /* Bordure bien visible */
   border-radius: 4px;
-  background: hsl(var(--background));
+  background: white !important;
   color: hsl(var(--foreground));
   font-size: 14px;
   transition: all 0.2s ease;
