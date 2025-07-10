@@ -161,19 +161,19 @@ export default function NewSaleForm() {
   };
 
   return (
-    <Card className="modern-card-elevated">
-      <CardContent className="mobile-card-content pt-6">
+    <Card className="modern-card">
+      <CardContent className="pt-6">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="mobile-form-responsive">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Seller Information */}
-            <div className="bg-muted border border-border mobile-form-section border-l-4 border-l-primary">
-              <h3 className="font-semibold text-foreground mb-6 flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary text-primary-foreground flex items-center justify-center">
+            <div className="modern-section border-l-4 border-l-primary">
+              <div className="modern-section-header">
+                <div className="modern-icon-container">
                   <User className="h-5 w-5" />
                 </div>
                 <span className="truncate">Informations Vendeur</span>
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 mobile-gap-responsive">
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="vendeur"
@@ -181,7 +181,7 @@ export default function NewSaleForm() {
                     <FormItem>
                       <FormLabel>Vendeur <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
-                        <Input placeholder="Nom du vendeur" {...field} />
+                        <Input placeholder="Nom du vendeur" className="modern-input" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -194,7 +194,7 @@ export default function NewSaleForm() {
                     <FormItem>
                       <FormLabel>Date de vente</FormLabel>
                       <FormControl>
-                        <Input type="date" {...field} />
+                        <Input type="date" className="modern-input" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -204,14 +204,14 @@ export default function NewSaleForm() {
             </div>
 
             {/* Product Information */}
-            <div className="bg-blue-50 border border-border mobile-form-section border-l-4 border-l-blue-500">
-              <h3 className="font-semibold text-foreground mb-6 flex items-center gap-3">
+            <div className="modern-section border-l-4 border-l-blue-500 bg-blue-50">
+              <div className="modern-section-header">
                 <div className="w-10 h-10 bg-blue-500 text-white flex items-center justify-center">
                   <Package className="h-5 w-5" />
                 </div>
                 <span className="truncate">Informations Produit</span>
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 mobile-gap-responsive">
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="typeArticle"
@@ -306,13 +306,13 @@ export default function NewSaleForm() {
             </div>
 
             {/* Customer Information */}
-            <div className="bg-emerald-50 border border-border mobile-form-section border-l-4 border-l-emerald-500">
-              <h3 className="font-semibold text-foreground mb-6 flex items-center gap-3">
+            <div className="modern-section border-l-4 border-l-emerald-500 bg-emerald-50">
+              <div className="modern-section-header">
                 <div className="w-10 h-10 bg-emerald-500 text-white flex items-center justify-center">
                   <Users className="h-5 w-5" />
                 </div>
                 <span className="truncate">Informations Client</span>
-              </h3>
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 mobile-gap-responsive">
                 <FormField
                   control={form.control}
@@ -394,15 +394,15 @@ export default function NewSaleForm() {
             </div>
 
             {/* Identity Information */}
-            <div className="bg-amber-50 border border-border mobile-form-section border-l-4 border-l-amber-500">
-              <h3 className="font-semibold text-foreground mb-6 flex items-center gap-3">
+            <div className="modern-section border-l-4 border-l-amber-500 bg-amber-50">
+              <div className="modern-section-header">
                 <div className="w-10 h-10 bg-amber-500 text-white flex items-center justify-center">
                   <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
                   </svg>
                 </div>
                 <span className="truncate">Pièce d'Identité</span>
-              </h3>
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 mobile-gap-responsive">
                 <FormField
                   control={form.control}

@@ -250,48 +250,48 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
   };
 
   return (
-    <Card className="modern-card-elevated">
-      <CardHeader className="mobile-card-header">
-        <CardTitle className="flex items-center gap-2 sm:gap-3 responsive-title">
-          <div className="p-1.5 sm:p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg sm:rounded-xl">
-            <History className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+    <Card className="modern-card">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-3">
+          <div className="modern-icon-container">
+            <History className="h-6 w-6" />
           </div>
           <span className="truncate">Historique des Ventes</span>
         </CardTitle>
-        <p className="text-muted-foreground mt-2 responsive-body">
+        <p className="text-muted-foreground mt-2">
           Consultation et gestion des ventes enregistrées
         </p>
       </CardHeader>
-      <CardContent className="mobile-card-content mobile-form-responsive">
+      <CardContent>
         {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-end mobile-form-section bg-muted bg-opacity-30 rounded-xl border border-border border-opacity-50">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 flex-1 w-full">
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end modern-section">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1 w-full">
             <div>
-              <label className="responsive-caption font-medium">Date de début</label>
+              <label className="font-medium">Date de début</label>
               <Input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="responsive-body"
+                className="modern-input"
               />
             </div>
             <div>
-              <label className="responsive-caption font-medium">Date de fin</label>
+              <label className="font-medium">Date de fin</label>
               <Input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="responsive-body"
+                className="modern-input"
               />
             </div>
           </div>
           <div className="flex gap-2 w-full sm:w-auto">
-            <Button onClick={exportToCSV} variant="outline" className="touch-friendly-button flex-1 sm:flex-none">
+            <Button onClick={exportToCSV} variant="outline" className="modern-button flex-1 sm:flex-none">
               <Download className="h-4 w-4 mr-2" />
               <span className="hidden sm:inline">Export CSV</span>
               <span className="sm:hidden">CSV</span>
             </Button>
-            <Button onClick={exportToPDF} variant="outline" className="touch-friendly-button flex-1 sm:flex-none">
+            <Button onClick={exportToPDF} variant="outline" className="modern-button flex-1 sm:flex-none">
               <FileText className="h-4 w-4 mr-2" />
               <span className="hidden sm:inline">Export PDF</span>
               <span className="sm:hidden">PDF</span>
