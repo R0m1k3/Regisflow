@@ -82,6 +82,7 @@ export default function NewSaleForm() {
       toast({
         title: "Vente enregistrée",
         description: "La vente a été enregistrée avec succès",
+        variant: "success",
       });
       form.reset({
         vendeur: '',

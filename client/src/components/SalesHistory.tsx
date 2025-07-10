@@ -60,6 +60,7 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
       toast({
         title: "Vente supprimée",
         description: "La vente a été supprimée avec succès",
+        variant: "success",
       });
     },
     onError: () => {
@@ -169,6 +170,7 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
       toast({
         title: "Export PDF réussi",
         description: `${sales.length} ventes exportées en PDF`,
+        variant: "success",
       });
     } catch (error) {
       console.error('Erreur lors de l\'export PDF:', error);
@@ -238,6 +240,7 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
     toast({
       title: "Export réussi",
       description: `${sales.length} ventes exportées`,
+      variant: "success",
     });
   };
 

@@ -113,7 +113,7 @@ export default function Administration() {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
       setIsUserDialogOpen(false);
       userForm.reset();
-      toast({ title: "Utilisateur créé avec succès" });
+      toast({ title: "Utilisateur créé avec succès", variant: "success" });
     },
     onError: () => {
       toast({ title: "Erreur", description: "Impossible de créer l'utilisateur", variant: "destructive" });
@@ -133,7 +133,7 @@ export default function Administration() {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
       setEditingUser(null);
       editUserForm.reset();
-      toast({ title: "Utilisateur modifié avec succès" });
+      toast({ title: "Utilisateur modifié avec succès", variant: "success" });
     },
     onError: (error) => {
       let errorMessage = "Impossible de modifier l'utilisateur";
@@ -152,7 +152,7 @@ export default function Administration() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
-      toast({ title: "Utilisateur supprimé avec succès" });
+      toast({ title: "Utilisateur supprimé avec succès", variant: "success" });
     },
     onError: () => {
       toast({ title: "Erreur", description: "Impossible de supprimer l'utilisateur", variant: "destructive" });
@@ -172,7 +172,7 @@ export default function Administration() {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/stores'] });
       setIsStoreDialogOpen(false);
       storeForm.reset();
-      toast({ title: "Magasin créé avec succès" });
+      toast({ title: "Magasin créé avec succès", variant: "success" });
     },
     onError: () => {
       toast({ title: "Erreur", description: "Impossible de créer le magasin", variant: "destructive" });
@@ -192,7 +192,7 @@ export default function Administration() {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/stores'] });
       setEditingStore(null);
       editStoreForm.reset();
-      toast({ title: "Magasin modifié avec succès" });
+      toast({ title: "Magasin modifié avec succès", variant: "success" });
     },
     onError: () => {
       toast({ title: "Erreur", description: "Impossible de modifier le magasin", variant: "destructive" });
@@ -205,7 +205,7 @@ export default function Administration() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/stores'] });
-      toast({ title: "Magasin supprimé avec succès" });
+      toast({ title: "Magasin supprimé avec succès", variant: "success" });
     },
     onError: () => {
       toast({ title: "Erreur", description: "Impossible de supprimer le magasin", variant: "destructive" });
@@ -329,6 +329,7 @@ export default function Administration() {
       toast({
         title: "Sauvegarde exportée",
         description: "Le fichier de sauvegarde a été téléchargé",
+        variant: "success",
       });
     },
     onError: () => {
@@ -354,6 +355,7 @@ export default function Administration() {
       toast({
         title: "Sauvegarde importée",
         description: "Les données ont été restaurées avec succès",
+        variant: "success",
       });
     },
     onError: () => {
@@ -377,6 +379,7 @@ export default function Administration() {
       toast({
         title: "Sauvegarde créée",
         description: `Sauvegarde automatique créée: ${data.filename}`,
+        variant: "success",
       });
     },
     onError: (error) => {
@@ -430,7 +433,8 @@ export default function Administration() {
       queryClient.invalidateQueries({ queryKey: ['/api/sales'] });
       toast({ 
         title: "Purge exécutée avec succès", 
-        description: result.message || `${result.deletedCount} vente(s) supprimée(s)`
+        description: result.message || `${result.deletedCount} vente(s) supprimée(s)`,
+        variant: "success"
       });
     },
     onError: (error: any) => {
