@@ -240,6 +240,9 @@ Preferred communication style: Simple, everyday language.
 - ✅ Optimized border thickness for better balance between visibility and aesthetics
 - ✅ Removed manual date field from new sale form - timestamp now automatically recorded
 - ✅ Automatic date/time creation ensures accuracy and prevents manual entry errors
+- ✅ Added date and time display in sales history with automatic timestamp from database
+- ✅ Harmonized color scheme in new sale form with softer, complementary colors
+- ✅ Updated section backgrounds to work cohesively with green save button
 
 ### Docker Configuration & Cleanup (January 9, 2025)
 - ✅ Complete Docker setup optimized for external PostgreSQL database

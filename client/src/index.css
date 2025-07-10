@@ -409,21 +409,21 @@ body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-/* Fonds de couleur unis pour chaque catégorie */
+/* Fonds de couleur unis harmonisés avec le bouton vert */
 .section-vendor {
-  background: #e0e7ff !important; /* Fond violet clair uni */
+  background: #f0f9ff !important; /* Fond bleu très clair */
 }
 
 .section-product {
-  background: #dbeafe !important; /* Fond bleu clair uni */
+  background: #f0fdf4 !important; /* Fond vert très clair */
 }
 
 .section-client {
-  background: #d1fae5 !important; /* Fond vert clair uni */
+  background: #ecfdf5 !important; /* Fond vert clair */
 }
 
 .section-identity {
-  background: #fed7aa !important; /* Fond orange clair uni */
+  background: #fefce8 !important; /* Fond jaune très clair */
 }
 
 /* Responsive design */
