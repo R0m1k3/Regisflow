@@ -243,6 +243,9 @@ Preferred communication style: Simple, everyday language.
 - ✅ Added date and time display in sales history with automatic timestamp from database
 - ✅ Harmonized color scheme in new sale form with softer, complementary colors
 - ✅ Updated section backgrounds to work cohesively with green save button
+- ✅ Uniformized export buttons with consistent styling
+- ✅ Applied angular design with reduced border-radius throughout entire application
+- ✅ Modern, crisp appearance with 4px border-radius for cards, inputs, and buttons
 
 ### Docker Configuration & Cleanup (January 9, 2025)
 - ✅ Complete Docker setup optimized for external PostgreSQL database
