@@ -65,8 +65,8 @@ volumes:
   logs_data:
     driver: local
 
-# Réseau pour RegisFlow
+# Utilisation du réseau nginx_default existant
 networks:
   default:
-    driver: bridge
-    name: regisflow_network
+    external: true
+    name: nginx_default
