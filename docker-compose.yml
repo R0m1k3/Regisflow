@@ -27,12 +27,15 @@ services:
   regisflow:
     build: 
       context: .
+      dockerfile: Dockerfile
       target: production
-    image: regisflow-regisflow:latest
+      args:
+        - NODE_ENV=production
     container_name: regisflow-app
     depends_on:
       regisflow-db:
         condition: service_healthy
+    pull_policy: never
     environment:
       NODE_ENV: production
       PORT: 5000
