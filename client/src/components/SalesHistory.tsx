@@ -332,7 +332,7 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
               <button
                 onClick={exportToPDF}
                 disabled={filteredSales.length === 0}
-                className="modern-button modern-button-primary"
+                className="modern-button modern-button-secondary"
               >
                 <FileText className="h-4 w-4" />
                 Export PDF
