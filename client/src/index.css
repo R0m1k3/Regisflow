@@ -426,6 +426,18 @@ body {
   background: #fce7f3 !important; /* Fond rose très clair */
 }
 
+/* S'assurer que tous les inputs ont un fond blanc dans toutes les sections */
+.section-vendor .modern-input,
+.section-product .modern-input,
+.section-client .modern-input,
+.section-identity .modern-input,
+.section-vendor input,
+.section-product input,
+.section-client input,
+.section-identity input {
+  background: white !important;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .section-vendor,
