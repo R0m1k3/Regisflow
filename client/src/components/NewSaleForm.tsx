@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -12,7 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useStoreContext } from '@/hooks/useStoreContext';
 import { apiRequest } from '@/lib/queryClient';
 import { validateRequiredFields, validateEAN13, ARTICLE_CATEGORY_MAPPING, IDENTITY_TYPES, PAYMENT_METHODS } from '@/lib/validation';
-import { Package, User, Users, Save, X } from 'lucide-react';
+import { Package, User, Users, Save, Calendar, BadgeCheck, Info } from 'lucide-react';
 
 interface FormData {
   vendeur: string;
@@ -66,7 +65,6 @@ export default function NewSaleForm() {
     mutationFn: async (saleData: any) => {
       const dataToSend = {
         ...saleData,
-        // Include storeId for admin users
         ...(user?.role === 'admin' && selectedStoreId && { storeId: selectedStoreId })
       };
       
@@ -77,7 +75,6 @@ export default function NewSaleForm() {
       return response.json();
     },
     onSuccess: () => {
-      // Invalidate all sales queries to refresh the history
       queryClient.invalidateQueries({ queryKey: ['/api/sales'], exact: false });
       toast({
         title: "Vente enregistrée",
@@ -115,7 +112,6 @@ export default function NewSaleForm() {
     try {
       setIsSubmitting(true);
 
-      // Validate required fields
       const missingFields = validateRequiredFields(data);
       if (missingFields.length > 0) {
         toast({
@@ -126,7 +122,6 @@ export default function NewSaleForm() {
         return;
       }
 
-      // Validate EAN13
       if (!validateEAN13(data.gencode)) {
         toast({
           title: "Code EAN13 invalide",
@@ -162,17 +157,15 @@ export default function NewSaleForm() {
   };
 
   return (
-    <Card className="modern-card">
-      <CardContent className="pt-6">
+    <div className="elegant-card animate-slide-in">
+      <div className="p-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Seller Information */}
-            <div className="modern-section modern-section-vendor">
-              <div className="modern-section-header">
-                <div className="w-10 h-10 bg-purple-500 text-white flex items-center justify-center border-2 border-purple-500 shadow-md">
-                  <User className="h-5 w-5" />
-                </div>
-                <span className="truncate">Informations Vendeur</span>
+            {/* Section Vendeur */}
+            <div className="section-vendor">
+              <div className="section-header">
+                <User className="h-5 w-5" />
+                <span>Informations Vendeur</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
@@ -193,7 +186,7 @@ export default function NewSaleForm() {
                   name="dateVente"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Date de vente</FormLabel>
+                      <FormLabel>Date de vente <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
                         <Input type="date" className="modern-input" {...field} />
                       </FormControl>
@@ -204,13 +197,11 @@ export default function NewSaleForm() {
               </div>
             </div>
 
-            {/* Product Information */}
-            <div className="modern-section modern-section-product">
-              <div className="modern-section-header">
-                <div className="w-10 h-10 bg-blue-500 text-white flex items-center justify-center border-2 border-blue-500 shadow-md">
-                  <Package className="h-5 w-5" />
-                </div>
-                <span className="truncate">Informations Produit</span>
+            {/* Section Produit */}
+            <div className="section-product">
+              <div className="section-header">
+                <Package className="h-5 w-5" />
+                <span>Informations Produit</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
@@ -221,10 +212,10 @@ export default function NewSaleForm() {
                       <FormLabel>Type d'article <span className="text-destructive">*</span></FormLabel>
                       <Select value={field.value} onValueChange={(value) => {
                         field.onChange(value);
-                        form.setValue('categorie', ''); // Reset category when article changes
+                        form.setValue('categorie', '');
                       }}>
                         <FormControl>
-                          <SelectTrigger className="modern-select-trigger">
+                          <SelectTrigger className="modern-input">
                             <SelectValue placeholder="Sélectionner un type" />
                           </SelectTrigger>
                         </FormControl>
@@ -248,7 +239,7 @@ export default function NewSaleForm() {
                       <FormLabel>Catégorie réglementaire <span className="text-destructive">*</span></FormLabel>
                       <Select value={field.value} onValueChange={field.onChange} disabled={!typeArticle}>
                         <FormControl>
-                          <SelectTrigger className="modern-select-trigger">
+                          <SelectTrigger className="modern-input">
                             <SelectValue placeholder="Sélectionner une catégorie" />
                           </SelectTrigger>
                         </FormControl>
@@ -292,29 +283,21 @@ export default function NewSaleForm() {
                 />
               </div>
 
-              <Alert className="mt-4">
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <AlertDescription>
-                  <strong>Information réglementaire :</strong>
-                  <ul className="mt-1 space-y-1 text-sm">
-                    <li>• <strong>F1</strong> : petits artifices (clac-doigts, mini-fontaines), accessibles dès 12 ans.</li>
-                    <li>• <strong>F2, F3</strong> : artifices plus puissants, vente et utilisation réservées aux majeurs.</li>
-                  </ul>
+              <Alert className="mt-4 border-blue-200 bg-blue-50">
+                <Info className="h-4 w-4 text-blue-600" />
+                <AlertDescription className="text-blue-800">
+                  <strong>Information réglementaire :</strong> F2/F3 = artifices puissants réservés aux majeurs, vente encadrée
                 </AlertDescription>
               </Alert>
             </div>
 
-            {/* Customer Information */}
-            <div className="modern-section modern-section-customer">
-              <div className="modern-section-header">
-                <div className="w-10 h-10 bg-emerald-500 text-white flex items-center justify-center border-2 border-emerald-500 shadow-md">
-                  <Users className="h-5 w-5" />
-                </div>
-                <span className="truncate">Informations Client</span>
+            {/* Section Client */}
+            <div className="section-client">
+              <div className="section-header">
+                <Users className="h-5 w-5" />
+                <span>Informations Client</span>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 mobile-gap-responsive">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="nom"
@@ -375,7 +358,7 @@ export default function NewSaleForm() {
                       <FormLabel>Mode de paiement <span className="text-destructive">*</span></FormLabel>
                       <Select value={field.value} onValueChange={field.onChange}>
                         <FormControl>
-                          <SelectTrigger className="modern-select-trigger">
+                          <SelectTrigger className="modern-input">
                             <SelectValue placeholder="Sélectionner le mode de paiement" />
                           </SelectTrigger>
                         </FormControl>
@@ -394,17 +377,13 @@ export default function NewSaleForm() {
               </div>
             </div>
 
-            {/* Identity Information */}
-            <div className="modern-section modern-section-identity">
-              <div className="modern-section-header">
-                <div className="w-10 h-10 bg-amber-500 text-white flex items-center justify-center border-2 border-amber-500 shadow-md">
-                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
-                  </svg>
-                </div>
-                <span className="truncate">Pièce d'Identité</span>
+            {/* Section Identité */}
+            <div className="section-identity">
+              <div className="section-header">
+                <BadgeCheck className="h-5 w-5" />
+                <span>Pièce d'Identité</span>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 mobile-gap-responsive">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="typeIdentite"
@@ -413,7 +392,7 @@ export default function NewSaleForm() {
                       <FormLabel>Type de pièce d'identité <span className="text-destructive">*</span></FormLabel>
                       <Select value={field.value} onValueChange={field.onChange}>
                         <FormControl>
-                          <SelectTrigger className="modern-select-trigger">
+                          <SelectTrigger className="modern-input">
                             <SelectValue placeholder="Sélectionner le type" />
                           </SelectTrigger>
                         </FormControl>
@@ -436,7 +415,7 @@ export default function NewSaleForm() {
                     <FormItem>
                       <FormLabel>Numéro de pièce d'identité <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
-                        <Input placeholder="Numéro de la pièce d'identité" className="modern-input" {...field} />
+                        <Input placeholder="Numéro de la pièce" className="modern-input" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -447,9 +426,9 @@ export default function NewSaleForm() {
                   name="autoriteDelivrance"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Autorité de délivrance <span className="text-destructive">*</span></FormLabel>
+                      <FormLabel>Autorité de délivrance</FormLabel>
                       <FormControl>
-                        <Input placeholder="Préfecture, Mairie, etc." className="modern-input" {...field} />
+                        <Input placeholder="Autorité ayant délivré la pièce (optionnel)" className="modern-input" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -471,49 +450,27 @@ export default function NewSaleForm() {
               </div>
             </div>
 
-            {/* Form Actions */}
-            <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 pt-6 sm:pt-8 mt-6 sm:mt-8 border-t border-border/50">
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="lg"
-                className="border-2 hover:bg-muted smooth-transition touch-friendly-button order-2 sm:order-1"
-                onClick={() => {
-                form.reset({
-                  vendeur: '',
-                  dateVente: new Date().toISOString().split('T')[0],
-                  typeArticle: '',
-                  categorie: '',
-                  quantite: '',
-                  gencode: '',
-                  nom: '',
-                  prenom: '',
-                  dateNaissance: '',
-                  lieuNaissance: '',
-                  modePaiement: 'Espèce',
-                  typeIdentite: '',
-                  numeroIdentite: '',
-                  autoriteDelivrance: '',
-                  dateDelivrance: '',
-                });
-              }}>
-                <X className="h-5 w-5 mr-2" />
-                Réinitialiser
-              </Button>
-              <Button 
-                type="submit" 
-                size="lg"
-                disabled={isSubmitting || createSaleMutation.isPending}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground border-0 shadow-lg hover:shadow-xl order-1 sm:order-2"
+            {/* Boutons d'action */}
+            <div className="flex flex-col sm:flex-row gap-4 pt-6">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="modern-button modern-button-success flex-1"
               >
-                <Save className="h-5 w-5 mr-2" />
-                <span className="hidden sm:inline">{isSubmitting || createSaleMutation.isPending ? 'Enregistrement...' : 'Enregistrer la Vente'}</span>
-                <span className="sm:hidden">{isSubmitting || createSaleMutation.isPending ? 'Enregistrement...' : 'Enregistrer'}</span>
-              </Button>
+                <Save className="h-4 w-4" />
+                {isSubmitting ? 'Enregistrement...' : 'Enregistrer la vente'}
+              </button>
+              <button
+                type="button"
+                onClick={() => form.reset()}
+                className="modern-button modern-button-secondary flex-1"
+              >
+                Réinitialiser
+              </button>
             </div>
           </form>
         </Form>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

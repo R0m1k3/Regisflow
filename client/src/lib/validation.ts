@@ -27,8 +27,8 @@ export function validateRequiredFields(formData: any): string[] {
     { key: 'modePaiement', label: 'Mode de paiement' },
     { key: 'typeIdentite', label: 'Type de pièce d\'identité' },
     { key: 'numeroIdentite', label: 'Numéro de pièce d\'identité' },
-    { key: 'autoriteDelivrance', label: 'Autorité de délivrance' },
     { key: 'dateDelivrance', label: 'Date de délivrance' }
+    // Note: autoriteDelivrance n'est plus obligatoire
   ];
   
   return requiredFields

@@ -1,6 +1,5 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -11,7 +10,7 @@ import { useStoreContext } from '@/hooks/useStoreContext';
 import { useAuth } from '@/hooks/useAuth';
 import { apiRequest } from '@/lib/queryClient';
 import type { Sale } from '@shared/schema';
-import { History, Download, Trash2, Eye, Filter, FileText } from 'lucide-react';
+import { History, Download, Trash2, Eye, Filter, FileText, Search, X, Calendar, Users } from 'lucide-react';
 
 interface SalesHistoryProps {
   canDelete?: boolean;
@@ -25,6 +24,7 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
   const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Query for sales
   const { data: salesData, isLoading } = useQuery<Sale[]>({
@@ -34,7 +34,6 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
       if (startDate) params.append('startDate', startDate);
       if (endDate) params.append('endDate', endDate);
       
-      // Always add storeId for queries
       if (selectedStoreId) {
         params.append('storeId', selectedStoreId.toString());
       }
@@ -43,19 +42,35 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
       const response = await apiRequest(`/api/sales${queryString ? `?${queryString}` : ''}`);
       return response.json();
     },
-    enabled: !!selectedStoreId && !!user, // Only run query when store is selected and user is loaded
-    refetchOnMount: true, // Always refetch when component mounts
-    refetchOnWindowFocus: false, // Don't refetch on window focus
+    enabled: !!selectedStoreId && !!user,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
   });
 
   const sales = Array.isArray(salesData) ? salesData : [];
+
+  // Filtrer les ventes selon la recherche
+  const filteredSales = useMemo(() => {
+    if (!searchQuery.trim()) return sales;
+    
+    const query = searchQuery.toLowerCase().trim();
+    return sales.filter(sale => 
+      sale.nom.toLowerCase().includes(query) ||
+      sale.prenom.toLowerCase().includes(query) ||
+      sale.vendeur.toLowerCase().includes(query) ||
+      sale.typeArticle.toLowerCase().includes(query) ||
+      sale.gencode.includes(query) ||
+      sale.numeroIdentite.toLowerCase().includes(query) ||
+      (sale.lieuNaissance && sale.lieuNaissance.toLowerCase().includes(query)) ||
+      sale.modePaiement.toLowerCase().includes(query)
+    );
+  }, [sales, searchQuery]);
 
   // Delete mutation
   const deleteSaleMutation = useMutation({
     mutationFn: (saleId: number) =>
       apiRequest(`/api/sales/${saleId}`, { method: 'DELETE' }),
     onSuccess: () => {
-      // Invalidate all sales queries to refresh the history
       queryClient.invalidateQueries({ queryKey: ['/api/sales'], exact: false });
       toast({
         title: "Vente supprimée",
@@ -77,7 +92,7 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
   };
 
   const exportToPDF = async () => {
-    if (sales.length === 0) {
+    if (filteredSales.length === 0) {
       toast({
         title: "Aucune donnée",
         description: "Aucune vente à exporter",
@@ -92,84 +107,44 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
 
       const doc = new jsPDF();
       
-      // Configuration du document
       doc.setFont('helvetica');
       
-      // Titre du document
       doc.setFontSize(16);
       doc.text('Historique des Ventes de Feux d\'Artifice', 20, 20);
       
-      // Informations générales
       doc.setFontSize(10);
-      doc.text(`Date d'export: ${new Date().toLocaleDateString('fr-FR')}`, 20, 30);
-      doc.text(`Nombre de ventes: ${sales.length}`, 20, 35);
+      doc.text(`Généré le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}`, 20, 30);
       
       if (startDate || endDate) {
-        let periodText = 'Période: ';
-        if (startDate) periodText += `du ${new Date(startDate).toLocaleDateString('fr-FR')} `;
-        if (endDate) periodText += `au ${new Date(endDate).toLocaleDateString('fr-FR')}`;
-        doc.text(periodText, 20, 40);
+        const period = `Période: ${startDate ? new Date(startDate).toLocaleDateString('fr-FR') : 'début'} - ${endDate ? new Date(endDate).toLocaleDateString('fr-FR') : 'fin'}`;
+        doc.text(period, 20, 35);
       }
 
-      // Données du tableau
-      const tableData = sales.map(sale => [
-        new Date(sale.timestamp!).toLocaleDateString('fr-FR'),
+      const tableData = filteredSales.map(sale => [
+        new Date(sale.timestamp).toLocaleDateString('fr-FR'),
         sale.vendeur,
+        `${sale.nom} ${sale.prenom}`,
         sale.typeArticle,
         sale.categorie,
         sale.quantite.toString(),
-        sale.nom + ' ' + sale.prenom,
-        sale.modePaiement || 'Espèce',
-        sale.typeIdentite,
-        sale.numeroIdentite
+        sale.modePaiement,
+        sale.gencode
       ]);
 
-      // Configuration du tableau
       autoTable(doc, {
-        head: [['Date', 'Vendeur', 'Article', 'Cat.', 'Qté', 'Client', 'Paiement', 'ID Type', 'N° ID']],
+        head: [['Date', 'Vendeur', 'Client', 'Article', 'Cat.', 'Qty', 'Paiement', 'Code']],
         body: tableData,
-        startY: startDate || endDate ? 50 : 45,
-        styles: {
-          fontSize: 8,
-          cellPadding: 2,
-        },
-        headStyles: {
-          fillColor: [59, 130, 246],
-          textColor: 255,
-          fontSize: 9,
-        },
-        alternateRowStyles: {
-          fillColor: [248, 250, 252],
-        },
-        columnStyles: {
-          0: { cellWidth: 18 }, // Date
-          1: { cellWidth: 25 }, // Vendeur
-          2: { cellWidth: 35 }, // Article
-          3: { cellWidth: 12 }, // Catégorie
-          4: { cellWidth: 12 }, // Quantité
-          5: { cellWidth: 30 }, // Client
-          6: { cellWidth: 20 }, // Paiement
-          7: { cellWidth: 15 }, // ID Type
-          8: { cellWidth: 25 }, // N° ID
-        },
-        margin: { left: 10, right: 10 },
+        startY: startDate || endDate ? 45 : 40,
+        styles: { fontSize: 8 },
+        headStyles: { fillColor: [64, 64, 64] },
+        margin: { top: 40, left: 20, right: 20 },
       });
 
-      // Pied de page
-      const pageCount = doc.internal.getNumberOfPages();
-      for (let i = 1; i <= pageCount; i++) {
-        doc.setPage(i);
-        doc.setFontSize(8);
-        doc.text(`Page ${i} sur ${pageCount}`, doc.internal.pageSize.width - 30, doc.internal.pageSize.height - 10);
-        doc.text('RegisFlow - Registre des ventes de feux d\'artifice', 20, doc.internal.pageSize.height - 10);
-      }
-
-      // Téléchargement
-      doc.save(`historique_ventes_${new Date().toISOString().split('T')[0]}.pdf`);
-
+      doc.save(`ventes-feux-artifice-${new Date().toISOString().split('T')[0]}.pdf`);
+      
       toast({
-        title: "Export PDF réussi",
-        description: `${sales.length} ventes exportées en PDF`,
+        title: "Export réussi",
+        description: "Le fichier PDF a été téléchargé",
         variant: "success",
       });
     } catch (error) {
@@ -182,254 +157,266 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
     }
   };
 
-  const exportToCSV = () => {
-    if (sales.length === 0) {
-      toast({
-        title: "Aucune donnée",
-        description: "Aucune vente à exporter",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const csvHeader = [
-      'Date/Heure',
-      'Vendeur',
-      'Date de vente',
-      'Type d\'article',
-      'Catégorie',
-      'Quantité',
-      'Gencode',
-      'Nom client',
-      'Prénom client',
-      'Date de naissance',
-      'Lieu de naissance',
-      'Mode de paiement',
-      'Type identité',
-      'Numéro identité',
-      'Autorité délivrance',
-      'Date délivrance'
-    ].join(',');
-
-    const csvData = sales.map(sale => [
-      new Date(sale.timestamp!).toLocaleString('fr-FR'),
-      sale.vendeur,
-      sale.dateVente,
-      sale.typeArticle,
-      sale.categorie,
-      sale.quantite,
-      sale.gencode,
-      sale.nom,
-      sale.prenom,
-      sale.dateNaissance,
-      sale.lieuNaissance || '',
-      sale.modePaiement || 'Espèce',
-      sale.typeIdentite,
-      sale.numeroIdentite,
-      sale.autoriteDelivrance,
-      sale.dateDelivrance
-    ].map(field => `"${field}"`).join(',')).join('\n');
-
-    const csvContent = csvHeader + '\n' + csvData;
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `ventes_fireworks_${new Date().toISOString().split('T')[0]}.csv`;
-    link.click();
-
-    toast({
-      title: "Export réussi",
-      description: `${sales.length} ventes exportées`,
-      variant: "success",
-    });
+  const clearFilters = () => {
+    setStartDate('');
+    setEndDate('');
+    setSearchQuery('');
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-FR');
-  };
-
-  const formatDateTime = (dateString: string) => {
-    return new Date(dateString).toLocaleString('fr-FR');
-  };
-
-  return (
-    <Card className="modern-card">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-3">
-          <div className="modern-icon-container">
-            <History className="h-6 w-6" />
-          </div>
-          <span className="truncate">Historique des Ventes</span>
-        </CardTitle>
-        <p className="text-muted-foreground mt-2">
-          Consultation et gestion des ventes enregistrées
-        </p>
-      </CardHeader>
-      <CardContent>
-        {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end modern-filter-card">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1 w-full">
-            <div>
-              <label className="font-medium text-sm block mb-2">Date de début</label>
-              <Input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="modern-input"
-              />
-            </div>
-            <div>
-              <label className="font-medium text-sm block mb-2">Date de fin</label>
-              <Input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="modern-input"
-              />
-            </div>
-          </div>
-          <div className="flex gap-2 w-full sm:w-auto">
-            <Button onClick={exportToCSV} variant="outline" className="modern-button flex-1 sm:flex-none">
-              <Download className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Export CSV</span>
-              <span className="sm:hidden">CSV</span>
-            </Button>
-            <Button onClick={exportToPDF} variant="outline" className="modern-button flex-1 sm:flex-none">
-              <FileText className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Export PDF</span>
-              <span className="sm:hidden">PDF</span>
-            </Button>
+  if (isLoading) {
+    return (
+      <div className="elegant-card">
+        <div className="p-6">
+          <div className="animate-pulse space-y-4">
+            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/3"></div>
           </div>
         </div>
+      </div>
+    );
+  }
 
-        {/* Sales Table */}
-        {isLoading ? (
-          <div className="flex justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+  return (
+    <div className="space-y-6 animate-slide-in">
+      {/* Module de recherche */}
+      <div className="search-container">
+        <div className="search-header">
+          <Search className="h-5 w-5" />
+          <span>Rechercher dans l'historique</span>
+        </div>
+        <div className="space-y-4">
+          <div className="relative">
+            <Input
+              placeholder="Rechercher par nom, prénom, vendeur, article, code..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="search-input pr-10"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
-        ) : sales.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground responsive-body">
-            Aucune vente trouvée
+          {searchQuery && (
+            <div className="text-sm text-gray-600">
+              {filteredSales.length} résultat{filteredSales.length > 1 ? 's' : ''} trouvé{filteredSales.length > 1 ? 's' : ''} sur {sales.length} vente{sales.length > 1 ? 's' : ''}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Filtres */}
+      <div className="filters-container">
+        <div className="section-header mb-4">
+          <Filter className="h-5 w-5" />
+          <span>Filtres par date</span>
+        </div>
+        <div className="filters-grid">
+          <div>
+            <label className="block text-sm font-medium mb-2">Date de début</label>
+            <Input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="modern-input"
+            />
           </div>
-        ) : (
-          <div className="rounded-md border overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="responsive-caption">Date/Heure</TableHead>
-                  <TableHead className="responsive-caption">Vendeur</TableHead>
-                  <TableHead className="responsive-caption">Client</TableHead>
-                  <TableHead className="responsive-caption">Article</TableHead>
-                  <TableHead className="responsive-caption">Quantité</TableHead>
-                  <TableHead className="responsive-caption hidden lg:table-cell">Paiement</TableHead>
-                  <TableHead className="responsive-caption hidden sm:table-cell">Gencode</TableHead>
-                  <TableHead className="responsive-caption">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {sales.map((sale) => (
-                  <TableRow key={sale.id}>
-                    <TableCell>{formatDateTime(sale.timestamp!)}</TableCell>
-                    <TableCell>{sale.vendeur}</TableCell>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium">{sale.nom} {sale.prenom}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {formatDate(sale.dateNaissance)}
-                        </p>
+          <div>
+            <label className="block text-sm font-medium mb-2">Date de fin</label>
+            <Input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="modern-input"
+            />
+          </div>
+          <div className="flex items-end">
+            <button
+              onClick={clearFilters}
+              className="modern-button modern-button-secondary"
+            >
+              <X className="h-4 w-4" />
+              Effacer
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Actions d'export */}
+      <div className="elegant-card">
+        <div className="p-4">
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 text-gray-600">
+                <History className="h-5 w-5" />
+                <span className="font-medium">
+                  {filteredSales.length} vente{filteredSales.length > 1 ? 's' : ''}
+                </span>
+              </div>
+              {searchQuery && (
+                <div className="text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                  Recherche active
+                </div>
+              )}
+            </div>
+            <button
+              onClick={exportToPDF}
+              disabled={filteredSales.length === 0}
+              className="modern-button modern-button-primary"
+            >
+              <Download className="h-4 w-4" />
+              Exporter en PDF
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Table des ventes */}
+      <div className="elegant-card">
+        <div className="overflow-x-auto">
+          <table className="modern-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Vendeur</th>
+                <th>Client</th>
+                <th>Article</th>
+                <th>Cat.</th>
+                <th>Qté</th>
+                <th>Paiement</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredSales.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="text-center py-8 text-gray-500">
+                    {searchQuery ? 'Aucun résultat pour cette recherche' : 'Aucune vente enregistrée'}
+                  </td>
+                </tr>
+              ) : (
+                filteredSales.map((sale) => (
+                  <tr key={sale.id}>
+                    <td className="font-mono text-sm">
+                      {new Date(sale.timestamp).toLocaleDateString('fr-FR')}
+                    </td>
+                    <td className="font-medium">{sale.vendeur}</td>
+                    <td>
+                      <div className="flex items-center gap-2">
+                        <Users className="h-4 w-4 text-gray-400" />
+                        <span>{sale.nom} {sale.prenom}</span>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium">{sale.typeArticle}</p>
-                        <span className={`inline-flex px-2 py-1 text-xs rounded-full ${
-                          sale.categorie === 'F3' 
-                            ? 'bg-red-100 text-red-800' 
-                            : 'bg-green-100 text-green-800'
-                        }`}>
-                          {sale.categorie}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>{sale.quantite}</TableCell>
-                    <TableCell className="hidden lg:table-cell">
-                      <span className="inline-flex px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
-                        {sale.modePaiement || 'Espèce'}
+                    </td>
+                    <td className="text-sm">{sale.typeArticle}</td>
+                    <td>
+                      <span className={`modern-badge ${
+                        sale.categorie === 'F3' ? 'badge-destructive' : 'badge-secondary'
+                      }`}>
+                        {sale.categorie}
                       </span>
-                    </TableCell>
-                    <TableCell className="hidden sm:table-cell">{sale.gencode}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
+                    </td>
+                    <td className="text-center">{sale.quantite}</td>
+                    <td className="text-sm">{sale.modePaiement}</td>
+                    <td>
+                      <div className="flex items-center gap-2">
                         <Dialog>
                           <DialogTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setSelectedSale(sale)}
-                            >
+                            <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
                               <Eye className="h-4 w-4" />
-                            </Button>
+                            </button>
                           </DialogTrigger>
                           <DialogContent className="max-w-2xl">
                             <DialogHeader>
                               <DialogTitle>Détails de la vente</DialogTitle>
                             </DialogHeader>
-                            {selectedSale && (
-                              <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div className="space-y-4">
+                              <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                  <h4 className="font-medium mb-2">Informations générales</h4>
-                                  <p><strong>Date/Heure :</strong> {formatDateTime(selectedSale.timestamp!)}</p>
-                                  <p><strong>Vendeur :</strong> {selectedSale.vendeur}</p>
-                                  <p><strong>Date de vente :</strong> {formatDate(selectedSale.dateVente)}</p>
+                                  <label className="text-sm font-medium text-gray-600">Date de vente</label>
+                                  <p className="font-mono">{new Date(sale.timestamp).toLocaleDateString('fr-FR')}</p>
                                 </div>
                                 <div>
-                                  <h4 className="font-medium mb-2">Produit</h4>
-                                  <p><strong>Type :</strong> {selectedSale.typeArticle}</p>
-                                  <p><strong>Catégorie :</strong> {selectedSale.categorie}</p>
-                                  <p><strong>Quantité :</strong> {selectedSale.quantite}</p>
-                                  <p><strong>Gencode :</strong> {selectedSale.gencode}</p>
+                                  <label className="text-sm font-medium text-gray-600">Vendeur</label>
+                                  <p>{sale.vendeur}</p>
                                 </div>
                                 <div>
-                                  <h4 className="font-medium mb-2">Client</h4>
-                                  <p><strong>Nom :</strong> {selectedSale.nom}</p>
-                                  <p><strong>Prénom :</strong> {selectedSale.prenom}</p>
-                                  <p><strong>Date de naissance :</strong> {formatDate(selectedSale.dateNaissance)}</p>
-                                  {selectedSale.lieuNaissance && (
-                                    <p><strong>Lieu de naissance :</strong> {selectedSale.lieuNaissance}</p>
-                                  )}
-                                  <p><strong>Mode de paiement :</strong> {selectedSale.modePaiement || 'Espèce'}</p>
+                                  <label className="text-sm font-medium text-gray-600">Client</label>
+                                  <p>{sale.nom} {sale.prenom}</p>
                                 </div>
                                 <div>
-                                  <h4 className="font-medium mb-2">Pièce d'identité</h4>
-                                  <p><strong>Type :</strong> {selectedSale.typeIdentite}</p>
-                                  <p><strong>Numéro :</strong> {selectedSale.numeroIdentite}</p>
-                                  <p><strong>Autorité :</strong> {selectedSale.autoriteDelivrance}</p>
-                                  <p><strong>Date délivrance :</strong> {formatDate(selectedSale.dateDelivrance)}</p>
+                                  <label className="text-sm font-medium text-gray-600">Date de naissance</label>
+                                  <p>{new Date(sale.dateNaissance).toLocaleDateString('fr-FR')}</p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium text-gray-600">Lieu de naissance</label>
+                                  <p>{sale.lieuNaissance || 'Non renseigné'}</p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium text-gray-600">Type d'article</label>
+                                  <p>{sale.typeArticle}</p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium text-gray-600">Catégorie</label>
+                                  <p>{sale.categorie}</p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium text-gray-600">Quantité</label>
+                                  <p>{sale.quantite}</p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium text-gray-600">Gencode</label>
+                                  <p className="font-mono">{sale.gencode}</p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium text-gray-600">Mode de paiement</label>
+                                  <p>{sale.modePaiement}</p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium text-gray-600">Type d'identité</label>
+                                  <p>{sale.typeIdentite}</p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium text-gray-600">Numéro d'identité</label>
+                                  <p className="font-mono">{sale.numeroIdentite}</p>
+                                </div>
+                                {sale.autoriteDelivrance && (
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-600">Autorité de délivrance</label>
+                                    <p>{sale.autoriteDelivrance}</p>
+                                  </div>
+                                )}
+                                <div>
+                                  <label className="text-sm font-medium text-gray-600">Date de délivrance</label>
+                                  <p>{new Date(sale.dateDelivrance).toLocaleDateString('fr-FR')}</p>
                                 </div>
                               </div>
-                            )}
+                            </div>
                           </DialogContent>
                         </Dialog>
+
                         {canDelete && (
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                disabled={deleteSaleMutation.isPending}
-                              >
-                                <Trash2 className="h-4 w-4 text-red-600" />
-                              </Button>
+                              <button className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                                <Trash2 className="h-4 w-4" />
+                              </button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+                                <AlertDialogTitle>Supprimer la vente</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Êtes-vous sûr de vouloir supprimer cette vente ? Cette action est irréversible.
-                                  <br /><br />
-                                  <strong>Client :</strong> {sale.nom} {sale.prenom}<br />
-                                  <strong>Article :</strong> {sale.typeArticle}<br />
-                                  <strong>Date :</strong> {formatDateTime(sale.timestamp!)}
+                                  Êtes-vous sûr de vouloir supprimer cette vente ?
+                                  <div className="mt-2 p-3 bg-gray-50 rounded-lg">
+                                    <p><strong>Client :</strong> {sale.nom} {sale.prenom}</p>
+                                    <p><strong>Article :</strong> {sale.typeArticle}</p>
+                                    <p><strong>Date :</strong> {new Date(sale.timestamp).toLocaleDateString('fr-FR')}</p>
+                                  </div>
+                                  Cette action est irréversible.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
@@ -445,14 +432,14 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
                           </AlertDialog>
                         )}
                       </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   );
 }
