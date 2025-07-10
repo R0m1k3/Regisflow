@@ -23,9 +23,12 @@ services:
       retries: 5
       start_period: 30s
 
-  # Application RegisFlow - Image construite localement
+  # Application RegisFlow - Construction depuis le code source
   regisflow:
-    image: regisflow:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
     container_name: regisflow-app
     depends_on:
       regisflow-db:
