@@ -109,13 +109,14 @@
 }
 
 .modern-input {
-  border: 2px solid hsl(var(--border));
+  border: 2px solid hsl(220, 13%, 75%);
   background: hsl(var(--background));
   color: hsl(var(--foreground));
   padding: 10px 14px;
   font-size: 14px;
   transition: all 0.2s ease;
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  border-radius: 0;
 }
 
 .modern-input:focus {
@@ -161,8 +162,8 @@
 
 /* Section-specific styles */
 .modern-section-vendor {
-  border-left: 4px solid hsl(var(--primary));
-  background: hsl(var(--muted) / 0.3);
+  border-left: 4px solid hsl(262, 83%, 58%);
+  background: hsl(262, 83%, 98%);
 }
 
 .modern-section-product {
@@ -181,11 +182,12 @@
 }
 
 .modern-select-trigger {
-  border: 2px solid hsl(var(--border));
+  border: 2px solid hsl(220, 13%, 75%);
   background: hsl(var(--background));
   padding: 10px 14px;
   transition: all 0.2s ease;
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  border-radius: 0;
 }
 
 .modern-select-trigger:hover {
@@ -195,6 +197,15 @@
 .modern-select-trigger:focus {
   border-color: hsl(var(--primary));
   box-shadow: 0 0 0 2px hsl(var(--primary) / 0.2);
+}
+
+/* Modern filter card styles */
+.modern-filter-card {
+  border: 2px solid hsl(220, 13%, 85%);
+  background: hsl(220, 13%, 96%);
+  padding: 16px;
+  border-radius: 0;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
 }
 
 /* Enhanced keyframes for mobile animations */

@@ -264,10 +264,10 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
       </CardHeader>
       <CardContent>
         {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end modern-section">
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end modern-filter-card">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1 w-full">
             <div>
-              <label className="font-medium">Date de début</label>
+              <label className="font-medium text-sm block mb-2">Date de début</label>
               <Input
                 type="date"
                 value={startDate}
@@ -276,7 +276,7 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
               />
             </div>
             <div>
-              <label className="font-medium">Date de fin</label>
+              <label className="font-medium text-sm block mb-2">Date de fin</label>
               <Input
                 type="date"
                 value={endDate}

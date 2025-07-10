@@ -168,7 +168,7 @@ export default function NewSaleForm() {
             {/* Seller Information */}
             <div className="modern-section modern-section-vendor">
               <div className="modern-section-header">
-                <div className="modern-icon-container">
+                <div className="w-10 h-10 bg-purple-500 text-white flex items-center justify-center border-2 border-purple-500 shadow-md">
                   <User className="h-5 w-5" />
                 </div>
                 <span className="truncate">Informations Vendeur</span>
