@@ -25,9 +25,7 @@ services:
 
   # Application RegisFlow
   regisflow:
-    build: 
-      context: .
-      target: production
+    image: regisflow:latest
     container_name: regisflow-app
     depends_on:
       regisflow-db:
