@@ -246,11 +246,11 @@ body {
 /* Module de recherche */
 .search-container {
   background: white;
-  border: 1px solid hsl(var(--border));
+  border: 2px solid hsl(var(--primary) / 0.3);
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .search-header {
@@ -283,10 +283,11 @@ body {
 /* Filtres élégants */
 .filters-container {
   background: hsl(var(--muted) / 0.5);
-  border: 1px solid hsl(var(--border));
+  border: 2px solid hsl(var(--border));
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .filters-grid {
@@ -421,6 +422,19 @@ body {
   animation: slideIn 0.3s ease-out;
 }
 
+/* Sections avec cadres visibles */
+.section-vendor,
+.section-product,
+.section-client,
+.section-identity {
+  border: 2px solid hsl(var(--border));
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .section-vendor,
@@ -428,6 +442,7 @@ body {
   .section-client,
   .section-identity {
     padding: 16px;
+    margin-bottom: 16px;
   }
   
   .filters-grid {

@@ -157,6 +157,70 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
     }
   };
 
+  const exportToCSV = () => {
+    if (filteredSales.length === 0) {
+      toast({
+        title: "Aucune donnée",
+        description: "Aucune vente à exporter",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const headers = [
+        'Date', 'Vendeur', 'Nom', 'Prénom', 'Date de naissance', 'Lieu de naissance',
+        'Type article', 'Catégorie', 'Quantité', 'Gencode', 'Mode de paiement',
+        'Type identité', 'Numéro identité', 'Autorité délivrance', 'Date délivrance'
+      ];
+
+      const csvData = filteredSales.map(sale => [
+        new Date(sale.timestamp).toLocaleDateString('fr-FR'),
+        sale.vendeur,
+        sale.nom,
+        sale.prenom,
+        new Date(sale.dateNaissance).toLocaleDateString('fr-FR'),
+        sale.lieuNaissance || '',
+        sale.typeArticle,
+        sale.categorie,
+        sale.quantite,
+        sale.gencode,
+        sale.modePaiement,
+        sale.typeIdentite,
+        sale.numeroIdentite,
+        sale.autoriteDelivrance || '',
+        new Date(sale.dateDelivrance).toLocaleDateString('fr-FR')
+      ]);
+
+      const csvContent = [headers, ...csvData]
+        .map(row => row.map(field => `"${field}"`).join(';'))
+        .join('\n');
+
+      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `ventes-feux-artifice-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast({
+        title: "Export réussi",
+        description: "Le fichier CSV a été téléchargé",
+        variant: "success",
+      });
+    } catch (error) {
+      console.error('Erreur lors de l\'export CSV:', error);
+      toast({
+        title: "Erreur d'export",
+        description: "Impossible de générer le fichier CSV",
+        variant: "destructive",
+      });
+    }
+  };
+
   const clearFilters = () => {
     setStartDate('');
     setEndDate('');
@@ -264,14 +328,24 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
                 </div>
               )}
             </div>
-            <button
-              onClick={exportToPDF}
-              disabled={filteredSales.length === 0}
-              className="modern-button modern-button-primary"
-            >
-              <Download className="h-4 w-4" />
-              Exporter en PDF
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={exportToPDF}
+                disabled={filteredSales.length === 0}
+                className="modern-button modern-button-primary"
+              >
+                <FileText className="h-4 w-4" />
+                Export PDF
+              </button>
+              <button
+                onClick={exportToCSV}
+                disabled={filteredSales.length === 0}
+                className="modern-button modern-button-secondary"
+              >
+                <Download className="h-4 w-4" />
+                Export CSV
+              </button>
+            </div>
           </div>
         </div>
       </div>
