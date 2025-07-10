@@ -4,7 +4,7 @@ export function exportToCSV(sales: Sale[]): void {
   if (sales.length === 0) return;
 
   const headers = [
-    'Date de vente',
+    'Date et heure de vente',
     'Vendeur',
     'Type d\'article',
     'Catégorie',
@@ -14,16 +14,15 @@ export function exportToCSV(sales: Sale[]): void {
     'Prénom client',
     'Date de naissance',
     'Lieu de naissance',
-    'Type et n° identité',
+    'Mode de paiement',
+    'Type d\'identité',
+    'Numéro d\'identité',
     'Autorité de délivrance',
-    'Date de délivrance',
-    'Photo recto (Oui/Non)',
-    'Photo verso (Oui/Non)',
-    'Horodatage'
+    'Date de délivrance'
   ];
 
   const rows = sales.map(sale => [
-    sale.dateVente,
+    new Date(sale.timestamp).toLocaleString('fr-FR'),
     sale.vendeur,
     sale.typeArticle,
     sale.categorie,
@@ -33,12 +32,11 @@ export function exportToCSV(sales: Sale[]): void {
     sale.prenom,
     sale.dateNaissance || '',
     sale.lieuNaissance || '',
+    sale.modePaiement || '',
     sale.typeIdentite || '',
+    sale.numeroIdentite || '',
     sale.autoriteDelivrance || '',
-    sale.dateDelivrance || '',
-    sale.photoRecto ? 'Oui' : 'Non',
-    sale.photoVerso ? 'Oui' : 'Non',
-    sale.timestamp
+    sale.dateDelivrance || ''
   ]);
 
   const csvContent = [headers, ...rows]

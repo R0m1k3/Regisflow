@@ -356,7 +356,7 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
           <table className="modern-table">
             <thead>
               <tr>
-                <th>Date</th>
+                <th>Date et Heure</th>
                 <th>Vendeur</th>
                 <th>Client</th>
                 <th>Article</th>
@@ -377,7 +377,8 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
                 filteredSales.map((sale) => (
                   <tr key={sale.id}>
                     <td className="font-mono text-sm">
-                      {new Date(sale.timestamp).toLocaleDateString('fr-FR')}
+                      <div>{new Date(sale.timestamp).toLocaleDateString('fr-FR')}</div>
+                      <div className="text-xs text-gray-500">{new Date(sale.timestamp).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</div>
                     </td>
                     <td className="font-medium">{sale.vendeur}</td>
                     <td>
@@ -411,8 +412,8 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
                             <div className="space-y-4">
                               <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                  <label className="text-sm font-medium text-gray-600">Date de vente</label>
-                                  <p className="font-mono">{new Date(sale.timestamp).toLocaleDateString('fr-FR')}</p>
+                                  <label className="text-sm font-medium text-gray-600">Date et heure de vente</label>
+                                  <p className="font-mono">{new Date(sale.timestamp).toLocaleString('fr-FR')}</p>
                                 </div>
                                 <div>
                                   <label className="text-sm font-medium text-gray-600">Vendeur</label>
