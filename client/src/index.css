@@ -409,7 +409,7 @@ body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-/* Fonds de couleur unis harmonisés avec le bouton vert */
+/* Fonds de couleur unis harmonisés avec des teintes distinctes */
 .section-vendor {
   background: #f0f9ff !important; /* Fond bleu très clair */
 }
@@ -419,11 +419,11 @@ body {
 }
 
 .section-client {
-  background: #ecfdf5 !important; /* Fond vert clair */
+  background: #fef3c7 !important; /* Fond jaune clair */
 }
 
 .section-identity {
-  background: #fefce8 !important; /* Fond jaune très clair */
+  background: #fce7f3 !important; /* Fond rose très clair */
 }
 
 /* Responsive design */
