@@ -3,11 +3,15 @@ import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
+import { useSessionTimeout } from "@/hooks/useSessionTimeout";
 import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
 
 function AppContent() {
   const { isAuthenticated, isLoading } = useAuth();
+  
+  // Initialize session timeout management
+  useSessionTimeout();
 
   if (isLoading) {
     return (

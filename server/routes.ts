@@ -61,7 +61,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     saveUninitialized: false,
     cookie: {
       secure: false, // Set to true in production with HTTPS
-      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+      maxAge: 15 * 60 * 1000 // 15 minutes
     }
   }));
 
@@ -94,6 +94,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.status(500).json({ error: "Login failed" });
     }
+  });
+
+  app.get('/api/auth/logout', (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        console.error('Logout error:', err);
+      }
+      res.redirect('/');
+    });
   });
 
   app.post('/api/auth/logout', (req, res) => {
