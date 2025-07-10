@@ -166,7 +166,7 @@ export default function NewSaleForm() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Seller Information */}
-            <div className="modern-section border-l-4 border-l-primary">
+            <div className="modern-section modern-section-vendor">
               <div className="modern-section-header">
                 <div className="modern-icon-container">
                   <User className="h-5 w-5" />
@@ -204,9 +204,9 @@ export default function NewSaleForm() {
             </div>
 
             {/* Product Information */}
-            <div className="modern-section border-l-4 border-l-blue-500 bg-blue-50">
+            <div className="modern-section modern-section-product">
               <div className="modern-section-header">
-                <div className="w-10 h-10 bg-blue-500 text-white flex items-center justify-center">
+                <div className="w-10 h-10 bg-blue-500 text-white flex items-center justify-center border-2 border-blue-500 shadow-md">
                   <Package className="h-5 w-5" />
                 </div>
                 <span className="truncate">Informations Produit</span>
@@ -223,7 +223,7 @@ export default function NewSaleForm() {
                         form.setValue('categorie', ''); // Reset category when article changes
                       }}>
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="modern-select-trigger">
                             <SelectValue placeholder="Sélectionner un type" />
                           </SelectTrigger>
                         </FormControl>
@@ -247,7 +247,7 @@ export default function NewSaleForm() {
                       <FormLabel>Catégorie réglementaire <span className="text-destructive">*</span></FormLabel>
                       <Select value={field.value} onValueChange={field.onChange} disabled={!typeArticle}>
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="modern-select-trigger">
                             <SelectValue placeholder="Sélectionner une catégorie" />
                           </SelectTrigger>
                         </FormControl>
@@ -270,7 +270,7 @@ export default function NewSaleForm() {
                     <FormItem>
                       <FormLabel>Quantité <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
-                        <Input type="number" min="1" placeholder="Entrez la quantité" {...field} />
+                        <Input type="number" min="1" placeholder="Entrez la quantité" className="modern-input" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -283,7 +283,7 @@ export default function NewSaleForm() {
                     <FormItem>
                       <FormLabel>Gencode (EAN13) <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
-                        <Input placeholder="Code EAN13 à 13 chiffres" {...field} />
+                        <Input placeholder="Code EAN13 à 13 chiffres" className="modern-input" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -306,9 +306,9 @@ export default function NewSaleForm() {
             </div>
 
             {/* Customer Information */}
-            <div className="modern-section border-l-4 border-l-emerald-500 bg-emerald-50">
+            <div className="modern-section modern-section-customer">
               <div className="modern-section-header">
-                <div className="w-10 h-10 bg-emerald-500 text-white flex items-center justify-center">
+                <div className="w-10 h-10 bg-emerald-500 text-white flex items-center justify-center border-2 border-emerald-500 shadow-md">
                   <Users className="h-5 w-5" />
                 </div>
                 <span className="truncate">Informations Client</span>
@@ -321,7 +321,7 @@ export default function NewSaleForm() {
                     <FormItem>
                       <FormLabel>Nom de famille <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
-                        <Input placeholder="Nom de famille" {...field} />
+                        <Input placeholder="Nom de famille" className="modern-input" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -334,7 +334,7 @@ export default function NewSaleForm() {
                     <FormItem>
                       <FormLabel>Prénom <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
-                        <Input placeholder="Prénom" {...field} />
+                        <Input placeholder="Prénom" className="modern-input" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -347,7 +347,7 @@ export default function NewSaleForm() {
                     <FormItem>
                       <FormLabel>Date de naissance <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
-                        <Input type="date" {...field} />
+                        <Input type="date" className="modern-input" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -360,7 +360,7 @@ export default function NewSaleForm() {
                     <FormItem>
                       <FormLabel>Lieu de naissance <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
-                        <Input placeholder="Ville de naissance" {...field} />
+                        <Input placeholder="Ville de naissance" className="modern-input" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -374,7 +374,7 @@ export default function NewSaleForm() {
                       <FormLabel>Mode de paiement <span className="text-destructive">*</span></FormLabel>
                       <Select value={field.value} onValueChange={field.onChange}>
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="modern-select-trigger">
                             <SelectValue placeholder="Sélectionner le mode de paiement" />
                           </SelectTrigger>
                         </FormControl>
@@ -394,9 +394,9 @@ export default function NewSaleForm() {
             </div>
 
             {/* Identity Information */}
-            <div className="modern-section border-l-4 border-l-amber-500 bg-amber-50">
+            <div className="modern-section modern-section-identity">
               <div className="modern-section-header">
-                <div className="w-10 h-10 bg-amber-500 text-white flex items-center justify-center">
+                <div className="w-10 h-10 bg-amber-500 text-white flex items-center justify-center border-2 border-amber-500 shadow-md">
                   <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
                   </svg>
@@ -412,7 +412,7 @@ export default function NewSaleForm() {
                       <FormLabel>Type de pièce d'identité <span className="text-destructive">*</span></FormLabel>
                       <Select value={field.value} onValueChange={field.onChange}>
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="modern-select-trigger">
                             <SelectValue placeholder="Sélectionner le type" />
                           </SelectTrigger>
                         </FormControl>
@@ -435,7 +435,7 @@ export default function NewSaleForm() {
                     <FormItem>
                       <FormLabel>Numéro de pièce d'identité <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
-                        <Input placeholder="Numéro de la pièce d'identité" {...field} />
+                        <Input placeholder="Numéro de la pièce d'identité" className="modern-input" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -448,7 +448,7 @@ export default function NewSaleForm() {
                     <FormItem>
                       <FormLabel>Autorité de délivrance <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
-                        <Input placeholder="Préfecture, Mairie, etc." {...field} />
+                        <Input placeholder="Préfecture, Mairie, etc." className="modern-input" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -461,7 +461,7 @@ export default function NewSaleForm() {
                     <FormItem>
                       <FormLabel>Date de délivrance <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
-                        <Input type="date" {...field} />
+                        <Input type="date" className="modern-input" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
