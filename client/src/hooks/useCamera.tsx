@@ -99,7 +99,7 @@ export function useCamera() {
   }, []);
 
   const capturePhoto = useCallback((): Promise<string> => {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       if (!videoRef.current || !canvasRef.current) {
         reject(new Error('Video or canvas not available'));
         return;
@@ -117,19 +117,44 @@ export function useCamera() {
         return;
       }
 
-      // Vérifier que la vidéo a des dimensions valides
-      if (video.videoWidth === 0 || video.videoHeight === 0) {
-        console.error('Video dimensions:', video.videoWidth, 'x', video.videoHeight);
-        setIsCapturing(false);
-        reject(new Error('Video not ready - no dimensions'));
-        return;
+      console.log('Starting photo capture, current dimensions:', video.videoWidth, 'x', video.videoHeight);
+
+      // Attendre que la vidéo ait des dimensions valides
+      let attempts = 0;
+      const maxAttempts = 50; // 5 secondes max
+      
+      const waitForDimensions = () => {
+        return new Promise<void>((resolveWait) => {
+          const checkDimensions = () => {
+            attempts++;
+            console.log(`Checking video dimensions, attempt ${attempts}: ${video.videoWidth}x${video.videoHeight}`);
+            
+            if (video.videoWidth > 0 && video.videoHeight > 0) {
+              console.log('Video dimensions are valid:', video.videoWidth, 'x', video.videoHeight);
+              resolveWait();
+            } else if (attempts >= maxAttempts) {
+              setIsCapturing(false);
+              reject(new Error('Timeout: video dimensions not available after 5 seconds'));
+            } else {
+              setTimeout(checkDimensions, 100);
+            }
+          };
+          checkDimensions();
+        });
+      };
+
+      try {
+        await waitForDimensions();
+      } catch (error) {
+        return; // Error already handled in waitForDimensions
       }
       
-      console.log('Video dimensions:', video.videoWidth, 'x', video.videoHeight);
+      console.log('Proceeding with capture, video dimensions:', video.videoWidth, 'x', video.videoHeight);
 
-      // Définir les dimensions du canvas
+      // Définir les dimensions du canvas en s'assurant qu'elles sont valides
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
+      console.log('Canvas dimensions set to:', canvas.width, 'x', canvas.height);
       
       // Dessiner l'image de la vidéo sur le canvas
       try {
