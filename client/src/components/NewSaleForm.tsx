@@ -272,7 +272,7 @@ export default function NewSaleForm() {
               <Alert className="mt-4 border-blue-200 bg-blue-50">
                 <Info className="h-4 w-4 text-blue-600" />
                 <AlertDescription className="text-blue-800">
-                  <strong>Information réglementaire :</strong> F2/F3 = artifices puissants réservés aux majeurs, vente encadrée
+                  <strong>Information réglementaire :</strong> F1 = vente interdite aux mineurs de moins de 12 ans • F2/F3 = artifices puissants réservés aux majeurs, vente encadrée
                 </AlertDescription>
               </Alert>
             </div>
@@ -436,23 +436,7 @@ export default function NewSaleForm() {
               </div>
             </div>
 
-            {/* Informations réglementaires */}
-            <div className="section-info">
-              <div className="section-header">
-                <Info className="h-5 w-5" />
-                <span>Informations Réglementaires</span>
-              </div>
-              <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-md border border-blue-200 dark:border-blue-800">
-                <div className="space-y-2 text-sm">
-                  <p className="font-medium text-blue-900 dark:text-blue-100">Restrictions d'âge selon la catégorie :</p>
-                  <div className="space-y-1 text-blue-800 dark:text-blue-200">
-                    <p>• <strong>F1</strong> = vente interdite aux mineurs de moins de 12 ans</p>
-                    <p>• <strong>F2</strong> = vente interdite aux mineurs de moins de 16 ans</p>
-                    <p>• <strong>F3</strong> = vente interdite aux mineurs de moins de 18 ans</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+
 
             {/* Boutons d'action */}
             <div className="flex flex-col sm:flex-row gap-4 pt-6">
