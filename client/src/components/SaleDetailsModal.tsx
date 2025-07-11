@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { X, Download } from 'lucide-react';
-import { Sale } from '@/types/sale';
+import { Sale } from '@shared/schema';
 import { formatDate, formatDateTime } from '@/lib/export';
 
 interface SaleDetailsModalProps {
@@ -37,7 +37,7 @@ export default function SaleDetailsModal({ isOpen, sale, onClose }: SaleDetailsM
             <h4 className="responsive-subtitle text-gray-900 mb-3">Informations Vendeur</h4>
             <div className="mobile-form-row responsive-body">
               <div><span className="font-medium">Vendeur:</span> {sale.vendeur}</div>
-              <div><span className="font-medium">Date de vente:</span> {formatDate(sale.dateVente)}</div>
+              <div><span className="font-medium">Date de vente:</span> {formatDateTime(sale.timestamp)}</div>
             </div>
           </div>
           
@@ -87,24 +87,24 @@ export default function SaleDetailsModal({ isOpen, sale, onClose }: SaleDetailsM
           </div>
           
           {/* Photos */}
-          {(sale.photoRecto || sale.photoVerso || sale.photoTicket) && (
+          {(sale.photo_recto || sale.photo_verso || sale.photo_ticket) && (
             <div className="mobile-form-section border-l-4 border-purple-500 pl-4">
               <h4 className="responsive-subtitle text-gray-900 mb-3">Photos</h4>
               
               {/* Photos de la pièce d'identité */}
-              {(sale.photoRecto || sale.photoVerso) && (
+              {(sale.photo_recto || sale.photo_verso) && (
                 <div className="mb-4">
                   <h5 className="text-sm font-semibold text-gray-700 mb-3">Pièce d'identité</h5>
                   <div className="mobile-form-row">
                     <div>
                       <span className="text-sm font-medium">Photo Recto:</span>
-                      {sale.photoRecto ? (
+                      {sale.photo_recto ? (
                         <div className="mt-2 space-y-2">
-                          <img src={sale.photoRecto} alt="Photo recto" className="w-32 h-auto rounded border" />
+                          <img src={sale.photo_recto} alt="Photo recto" className="w-32 h-auto rounded border" />
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => downloadPhoto(sale.photoRecto!, `vente-${sale.id}-recto.jpg`)}
+                            onClick={() => downloadPhoto(sale.photo_recto!, `vente-${sale.id}-recto.jpg`)}
                             className="w-full"
                           >
                             <Download className="h-4 w-4 mr-2" />
@@ -117,13 +117,13 @@ export default function SaleDetailsModal({ isOpen, sale, onClose }: SaleDetailsM
                     </div>
                     <div>
                       <span className="text-sm font-medium">Photo Verso:</span>
-                      {sale.photoVerso ? (
+                      {sale.photo_verso ? (
                         <div className="mt-2 space-y-2">
-                          <img src={sale.photoVerso} alt="Photo verso" className="w-32 h-auto rounded border" />
+                          <img src={sale.photo_verso} alt="Photo verso" className="w-32 h-auto rounded border" />
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => downloadPhoto(sale.photoVerso!, `vente-${sale.id}-verso.jpg`)}
+                            onClick={() => downloadPhoto(sale.photo_verso!, `vente-${sale.id}-verso.jpg`)}
                             className="w-full"
                           >
                             <Download className="h-4 w-4 mr-2" />
@@ -139,15 +139,15 @@ export default function SaleDetailsModal({ isOpen, sale, onClose }: SaleDetailsM
               )}
 
               {/* Photo du ticket de caisse */}
-              {sale.photoTicket && (
+              {sale.photo_ticket && (
                 <div>
                   <h5 className="text-sm font-semibold text-gray-700 mb-3">Ticket de caisse</h5>
                   <div className="max-w-xs">
-                    <img src={sale.photoTicket} alt="Photo ticket" className="w-full h-auto rounded border mb-2" />
+                    <img src={sale.photo_ticket} alt="Photo ticket" className="w-full h-auto rounded border mb-2" />
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => downloadPhoto(sale.photoTicket!, `vente-${sale.id}-ticket.jpg`)}
+                      onClick={() => downloadPhoto(sale.photo_ticket!, `vente-${sale.id}-ticket.jpg`)}
                       className="w-full"
                     >
                       <Download className="h-4 w-4 mr-2" />

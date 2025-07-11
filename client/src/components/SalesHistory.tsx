@@ -11,6 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { apiRequest } from '@/lib/queryClient';
 import type { Sale } from '@shared/schema';
 import { History, Download, Trash2, Eye, Filter, FileText, Search, X, Calendar, Users } from 'lucide-react';
+import SaleDetailsModal from '@/components/SaleDetailsModal';
 
 interface SalesHistoryProps {
   canDelete?: boolean;
@@ -399,80 +400,12 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
                     <td className="text-sm">{sale.modePaiement}</td>
                     <td>
                       <div className="flex items-center gap-2">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                              <Eye className="h-4 w-4" />
-                            </button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-2xl">
-                            <DialogHeader>
-                              <DialogTitle>Détails de la vente</DialogTitle>
-                            </DialogHeader>
-                            <div className="space-y-4">
-                              <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                  <label className="text-sm font-medium text-gray-600">Date et heure de vente</label>
-                                  <p className="font-mono">{new Date(sale.timestamp).toLocaleString('fr-FR')}</p>
-                                </div>
-                                <div>
-                                  <label className="text-sm font-medium text-gray-600">Vendeur</label>
-                                  <p>{sale.vendeur}</p>
-                                </div>
-                                <div>
-                                  <label className="text-sm font-medium text-gray-600">Client</label>
-                                  <p>{sale.nom} {sale.prenom}</p>
-                                </div>
-                                <div>
-                                  <label className="text-sm font-medium text-gray-600">Date de naissance</label>
-                                  <p>{new Date(sale.dateNaissance).toLocaleDateString('fr-FR')}</p>
-                                </div>
-                                <div>
-                                  <label className="text-sm font-medium text-gray-600">Lieu de naissance</label>
-                                  <p>{sale.lieuNaissance || 'Non renseigné'}</p>
-                                </div>
-                                <div>
-                                  <label className="text-sm font-medium text-gray-600">Type d'article</label>
-                                  <p>{sale.typeArticle}</p>
-                                </div>
-                                <div>
-                                  <label className="text-sm font-medium text-gray-600">Catégorie</label>
-                                  <p>{sale.categorie}</p>
-                                </div>
-                                <div>
-                                  <label className="text-sm font-medium text-gray-600">Quantité</label>
-                                  <p>{sale.quantite}</p>
-                                </div>
-                                <div>
-                                  <label className="text-sm font-medium text-gray-600">Gencode</label>
-                                  <p className="font-mono">{sale.gencode}</p>
-                                </div>
-                                <div>
-                                  <label className="text-sm font-medium text-gray-600">Mode de paiement</label>
-                                  <p>{sale.modePaiement}</p>
-                                </div>
-                                <div>
-                                  <label className="text-sm font-medium text-gray-600">Type d'identité</label>
-                                  <p>{sale.typeIdentite}</p>
-                                </div>
-                                <div>
-                                  <label className="text-sm font-medium text-gray-600">Numéro d'identité</label>
-                                  <p className="font-mono">{sale.numeroIdentite}</p>
-                                </div>
-                                {sale.autoriteDelivrance && (
-                                  <div>
-                                    <label className="text-sm font-medium text-gray-600">Autorité de délivrance</label>
-                                    <p>{sale.autoriteDelivrance}</p>
-                                  </div>
-                                )}
-                                <div>
-                                  <label className="text-sm font-medium text-gray-600">Date de délivrance</label>
-                                  <p>{new Date(sale.dateDelivrance).toLocaleDateString('fr-FR')}</p>
-                                </div>
-                              </div>
-                            </div>
-                          </DialogContent>
-                        </Dialog>
+                        <button 
+                          onClick={() => setSelectedSale(sale)}
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </button>
 
                         {canDelete && (
                           <AlertDialog>
@@ -515,6 +448,13 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
           </table>
         </div>
       </div>
+      
+      {/* Modal de détails de la vente */}
+      <SaleDetailsModal 
+        isOpen={!!selectedSale}
+        sale={selectedSale}
+        onClose={() => setSelectedSale(null)}
+      />
     </div>
   );
 }
