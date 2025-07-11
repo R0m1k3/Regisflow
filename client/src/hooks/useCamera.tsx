@@ -55,36 +55,75 @@ export function useCamera() {
       setIsOpen(true);
       
       if (videoRef.current) {
-        videoRef.current.srcObject = stream;
+        const video = videoRef.current;
+        video.srcObject = stream;
         console.log('Video stream attached to video element');
+        
+        // Forcer le démarrage de la vidéo
+        video.autoplay = true;
+        video.playsInline = true;
+        video.muted = true;
+        
+        // Forcer le play immédiatement
+        try {
+          await video.play();
+          console.log('Video play() successful');
+        } catch (playError) {
+          console.warn('Video play() failed:', playError);
+        }
         
         // Attendre que la vidéo soit prête
         return new Promise<boolean>((resolve, reject) => {
-          const video = videoRef.current!;
-          
           const handleLoadedMetadata = () => {
-            console.log('Video metadata loaded, dimensions:', video.videoWidth, 'x', video.videoHeight);
+            console.log('Video metadata loaded successfully');
+            console.log('Video dimensions:', video.videoWidth, 'x', video.videoHeight);
+            console.log('Video readyState:', video.readyState);
+            console.log('Video paused:', video.paused);
+            console.log('Video ended:', video.ended);
             video.removeEventListener('loadedmetadata', handleLoadedMetadata);
             video.removeEventListener('error', handleError);
+            video.removeEventListener('canplay', handleCanPlay);
             resolve(true);
           };
           
+          const handleCanPlay = () => {
+            console.log('Video can play event fired');
+            if (video.videoWidth > 0 && video.videoHeight > 0) {
+              handleLoadedMetadata();
+            }
+          };
+          
           const handleError = (error: Event) => {
-            console.error('Video error:', error);
+            console.error('Video error event:', error);
             video.removeEventListener('loadedmetadata', handleLoadedMetadata);
             video.removeEventListener('error', handleError);
+            video.removeEventListener('canplay', handleCanPlay);
             reject(new Error('Erreur lors du chargement de la vidéo'));
           };
           
           video.addEventListener('loadedmetadata', handleLoadedMetadata);
+          video.addEventListener('canplay', handleCanPlay);
           video.addEventListener('error', handleError);
           
-          // Timeout de sécurité
+          // Si les métadonnées sont déjà chargées
+          if (video.readyState >= 1 && video.videoWidth > 0) {
+            console.log('Video metadata already available');
+            handleLoadedMetadata();
+          }
+          
+          // Timeout de sécurité réduit
           setTimeout(() => {
             video.removeEventListener('loadedmetadata', handleLoadedMetadata);
             video.removeEventListener('error', handleError);
-            resolve(true); // Continuer même si metadata pas encore chargé
-          }, 5000);
+            video.removeEventListener('canplay', handleCanPlay);
+            console.log('Video load timeout, current state:', {
+              readyState: video.readyState,
+              videoWidth: video.videoWidth,
+              videoHeight: video.videoHeight,
+              paused: video.paused
+            });
+            resolve(true);
+          }, 3000);
         });
       }
       

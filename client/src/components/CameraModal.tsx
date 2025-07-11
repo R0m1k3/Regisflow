@@ -70,12 +70,17 @@ export default function CameraModal({
               autoPlay
               playsInline
               muted
-              className="w-full max-w-full h-auto camera-preview rounded-lg border"
+              className="w-full max-w-full h-auto camera-preview rounded-lg border bg-black"
               style={{ 
                 aspectRatio: '16/9',
                 objectFit: 'cover',
-                maxHeight: '400px'
+                maxHeight: '400px',
+                minHeight: '200px'
               }}
+              onLoadedMetadata={() => console.log('CameraModal: Video metadata loaded')}
+              onCanPlay={() => console.log('CameraModal: Video can play')}
+              onPlay={() => console.log('CameraModal: Video playing')}
+              onError={(e) => console.error('CameraModal: Video error:', e)}
             />
             <canvas ref={canvasRef} className="hidden" />
             
