@@ -26,7 +26,31 @@ export default function CameraModal({
   useEffect(() => {
     if (isOpen && videoRef.current) {
       // Ensure video starts playing when modal opens
-      videoRef.current.play().catch(console.error);
+      const video = videoRef.current;
+      
+      const handleLoadedMetadata = () => {
+        console.log('Video loaded metadata:', video.videoWidth, 'x', video.videoHeight);
+      };
+      
+      const handleCanPlay = () => {
+        console.log('Video can play');
+      };
+      
+      const handleError = (error: Event) => {
+        console.error('Video error:', error);
+      };
+      
+      video.addEventListener('loadedmetadata', handleLoadedMetadata);
+      video.addEventListener('canplay', handleCanPlay);
+      video.addEventListener('error', handleError);
+      
+      video.play().catch(console.error);
+      
+      return () => {
+        video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+        video.removeEventListener('canplay', handleCanPlay);
+        video.removeEventListener('error', handleError);
+      };
     }
   }, [isOpen, videoRef]);
 
@@ -57,9 +81,12 @@ export default function CameraModal({
             
             {/* Overlay pour aider à cadrer la pièce d'identité */}
             <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute inset-4 border-2 border-white border-dashed rounded-lg opacity-50"></div>
-              <div className="absolute bottom-2 left-2 text-white text-sm bg-black bg-opacity-50 px-2 py-1 rounded">
+              <div className="absolute inset-4 border-2 border-white border-dashed rounded-lg opacity-70"></div>
+              <div className="absolute bottom-2 left-2 text-white text-sm bg-black bg-opacity-70 px-2 py-1 rounded">
                 Cadrez la pièce d'identité dans le rectangle
+              </div>
+              <div className="absolute top-2 right-2 text-white text-xs bg-black bg-opacity-70 px-2 py-1 rounded">
+                {photoType === 'recto' ? 'RECTO' : 'VERSO'}
               </div>
             </div>
           </div>
@@ -72,7 +99,7 @@ export default function CameraModal({
             <Button 
               onClick={onCapture} 
               disabled={isCapturing}
-              className="bg-primary hover:bg-primary/90 flex-1"
+              className="bg-green-600 hover:bg-green-700 text-white flex-1"
             >
               <Camera className="h-4 w-4 mr-2" />
               {isCapturing ? 'Capture...' : 'Prendre la photo'}

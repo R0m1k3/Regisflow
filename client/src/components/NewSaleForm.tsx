@@ -205,7 +205,10 @@ export default function NewSaleForm() {
     if (!currentPhotoType) return;
     
     try {
+      console.log('Attempting to capture photo...');
       const photoData = await capturePhoto();
+      console.log('Photo captured successfully, data length:', photoData.length);
+      
       form.setValue(currentPhotoType === 'recto' ? 'photoRecto' : 'photoVerso', photoData);
       
       toast({
@@ -216,6 +219,7 @@ export default function NewSaleForm() {
       
       stopCamera();
     } catch (error) {
+      console.error('Photo capture error:', error);
       toast({
         title: "Erreur de capture",
         description: error instanceof Error ? error.message : "Erreur lors de la capture",

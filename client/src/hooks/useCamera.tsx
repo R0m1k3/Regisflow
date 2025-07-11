@@ -12,6 +12,15 @@ export function useCamera() {
 
   const startCamera = useCallback(async (photoType: PhotoType) => {
     try {
+      // Vérification des permissions avant d'essayer
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(device => device.kind === 'videoinput');
+      console.log('Available video devices:', videoDevices.length);
+      
+      if (videoDevices.length === 0) {
+        throw new Error('Aucune caméra détectée sur cet appareil');
+      }
+
       // Configuration avancée pour tablettes et appareils mobiles
       const constraints = {
         video: {
@@ -28,6 +37,7 @@ export function useCamera() {
       try {
         // Essai avec caméra arrière
         stream = await navigator.mediaDevices.getUserMedia(constraints);
+        console.log('Back camera started successfully');
       } catch (backCameraError) {
         console.warn('Caméra arrière non disponible, essai avec caméra avant:', backCameraError);
         
@@ -44,6 +54,7 @@ export function useCamera() {
         
         try {
           stream = await navigator.mediaDevices.getUserMedia(frontConstraints);
+          console.log('Front camera started successfully');
         } catch (frontCameraError) {
           console.warn('Caméra avant non disponible, essai basique:', frontCameraError);
           
@@ -51,6 +62,7 @@ export function useCamera() {
           stream = await navigator.mediaDevices.getUserMedia({
             video: true
           });
+          console.log('Basic camera started successfully');
         }
       }
       
@@ -60,6 +72,14 @@ export function useCamera() {
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+        
+        // Attendre que la vidéo soit prête
+        await new Promise<void>((resolve) => {
+          videoRef.current!.onloadedmetadata = () => {
+            console.log('Video metadata loaded');
+            resolve();
+          };
+        });
       }
       
       return true;
@@ -83,36 +103,78 @@ export function useCamera() {
       const context = canvas.getContext('2d');
       
       if (!context) {
+        setIsCapturing(false);
         reject(new Error('Canvas context not available'));
         return;
       }
 
+      // Vérifier que la vidéo a des dimensions valides
+      if (video.videoWidth === 0 || video.videoHeight === 0) {
+        console.error('Video dimensions:', video.videoWidth, 'x', video.videoHeight);
+        setIsCapturing(false);
+        reject(new Error('Video not ready - no dimensions'));
+        return;
+      }
+      
+      console.log('Video dimensions:', video.videoWidth, 'x', video.videoHeight);
+
+      // Définir les dimensions du canvas
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       
-      context.drawImage(video, 0, 0);
+      // Dessiner l'image de la vidéo sur le canvas
+      try {
+        // Effacer le canvas avant de dessiner
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        console.log('Image drawn on canvas successfully');
+      } catch (error) {
+        console.error('Failed to draw image on canvas:', error);
+        setIsCapturing(false);
+        reject(new Error('Failed to draw image on canvas'));
+        return;
+      }
       
-      canvas.toBlob(
-        (blob) => {
-          if (!blob) {
-            reject(new Error('Failed to create image blob'));
-            return;
-          }
-          
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            setIsCapturing(false);
-            resolve(e.target?.result as string);
-          };
-          reader.onerror = () => {
-            setIsCapturing(false);
-            reject(new Error('Failed to read image'));
-          };
-          reader.readAsDataURL(blob);
-        },
-        'image/jpeg',
-        0.8
-      );
+      // Méthode alternative plus robuste - utiliser toDataURL directement
+      try {
+        const dataURL = canvas.toDataURL('image/jpeg', 0.8);
+        console.log('Canvas dataURL generated, length:', dataURL.length);
+        
+        if (!dataURL || dataURL === 'data:,') {
+          setIsCapturing(false);
+          reject(new Error('Failed to create image data'));
+          return;
+        }
+        
+        setIsCapturing(false);
+        resolve(dataURL);
+      } catch (error) {
+        console.error('Canvas toDataURL error:', error);
+        
+        // Fallback avec toBlob si toDataURL échoue
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              setIsCapturing(false);
+              reject(new Error('Failed to create image blob'));
+              return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              setIsCapturing(false);
+              resolve(e.target?.result as string);
+            };
+            reader.onerror = () => {
+              setIsCapturing(false);
+              reject(new Error('Failed to read image'));
+            };
+            reader.readAsDataURL(blob);
+          },
+          'image/jpeg',
+          0.8
+        );
+      }
     });
   }, []);
 
