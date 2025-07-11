@@ -152,11 +152,6 @@ export default function SaleDetailsModal({ isOpen, sale, onClose }: SaleDetailsM
             <div className="text-sm space-y-1">
               <div><span className="font-medium">ID:</span> {sale.id}</div>
               <div><span className="font-medium">Timestamp:</span> {formatDateTime(sale.timestamp)}</div>
-              {/* Debug temporaire */}
-              <div className="mt-2 p-2 bg-yellow-100 text-xs">
-                <div><span className="font-medium">Debug Photo Ticket:</span> {sale.photo_ticket ? 'PRÉSENTE' : 'ABSENTE'}</div>
-                <div><span className="font-medium">Longueur:</span> {sale.photo_ticket?.length || 0}</div>
-              </div>
             </div>
           </div>
         </div>

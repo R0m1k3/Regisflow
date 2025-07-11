@@ -85,19 +85,10 @@ export default function NewSaleForm() {
 
   const createSaleMutation = useMutation({
     mutationFn: async (saleData: any) => {
-      // Debug logging client-side
-      console.log('=== CLIENT SALE SUBMISSION ===');
-      console.log('photoTicket present:', !!saleData.photoTicket);
-      console.log('photoTicket length:', saleData.photoTicket?.length);
-      console.log('modePaiement:', saleData.modePaiement);
-      
       const dataToSend = {
         ...saleData,
         ...(user?.role === 'admin' && selectedStoreId && { storeId: selectedStoreId })
       };
-      
-      console.log('Final dataToSend keys:', Object.keys(dataToSend));
-      console.log('Final photoTicket present:', !!dataToSend.photoTicket);
       
       const response = await apiRequest('/api/sales', {
         method: 'POST',
