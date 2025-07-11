@@ -11,59 +11,43 @@ export function useCamera() {
   const streamRef = useRef<MediaStream | null>(null);
 
   const startCamera = useCallback(async (photoType: PhotoType) => {
+    console.log('Starting camera for photoType:', photoType);
+    
+    // Vérifications de base
+    if (!navigator.mediaDevices) {
+      throw new Error('Votre navigateur ne supporte pas l\'accès aux médias. Utilisez Chrome, Firefox ou Safari récent.');
+    }
+
+    if (!navigator.mediaDevices.getUserMedia) {
+      throw new Error('getUserMedia n\'est pas supporté par votre navigateur.');
+    }
+
     try {
-      // Vérification des permissions avant d'essayer
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const videoDevices = devices.filter(device => device.kind === 'videoinput');
-      console.log('Available video devices:', videoDevices.length);
+      console.log('Testing basic camera access...');
       
-      if (videoDevices.length === 0) {
-        throw new Error('Aucune caméra détectée sur cet appareil');
-      }
-
-      // Configuration avancée pour tablettes et appareils mobiles
-      const constraints = {
-        video: {
-          facingMode: 'environment', // Caméra arrière par défaut
-          width: { ideal: 1280, max: 1920 }, // Résolution optimale
-          height: { ideal: 720, max: 1080 },
-          aspectRatio: { ideal: 16/9 },
-          frameRate: { ideal: 30 }
-        }
-      };
-
+      // Test simple d'abord - juste video: true
       let stream: MediaStream;
       
       try {
-        // Essai avec caméra arrière
-        stream = await navigator.mediaDevices.getUserMedia(constraints);
-        console.log('Back camera started successfully');
-      } catch (backCameraError) {
-        console.warn('Caméra arrière non disponible, essai avec caméra avant:', backCameraError);
+        stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        console.log('Basic camera access successful');
+      } catch (basicError) {
+        console.error('Basic camera access failed:', basicError);
         
-        // Fallback vers caméra avant si arrière non disponible
-        const frontConstraints = {
-          video: {
-            facingMode: 'user',
-            width: { ideal: 1280, max: 1920 },
-            height: { ideal: 720, max: 1080 },
-            aspectRatio: { ideal: 16/9 },
-            frameRate: { ideal: 30 }
+        // Vérifier le type d'erreur
+        if (basicError instanceof Error) {
+          if (basicError.name === 'NotAllowedError') {
+            throw new Error('Permission d\'accès à la caméra refusée. Autorisez l\'accès dans votre navigateur.');
+          } else if (basicError.name === 'NotFoundError') {
+            throw new Error('Aucune caméra trouvée sur cet appareil.');
+          } else if (basicError.name === 'NotReadableError') {
+            throw new Error('Caméra déjà utilisée par une autre application.');
+          } else if (basicError.name === 'OverconstrainedError') {
+            throw new Error('Contraintes de caméra non supportées.');
           }
-        };
-        
-        try {
-          stream = await navigator.mediaDevices.getUserMedia(frontConstraints);
-          console.log('Front camera started successfully');
-        } catch (frontCameraError) {
-          console.warn('Caméra avant non disponible, essai basique:', frontCameraError);
-          
-          // Fallback minimal pour compatibilité maximale
-          stream = await navigator.mediaDevices.getUserMedia({
-            video: true
-          });
-          console.log('Basic camera started successfully');
         }
+        
+        throw new Error(`Erreur d'accès à la caméra: ${basicError}`);
       }
       
       streamRef.current = stream;
@@ -72,20 +56,45 @@ export function useCamera() {
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+        console.log('Video stream attached to video element');
         
         // Attendre que la vidéo soit prête
-        await new Promise<void>((resolve) => {
-          videoRef.current!.onloadedmetadata = () => {
-            console.log('Video metadata loaded');
-            resolve();
+        return new Promise<boolean>((resolve, reject) => {
+          const video = videoRef.current!;
+          
+          const handleLoadedMetadata = () => {
+            console.log('Video metadata loaded, dimensions:', video.videoWidth, 'x', video.videoHeight);
+            video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+            video.removeEventListener('error', handleError);
+            resolve(true);
           };
+          
+          const handleError = (error: Event) => {
+            console.error('Video error:', error);
+            video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+            video.removeEventListener('error', handleError);
+            reject(new Error('Erreur lors du chargement de la vidéo'));
+          };
+          
+          video.addEventListener('loadedmetadata', handleLoadedMetadata);
+          video.addEventListener('error', handleError);
+          
+          // Timeout de sécurité
+          setTimeout(() => {
+            video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+            video.removeEventListener('error', handleError);
+            resolve(true); // Continuer même si metadata pas encore chargé
+          }, 5000);
         });
       }
       
       return true;
     } catch (error) {
-      console.error('Camera error:', error);
-      throw new Error('Impossible d\'accéder à la caméra. Vérifiez les permissions et la disponibilité des caméras.');
+      console.error('Camera start error:', error);
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('Erreur inconnue lors de l\'accès à la caméra');
     }
   }, []);
 

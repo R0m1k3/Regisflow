@@ -10,9 +10,10 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useStoreContext } from '@/hooks/useStoreContext';
 import { useCamera } from '@/hooks/useCamera';
+import { useCameraTest } from '@/hooks/useCameraTest';
 import { apiRequest } from '@/lib/queryClient';
 import { validateRequiredFields, validateEAN13, ARTICLE_CATEGORY_MAPPING, IDENTITY_TYPES, PAYMENT_METHODS } from '@/lib/validation';
-import { Package, User, Users, Save, Calendar, BadgeCheck, Info, Camera } from 'lucide-react';
+import { Package, User, Users, Save, Calendar, BadgeCheck, Info, Camera, TestTube, Upload, Trash2 } from 'lucide-react';
 import CameraModal from '@/components/CameraModal';
 import type { PhotoType } from '@/types/sale';
 
@@ -54,6 +55,9 @@ export default function NewSaleForm() {
     capturePhoto,
     stopCamera
   } = useCamera();
+
+  // Camera test functionality
+  const { testResults, runCameraTest } = useCameraTest();
 
   const form = useForm<FormData>({
     defaultValues: {
@@ -180,21 +184,36 @@ export default function NewSaleForm() {
 
   // Photo capture functions
   const handlePhotoCapture = async (photoType: PhotoType) => {
-    // Vérifier d'abord si les caméras sont supportées
+    console.log('Photo capture requested for:', photoType);
+    
+    // Vérifications préliminaires
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       toast({
-        title: "Caméra non supportée",
-        description: "Votre navigateur ne supporte pas l'accès aux caméras",
+        title: "Navigateur non compatible",
+        description: "Votre navigateur ne supporte pas la capture photo. Utilisez Chrome, Firefox ou Safari récent.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Vérifier si nous sommes en HTTPS (requis par certains navigateurs)
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+      toast({
+        title: "Connexion sécurisée requise",
+        description: "L'accès à la caméra nécessite une connexion HTTPS.",
         variant: "destructive",
       });
       return;
     }
 
     try {
+      console.log('Attempting to start camera...');
       await startCamera(photoType);
+      console.log('Camera started successfully');
     } catch (error) {
+      console.error('Camera start failed:', error);
       toast({
-        title: "Erreur caméra",
+        title: "Erreur d'accès à la caméra",
         description: error instanceof Error ? error.message : "Impossible d'accéder à la caméra",
         variant: "destructive",
       });
@@ -233,7 +252,69 @@ export default function NewSaleForm() {
     toast({
       title: "Photo supprimée",
       description: `Photo ${photoType} supprimée`,
-      variant: "success",
+    });
+  };
+
+  // File upload fallback
+  const handleFileUpload = (photoType: PhotoType, event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Type de fichier invalide",
+        description: "Veuillez sélectionner une image",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      toast({
+        title: "Fichier trop volumineux",
+        description: "La taille maximale est de 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const result = e.target?.result as string;
+      form.setValue(photoType === 'recto' ? 'photoRecto' : 'photoVerso', result);
+      toast({
+        title: "Photo ajoutée",
+        description: `Photo ${photoType} ajoutée avec succès`,
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Camera test function
+  const handleCameraTest = async () => {
+    toast({
+      title: "Test en cours...",
+      description: "Vérification de l'accès aux caméras",
+    });
+    
+    const results = await runCameraTest();
+    
+    let message = `Test de caméra terminé:\n`;
+    message += `✓ Navigateur compatible: ${results.hasMediaDevices ? 'Oui' : 'Non'}\n`;
+    message += `✓ getUserMedia disponible: ${results.hasGetUserMedia ? 'Oui' : 'Non'}\n`;
+    message += `✓ Caméras détectées: ${results.videoDevicesCount}\n`;
+    message += `✓ Permissions: ${results.permissions}\n`;
+    
+    if (results.error) {
+      message += `❌ Erreur: ${results.error}`;
+    } else {
+      message += `✅ Caméra fonctionnelle`;
+    }
+    
+    toast({
+      title: results.error ? "Test échoué" : "Test réussi",
+      description: message,
+      variant: results.error ? "destructive" : "default",
     });
   };
 
@@ -519,7 +600,19 @@ export default function NewSaleForm() {
               
               {/* Section Photos */}
               <div className="mt-6 space-y-4">
-                <h4 className="text-sm font-medium text-gray-700">Photos de la pièce d'identité</h4>
+                <div className="flex justify-between items-center">
+                  <h4 className="text-sm font-medium text-gray-700">Photos de la pièce d'identité</h4>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCameraTest}
+                  >
+                    <TestTube className="h-4 w-4 mr-2" />
+                    Test caméra
+                  </Button>
+                </div>
+                
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Photo Recto */}
                   <div className="space-y-2">
@@ -538,19 +631,37 @@ export default function NewSaleForm() {
                           className="absolute top-2 right-2"
                           onClick={() => handleRemovePhoto('recto')}
                         >
-                          ✕
+                          <Trash2 className="h-3 w-3" />
                         </Button>
                       </div>
                     ) : (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="w-full h-32 border-dashed border-2"
-                        onClick={() => handlePhotoCapture('recto')}
-                      >
-                        <Camera className="h-6 w-6 mr-2" />
-                        Prendre photo recto
-                      </Button>
+                      <div className="space-y-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full h-24 border-dashed border-2"
+                          onClick={() => handlePhotoCapture('recto')}
+                        >
+                          <Camera className="h-5 w-5 mr-2" />
+                          Prendre photo
+                        </Button>
+                        <div className="relative">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="absolute inset-0 opacity-0 cursor-pointer"
+                            onChange={(e) => handleFileUpload('recto', e)}
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="w-full h-8 text-xs"
+                          >
+                            <Upload className="h-3 w-3 mr-1" />
+                            Ou choisir un fichier
+                          </Button>
+                        </div>
+                      </div>
                     )}
                   </div>
 
@@ -571,19 +682,37 @@ export default function NewSaleForm() {
                           className="absolute top-2 right-2"
                           onClick={() => handleRemovePhoto('verso')}
                         >
-                          ✕
+                          <Trash2 className="h-3 w-3" />
                         </Button>
                       </div>
                     ) : (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="w-full h-32 border-dashed border-2"
-                        onClick={() => handlePhotoCapture('verso')}
-                      >
-                        <Camera className="h-6 w-6 mr-2" />
-                        Prendre photo verso
-                      </Button>
+                      <div className="space-y-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full h-24 border-dashed border-2"
+                          onClick={() => handlePhotoCapture('verso')}
+                        >
+                          <Camera className="h-5 w-5 mr-2" />
+                          Prendre photo
+                        </Button>
+                        <div className="relative">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="absolute inset-0 opacity-0 cursor-pointer"
+                            onChange={(e) => handleFileUpload('verso', e)}
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="w-full h-8 text-xs"
+                          >
+                            <Upload className="h-3 w-3 mr-1" />
+                            Ou choisir un fichier
+                          </Button>
+                        </div>
+                      </div>
                     )}
                   </div>
                 </div>
