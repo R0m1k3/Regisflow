@@ -9,12 +9,12 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useStoreContext } from '@/hooks/useStoreContext';
-import { useCamera } from '@/hooks/useCamera';
+import { useSimpleCamera } from '@/hooks/useSimpleCamera';
 import { useCameraTest } from '@/hooks/useCameraTest';
 import { apiRequest } from '@/lib/queryClient';
 import { validateRequiredFields, validateEAN13, ARTICLE_CATEGORY_MAPPING, IDENTITY_TYPES, PAYMENT_METHODS } from '@/lib/validation';
 import { Package, User, Users, Save, Calendar, BadgeCheck, Info, Camera, TestTube, Upload, Trash2 } from 'lucide-react';
-import CameraModal from '@/components/CameraModal';
+import SimpleCameraModal from '@/components/SimpleCameraModal';
 import type { PhotoType } from '@/types/sale';
 
 interface FormData {
@@ -54,7 +54,7 @@ export default function NewSaleForm() {
     startCamera,
     capturePhoto,
     stopCamera
-  } = useCamera();
+  } = useSimpleCamera();
 
   // Camera test functionality
   const { testResults, runCameraTest } = useCameraTest();
@@ -216,27 +216,9 @@ export default function NewSaleForm() {
         description: "Préparation de la caméra en cours...",
       });
       
-      // Démarrer la caméra
+      // Démarrer la caméra simple
       await startCamera(photoType);
-      console.log('Camera started successfully');
-      
-      // Attendre 2 secondes supplémentaires pour s'assurer que la vidéo est prête
-      console.log('Waiting for video to be fully ready...');
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Vérifier l'état final de la vidéo
-      if (videoRef.current) {
-        const video = videoRef.current;
-        console.log('Final video state check:', {
-          videoWidth: video.videoWidth,
-          videoHeight: video.videoHeight,
-          readyState: video.readyState,
-          paused: video.paused,
-          currentTime: video.currentTime
-        });
-      }
-      
-      console.log('Camera should be ready for capture');
+      console.log('Simple camera started successfully');
       
     } catch (error) {
       console.error('Camera start failed:', error);
@@ -770,7 +752,7 @@ export default function NewSaleForm() {
       </div>
       
       {/* Camera Modal */}
-      <CameraModal
+      <SimpleCameraModal
         isOpen={isCameraOpen}
         photoType={currentPhotoType}
         videoRef={videoRef}
