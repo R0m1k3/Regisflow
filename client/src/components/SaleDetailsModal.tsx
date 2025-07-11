@@ -86,16 +86,6 @@ export default function SaleDetailsModal({ isOpen, sale, onClose }: SaleDetailsM
             </div>
           </div>
           
-          {/* Photos - Debug */}
-          <div className="mobile-form-section border-l-4 border-red-500 pl-4 mb-4">
-            <h4 className="responsive-subtitle text-gray-900 mb-3">Debug Photos</h4>
-            <div className="text-xs">
-              <div>photo_recto: {sale.photo_recto ? 'EXISTE' : 'NULL'}</div>
-              <div>photo_verso: {sale.photo_verso ? 'EXISTE' : 'NULL'}</div>
-              <div>photo_ticket: {sale.photo_ticket ? 'EXISTE' : 'NULL'}</div>
-            </div>
-          </div>
-          
           {/* Photos */}
           {(sale.photo_recto || sale.photo_verso || sale.photo_ticket) && (
             <div className="mobile-form-section border-l-4 border-purple-500 pl-4">
