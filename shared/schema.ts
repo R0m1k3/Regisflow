@@ -81,9 +81,9 @@ export const sales = pgTable("sales", {
   dateDelivrance: varchar("date_delivrance", { length: 10 }).notNull(),
   
   // Photos
-  photoRecto: text("photo_recto"),
-  photoVerso: text("photo_verso"),
-  photoTicket: text("photo_ticket"),
+  photo_recto: text("photo_recto"),
+  photo_verso: text("photo_verso"),
+  photo_ticket: text("photo_ticket"),
 });
 
 // Relations
