@@ -148,11 +148,15 @@ export class DatabaseStorage implements IStorage {
     let query = db.select().from(sales).where(eq(sales.storeId, storeId));
     
     if (startDate && endDate) {
+      // Convert dates to timestamp format for comparison
+      const startTimestamp = new Date(startDate + 'T00:00:00').toISOString();
+      const endTimestamp = new Date(endDate + 'T23:59:59').toISOString();
+      
       query = db.select().from(sales).where(
         and(
           eq(sales.storeId, storeId),
-          gte(sales.dateVente, startDate),
-          lte(sales.dateVente, endDate)
+          gte(sales.timestamp, startTimestamp),
+          lte(sales.timestamp, endTimestamp)
         )
       );
     }
