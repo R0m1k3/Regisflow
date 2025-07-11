@@ -25,31 +25,47 @@ export default function CameraModal({
 }: CameraModalProps) {
   useEffect(() => {
     if (isOpen && videoRef.current) {
-      // Ensure video starts playing when modal opens
       const video = videoRef.current;
+      console.log('CameraModal useEffect - video element ready');
       
       const handleLoadedMetadata = () => {
-        console.log('Video loaded metadata:', video.videoWidth, 'x', video.videoHeight);
+        console.log('CameraModal: Video metadata loaded, dimensions:', video.videoWidth, 'x', video.videoHeight);
       };
       
       const handleCanPlay = () => {
-        console.log('Video can play');
+        console.log('CameraModal: Video can play, readyState:', video.readyState);
       };
       
       const handleError = (error: Event) => {
-        console.error('Video error:', error);
+        console.error('CameraModal: Video error event:', error);
+      };
+      
+      const handlePlay = () => {
+        console.log('CameraModal: Video started playing');
       };
       
       video.addEventListener('loadedmetadata', handleLoadedMetadata);
       video.addEventListener('canplay', handleCanPlay);
       video.addEventListener('error', handleError);
+      video.addEventListener('play', handlePlay);
       
-      video.play().catch(console.error);
+      // Forcer le play avec gestion d'erreur
+      const startPlayback = async () => {
+        try {
+          await video.play();
+          console.log('CameraModal: Video play() successful');
+        } catch (playError) {
+          console.error('CameraModal: Video play() failed:', playError);
+        }
+      };
+      
+      startPlayback();
       
       return () => {
         video.removeEventListener('loadedmetadata', handleLoadedMetadata);
         video.removeEventListener('canplay', handleCanPlay);
         video.removeEventListener('error', handleError);
+        video.removeEventListener('play', handlePlay);
       };
     }
   }, [isOpen, videoRef]);

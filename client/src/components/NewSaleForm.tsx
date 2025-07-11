@@ -184,7 +184,8 @@ export default function NewSaleForm() {
 
   // Photo capture functions
   const handlePhotoCapture = async (photoType: PhotoType) => {
-    console.log('Photo capture requested for:', photoType);
+    console.log('=== PHOTO CAPTURE REQUESTED ===');
+    console.log('Photo type:', photoType);
     
     // Vérifications préliminaires
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -208,8 +209,35 @@ export default function NewSaleForm() {
 
     try {
       console.log('Attempting to start camera...');
+      
+      // Afficher toast de démarrage
+      toast({
+        title: "Démarrage de la caméra",
+        description: "Préparation de la caméra en cours...",
+      });
+      
+      // Démarrer la caméra
       await startCamera(photoType);
       console.log('Camera started successfully');
+      
+      // Attendre 2 secondes supplémentaires pour s'assurer que la vidéo est prête
+      console.log('Waiting for video to be fully ready...');
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Vérifier l'état final de la vidéo
+      if (videoRef.current) {
+        const video = videoRef.current;
+        console.log('Final video state check:', {
+          videoWidth: video.videoWidth,
+          videoHeight: video.videoHeight,
+          readyState: video.readyState,
+          paused: video.paused,
+          currentTime: video.currentTime
+        });
+      }
+      
+      console.log('Camera should be ready for capture');
+      
     } catch (error) {
       console.error('Camera start failed:', error);
       toast({

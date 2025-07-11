@@ -111,17 +111,33 @@ export function useCamera() {
             handleLoadedMetadata();
           }
           
-          // Timeout de sécurité réduit
+          // Timeout de sécurité avec état détaillé
           setTimeout(() => {
             video.removeEventListener('loadedmetadata', handleLoadedMetadata);
             video.removeEventListener('error', handleError);
             video.removeEventListener('canplay', handleCanPlay);
-            console.log('Video load timeout, current state:', {
+            console.log('Video load timeout - final state:', {
               readyState: video.readyState,
               videoWidth: video.videoWidth,
               videoHeight: video.videoHeight,
-              paused: video.paused
+              paused: video.paused,
+              currentTime: video.currentTime,
+              duration: video.duration,
+              srcObject: !!video.srcObject
             });
+            
+            // Vérifier si le stream est actif
+            if (video.srcObject) {
+              const stream = video.srcObject as MediaStream;
+              const tracks = stream.getTracks();
+              console.log('Stream tracks status:', tracks.map(t => ({
+                kind: t.kind,
+                enabled: t.enabled,
+                readyState: t.readyState,
+                label: t.label
+              })));
+            }
+            
             resolve(true);
           }, 3000);
         });
@@ -158,23 +174,57 @@ export function useCamera() {
 
       console.log('Starting photo capture, current dimensions:', video.videoWidth, 'x', video.videoHeight);
 
-      // Attendre que la vidéo ait des dimensions valides
+      // Attendre que la vidéo ait des dimensions valides avec diagnostic détaillé
       let attempts = 0;
-      const maxAttempts = 50; // 5 secondes max
+      const maxAttempts = 100; // 10 secondes max
       
       const waitForDimensions = () => {
         return new Promise<void>((resolveWait) => {
           const checkDimensions = () => {
             attempts++;
-            console.log(`Checking video dimensions, attempt ${attempts}: ${video.videoWidth}x${video.videoHeight}`);
+            
+            // Diagnostic détaillé à chaque tentative
+            const diagnosticInfo = {
+              attempt: attempts,
+              videoWidth: video.videoWidth,
+              videoHeight: video.videoHeight,
+              readyState: video.readyState,
+              paused: video.paused,
+              currentTime: video.currentTime,
+              duration: video.duration,
+              networkState: video.networkState,
+              srcObject: !!video.srcObject
+            };
+            
+            console.log(`Capture attempt ${attempts}/100:`, diagnosticInfo);
             
             if (video.videoWidth > 0 && video.videoHeight > 0) {
-              console.log('Video dimensions are valid:', video.videoWidth, 'x', video.videoHeight);
+              console.log('✅ Video dimensions are valid:', video.videoWidth, 'x', video.videoHeight);
               resolveWait();
             } else if (attempts >= maxAttempts) {
+              console.error('❌ Timeout: video dimensions not available after 10 seconds');
+              console.error('Final video state:', diagnosticInfo);
+              
+              // Vérifier l'état du stream
+              if (video.srcObject) {
+                const stream = video.srcObject as MediaStream;
+                const tracks = stream.getTracks();
+                console.error('Stream tracks final state:', tracks.map(t => ({
+                  kind: t.kind,
+                  enabled: t.enabled,
+                  readyState: t.readyState,
+                  label: t.label
+                })));
+              }
+              
               setIsCapturing(false);
-              reject(new Error('Timeout: video dimensions not available after 5 seconds'));
+              reject(new Error('Timeout: video dimensions not available after 10 seconds'));
             } else {
+              // Diagnostic périodique plus détaillé
+              if (attempts % 10 === 0) {
+                console.warn(`Still waiting for video dimensions after ${attempts} attempts...`);
+                console.warn('Current video state:', diagnosticInfo);
+              }
               setTimeout(checkDimensions, 100);
             }
           };
