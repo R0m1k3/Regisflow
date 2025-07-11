@@ -87,49 +87,77 @@ export default function SaleDetailsModal({ isOpen, sale, onClose }: SaleDetailsM
           </div>
           
           {/* Photos */}
-          <div className="mobile-form-section border-l-4 border-purple-500 pl-4">
-            <h4 className="responsive-subtitle text-gray-900 mb-3">Photos de la Pièce d'Identité</h4>
-            <div className="mobile-form-row">
-              <div>
-                <span className="text-sm font-medium">Photo Recto:</span>
-                {sale.photoRecto ? (
-                  <div className="mt-2 space-y-2">
-                    <img src={sale.photoRecto} alt="Photo recto" className="w-32 h-auto rounded border" />
+          {(sale.photoRecto || sale.photoVerso || sale.photoTicket) && (
+            <div className="mobile-form-section border-l-4 border-purple-500 pl-4">
+              <h4 className="responsive-subtitle text-gray-900 mb-3">Photos</h4>
+              
+              {/* Photos de la pièce d'identité */}
+              {(sale.photoRecto || sale.photoVerso) && (
+                <div className="mb-4">
+                  <h5 className="text-sm font-semibold text-gray-700 mb-3">Pièce d'identité</h5>
+                  <div className="mobile-form-row">
+                    <div>
+                      <span className="text-sm font-medium">Photo Recto:</span>
+                      {sale.photoRecto ? (
+                        <div className="mt-2 space-y-2">
+                          <img src={sale.photoRecto} alt="Photo recto" className="w-32 h-auto rounded border" />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => downloadPhoto(sale.photoRecto!, `vente-${sale.id}-recto.jpg`)}
+                            className="w-full"
+                          >
+                            <Download className="h-4 w-4 mr-2" />
+                            Télécharger Recto
+                          </Button>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-500 mt-2">Aucune photo</p>
+                      )}
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium">Photo Verso:</span>
+                      {sale.photoVerso ? (
+                        <div className="mt-2 space-y-2">
+                          <img src={sale.photoVerso} alt="Photo verso" className="w-32 h-auto rounded border" />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => downloadPhoto(sale.photoVerso!, `vente-${sale.id}-verso.jpg`)}
+                            className="w-full"
+                          >
+                            <Download className="h-4 w-4 mr-2" />
+                            Télécharger Verso
+                          </Button>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-500 mt-2">Aucune photo</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Photo du ticket de caisse */}
+              {sale.photoTicket && (
+                <div>
+                  <h5 className="text-sm font-semibold text-gray-700 mb-3">Ticket de caisse</h5>
+                  <div className="max-w-xs">
+                    <img src={sale.photoTicket} alt="Photo ticket" className="w-full h-auto rounded border mb-2" />
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => downloadPhoto(sale.photoRecto!, `vente-${sale.id}-recto.jpg`)}
+                      onClick={() => downloadPhoto(sale.photoTicket!, `vente-${sale.id}-ticket.jpg`)}
                       className="w-full"
                     >
                       <Download className="h-4 w-4 mr-2" />
-                      Télécharger Recto
+                      Télécharger Ticket
                     </Button>
                   </div>
-                ) : (
-                  <p className="text-sm text-gray-500 mt-2">Aucune photo</p>
-                )}
-              </div>
-              <div>
-                <span className="text-sm font-medium">Photo Verso:</span>
-                {sale.photoVerso ? (
-                  <div className="mt-2 space-y-2">
-                    <img src={sale.photoVerso} alt="Photo verso" className="w-32 h-auto rounded border" />
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => downloadPhoto(sale.photoVerso!, `vente-${sale.id}-verso.jpg`)}
-                      className="w-full"
-                    >
-                      <Download className="h-4 w-4 mr-2" />
-                      Télécharger Verso
-                    </Button>
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-500 mt-2">Aucune photo</p>
-                )}
-              </div>
+                </div>
+              )}
             </div>
-          </div>
+          )}
           
           {/* System Information */}
           <div className="border-l-4 border-gray-400 pl-4">

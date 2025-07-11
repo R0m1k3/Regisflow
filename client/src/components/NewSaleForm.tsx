@@ -35,6 +35,7 @@ interface FormData {
   dateDelivrance: string;
   photoRecto?: string;
   photoVerso?: string;
+  photoTicket?: string;
 }
 
 export default function NewSaleForm() {
@@ -75,6 +76,7 @@ export default function NewSaleForm() {
       dateDelivrance: '',
       photoRecto: '',
       photoVerso: '',
+      photoTicket: '',
     }
   });
 
@@ -119,6 +121,7 @@ export default function NewSaleForm() {
         dateDelivrance: '',
         photoRecto: '',
         photoVerso: '',
+        photoTicket: '',
       });
     },
     onError: (error: any) => {
@@ -235,7 +238,13 @@ export default function NewSaleForm() {
       const photoData = await capturePhoto();
       console.log('Photo captured successfully, data length:', photoData.length);
       
-      form.setValue(currentPhotoType === 'recto' ? 'photoRecto' : 'photoVerso', photoData);
+      if (currentPhotoType === 'recto') {
+        form.setValue('photoRecto', photoData);
+      } else if (currentPhotoType === 'verso') {
+        form.setValue('photoVerso', photoData);
+      } else if (currentPhotoType === 'ticket') {
+        form.setValue('photoTicket', photoData);
+      }
       
       toast({
         title: "Photo capturée",
@@ -255,7 +264,13 @@ export default function NewSaleForm() {
   };
 
   const handleRemovePhoto = (photoType: PhotoType) => {
-    form.setValue(photoType === 'recto' ? 'photoRecto' : 'photoVerso', '');
+    if (photoType === 'recto') {
+      form.setValue('photoRecto', '');
+    } else if (photoType === 'verso') {
+      form.setValue('photoVerso', '');
+    } else if (photoType === 'ticket') {
+      form.setValue('photoTicket', '');
+    }
     toast({
       title: "Photo supprimée",
       description: `Photo ${photoType} supprimée`,
@@ -288,7 +303,13 @@ export default function NewSaleForm() {
     const reader = new FileReader();
     reader.onload = (e) => {
       const result = e.target?.result as string;
-      form.setValue(photoType === 'recto' ? 'photoRecto' : 'photoVerso', result);
+      if (photoType === 'recto') {
+        form.setValue('photoRecto', result);
+      } else if (photoType === 'verso') {
+        form.setValue('photoVerso', result);
+      } else if (photoType === 'ticket') {
+        form.setValue('photoTicket', result);
+      }
       toast({
         title: "Photo ajoutée",
         description: `Photo ${photoType} ajoutée avec succès`,
@@ -713,6 +734,63 @@ export default function NewSaleForm() {
                       </div>
                     )}
                   </div>
+                </div>
+              </div>
+              
+              {/* Photo Ticket de caisse */}
+              <div className="mt-6 space-y-4">
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700">Photo du ticket de caisse</h4>
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-600">Photo Ticket</label>
+                  {form.watch('photoTicket') ? (
+                    <div className="relative">
+                      <img 
+                        src={form.watch('photoTicket')} 
+                        alt="Photo ticket" 
+                        className="w-full h-32 object-cover rounded border"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-2 right-2"
+                        onClick={() => handleRemovePhoto('ticket')}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full h-24 border-dashed border-2"
+                        onClick={() => handlePhotoCapture('ticket')}
+                      >
+                        <Camera className="h-5 w-5 mr-2" />
+                        Prendre photo
+                      </Button>
+                      <div className="relative">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleFileUpload('ticket', e)}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full h-8 text-xs"
+                        >
+                          <Upload className="h-3 w-3 mr-1" />
+                          Ou choisir un fichier
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

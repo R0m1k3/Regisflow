@@ -83,6 +83,7 @@ export const sales = pgTable("sales", {
   // Photos
   photoRecto: text("photo_recto"),
   photoVerso: text("photo_verso"),
+  photoTicket: text("photo_ticket"),
 });
 
 // Relations

@@ -27,6 +27,7 @@ export interface Sale {
   // Photos
   photoRecto?: string;
   photoVerso?: string;
+  photoTicket?: string;
 }
 
 export interface FormData {
@@ -46,9 +47,10 @@ export interface FormData {
   dateDelivrance: string;
   photoRecto?: string;
   photoVerso?: string;
+  photoTicket?: string;
 }
 
-export type PhotoType = 'recto' | 'verso';
+export type PhotoType = 'recto' | 'verso' | 'ticket';
 
 export interface BackupData {
   timestamp: string;
