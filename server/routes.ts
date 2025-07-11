@@ -243,8 +243,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
         targetStoreId = user.storeId;
       }
 
-      const saleData = insertSaleSchema.parse({
+      // Debug logging
+      console.log('=== PHOTO MAPPING DEBUG ===');
+      console.log('photoRecto present:', !!req.body.photoRecto);
+      console.log('photoVerso present:', !!req.body.photoVerso);
+      console.log('photoTicket present:', !!req.body.photoTicket);
+      console.log('photoTicket length:', req.body.photoTicket?.length);
+      
+      // Map frontend camelCase to database snake_case for photos
+      const mappedBody = {
         ...req.body,
+      };
+      
+      // Add photo fields with proper mapping, only if they exist and are not empty
+      if (req.body.photoRecto) {
+        mappedBody.photo_recto = req.body.photoRecto;
+        console.log('Added photo_recto to mappedBody');
+      }
+      if (req.body.photoVerso) {
+        mappedBody.photo_verso = req.body.photoVerso;
+        console.log('Added photo_verso to mappedBody');
+      }
+      if (req.body.photoTicket) {
+        mappedBody.photo_ticket = req.body.photoTicket;
+        console.log('Added photo_ticket to mappedBody');
+      }
+      
+      // Remove camelCase versions to avoid conflicts
+      delete mappedBody.photoRecto;
+      delete mappedBody.photoVerso;
+      delete mappedBody.photoTicket;
+
+      const saleData = insertSaleSchema.parse({
+        ...mappedBody,
         storeId: targetStoreId,
         userId: user.id
       });

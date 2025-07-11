@@ -285,6 +285,9 @@ Preferred communication style: Simple, everyday language.
 - ✅ Photo capture system fully integrated with database storage
 - ✅ Modal de détails des ventes opérationnel avec support complet des photos
 - ✅ API et schéma de base de données synchronisés pour la production
+- ✅ Bug critique corrigé : mapping camelCase/snake_case pour photo_ticket
+- ✅ NewSaleForm.tsx corrigé pour inclure photoTicket dans la soumission
+- ✅ API routes.ts corrigé avec mapping automatique des photos
 - ✅ RegisFlow prêt pour déploiement en production avec toutes les fonctionnalités
 
 ### Docker Configuration & Cleanup (January 9, 2025)
