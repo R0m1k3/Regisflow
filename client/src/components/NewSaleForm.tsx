@@ -10,10 +10,10 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useStoreContext } from '@/hooks/useStoreContext';
 import { useSimpleCamera } from '@/hooks/useSimpleCamera';
-import { useCameraTest } from '@/hooks/useCameraTest';
+
 import { apiRequest } from '@/lib/queryClient';
 import { validateRequiredFields, validateEAN13, ARTICLE_CATEGORY_MAPPING, IDENTITY_TYPES, PAYMENT_METHODS } from '@/lib/validation';
-import { Package, User, Users, Save, Calendar, BadgeCheck, Info, Camera, TestTube, Upload, Trash2 } from 'lucide-react';
+import { Package, User, Users, Save, Calendar, BadgeCheck, Info, Camera, Upload, Trash2 } from 'lucide-react';
 import SimpleCameraModal from '@/components/SimpleCameraModal';
 import type { PhotoType } from '@/types/sale';
 
@@ -55,9 +55,6 @@ export default function NewSaleForm() {
     capturePhoto,
     stopCamera
   } = useSimpleCamera();
-
-  // Camera test functionality
-  const { testResults, runCameraTest } = useCameraTest();
 
   const form = useForm<FormData>({
     defaultValues: {
@@ -610,17 +607,8 @@ export default function NewSaleForm() {
               
               {/* Section Photos */}
               <div className="mt-6 space-y-4">
-                <div className="flex justify-between items-center">
+                <div>
                   <h4 className="text-sm font-medium text-gray-700">Photos de la pièce d'identité</h4>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleCameraTest}
-                  >
-                    <TestTube className="h-4 w-4 mr-2" />
-                    Test caméra
-                  </Button>
                 </div>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
