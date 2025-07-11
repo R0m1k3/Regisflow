@@ -54,7 +54,8 @@ export const ARTICLE_CATEGORY_MAPPING = {
   "Pétard à composition flash": ["F3"],
   "Fusée": ["F2", "F3"],
   "Chandelle romaine": ["F2", "F3"],
-  "Chandelle monocoup": ["F2", "F3"]
+  "Chandelle monocoup": ["F2", "F3"],
+  "Fontaine": ["F2"]
 } as const;
 
 export const IDENTITY_TYPES = [
