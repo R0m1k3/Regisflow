@@ -83,7 +83,8 @@ CREATE TABLE IF NOT EXISTS sales (
     
     -- Photos (Base64)
     photo_recto TEXT,
-    photo_verso TEXT
+    photo_verso TEXT,
+    photo_ticket TEXT
 );
 
 -- Index pour optimiser les recherches
@@ -164,6 +165,7 @@ COMMENT ON TABLE sales IS 'Table principale des ventes de feux d''artifice';
 COMMENT ON COLUMN sales.categorie IS 'Catégorie F2 ou F3 selon la réglementation française';
 COMMENT ON COLUMN sales.photo_recto IS 'Photo recto de la pièce d''identité (Base64)';
 COMMENT ON COLUMN sales.photo_verso IS 'Photo verso de la pièce d''identité (Base64)';
+COMMENT ON COLUMN sales.photo_ticket IS 'Photo du ticket de caisse (Base64)';
 
 -- Affichage des informations de fin
 \echo 'Base de données RegisFlow initialisée avec succès!'
