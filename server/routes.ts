@@ -243,7 +243,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         targetStoreId = user.storeId;
       }
 
-      // Photo mapping debug (can be removed in production)
+      // Debug logging - temporary
+      console.log('=== SALE CREATION DEBUG ===');
+      console.log('Request body keys:', Object.keys(req.body));
+      console.log('photoRecto present:', !!req.body.photoRecto);
+      console.log('photoVerso present:', !!req.body.photoVerso);
+      console.log('photoTicket present:', !!req.body.photoTicket);
+      console.log('photoTicket length:', req.body.photoTicket?.length);
+      console.log('modePaiement:', req.body.modePaiement);
       
       // Map frontend camelCase to database snake_case for photos
       const mappedBody = {
