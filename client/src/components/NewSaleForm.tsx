@@ -9,9 +9,12 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useStoreContext } from '@/hooks/useStoreContext';
+import { useCamera } from '@/hooks/useCamera';
 import { apiRequest } from '@/lib/queryClient';
 import { validateRequiredFields, validateEAN13, ARTICLE_CATEGORY_MAPPING, IDENTITY_TYPES, PAYMENT_METHODS } from '@/lib/validation';
-import { Package, User, Users, Save, Calendar, BadgeCheck, Info } from 'lucide-react';
+import { Package, User, Users, Save, Calendar, BadgeCheck, Info, Camera } from 'lucide-react';
+import CameraModal from '@/components/CameraModal';
+import type { PhotoType } from '@/types/sale';
 
 interface FormData {
   vendeur: string;
@@ -29,6 +32,8 @@ interface FormData {
   numeroIdentite: string;
   autoriteDelivrance: string;
   dateDelivrance: string;
+  photoRecto?: string;
+  photoVerso?: string;
 }
 
 export default function NewSaleForm() {
@@ -37,6 +42,18 @@ export default function NewSaleForm() {
   const { user } = useAuth();
   const { selectedStoreId } = useStoreContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Camera functionality
+  const {
+    isOpen: isCameraOpen,
+    currentPhotoType,
+    isCapturing,
+    videoRef,
+    canvasRef,
+    startCamera,
+    capturePhoto,
+    stopCamera
+  } = useCamera();
 
   const form = useForm<FormData>({
     defaultValues: {
@@ -55,6 +72,8 @@ export default function NewSaleForm() {
       numeroIdentite: '',
       autoriteDelivrance: '',
       dateDelivrance: '',
+      photoRecto: '',
+      photoVerso: '',
     }
   });
 
@@ -97,6 +116,8 @@ export default function NewSaleForm() {
         numeroIdentite: '',
         autoriteDelivrance: '',
         dateDelivrance: '',
+        photoRecto: '',
+        photoVerso: '',
       });
     },
     onError: (error: any) => {
@@ -145,6 +166,8 @@ export default function NewSaleForm() {
         numeroIdentite: data.numeroIdentite,
         autoriteDelivrance: data.autoriteDelivrance,
         dateDelivrance: data.dateDelivrance,
+        photoRecto: data.photoRecto,
+        photoVerso: data.photoVerso,
       };
 
       await createSaleMutation.mutateAsync(saleData);
@@ -153,6 +176,51 @@ export default function NewSaleForm() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Photo capture functions
+  const handlePhotoCapture = async (photoType: PhotoType) => {
+    try {
+      await startCamera(photoType);
+    } catch (error) {
+      toast({
+        title: "Erreur caméra",
+        description: error instanceof Error ? error.message : "Impossible d'accéder à la caméra",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleTakePhoto = async () => {
+    if (!currentPhotoType) return;
+    
+    try {
+      const photoData = await capturePhoto();
+      form.setValue(currentPhotoType === 'recto' ? 'photoRecto' : 'photoVerso', photoData);
+      
+      toast({
+        title: "Photo capturée",
+        description: `Photo ${currentPhotoType} enregistrée avec succès`,
+        variant: "success",
+      });
+      
+      stopCamera();
+    } catch (error) {
+      toast({
+        title: "Erreur de capture",
+        description: error instanceof Error ? error.message : "Erreur lors de la capture",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleRemovePhoto = (photoType: PhotoType) => {
+    form.setValue(photoType === 'recto' ? 'photoRecto' : 'photoVerso', '');
+    toast({
+      title: "Photo supprimée",
+      description: `Photo ${photoType} supprimée`,
+      variant: "success",
+    });
   };
 
   return (
@@ -434,9 +502,79 @@ export default function NewSaleForm() {
                   )}
                 />
               </div>
+              
+              {/* Section Photos */}
+              <div className="mt-6 space-y-4">
+                <h4 className="text-sm font-medium text-gray-700">Photos de la pièce d'identité</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Photo Recto */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-600">Photo Recto</label>
+                    {form.watch('photoRecto') ? (
+                      <div className="relative">
+                        <img 
+                          src={form.watch('photoRecto')} 
+                          alt="Photo recto" 
+                          className="w-full h-32 object-cover rounded border"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-2 right-2"
+                          onClick={() => handleRemovePhoto('recto')}
+                        >
+                          ✕
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full h-32 border-dashed border-2"
+                        onClick={() => handlePhotoCapture('recto')}
+                      >
+                        <Camera className="h-6 w-6 mr-2" />
+                        Prendre photo recto
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Photo Verso */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-600">Photo Verso</label>
+                    {form.watch('photoVerso') ? (
+                      <div className="relative">
+                        <img 
+                          src={form.watch('photoVerso')} 
+                          alt="Photo verso" 
+                          className="w-full h-32 object-cover rounded border"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-2 right-2"
+                          onClick={() => handleRemovePhoto('verso')}
+                        >
+                          ✕
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full h-32 border-dashed border-2"
+                        onClick={() => handlePhotoCapture('verso')}
+                      >
+                        <Camera className="h-6 w-6 mr-2" />
+                        Prendre photo verso
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
-
-
 
             {/* Boutons d'action */}
             <div className="flex flex-col sm:flex-row gap-4 pt-6">
@@ -459,6 +597,17 @@ export default function NewSaleForm() {
           </form>
         </Form>
       </div>
+      
+      {/* Camera Modal */}
+      <CameraModal
+        isOpen={isCameraOpen}
+        photoType={currentPhotoType}
+        videoRef={videoRef}
+        canvasRef={canvasRef}
+        isCapturing={isCapturing}
+        onClose={stopCamera}
+        onCapture={handleTakePhoto}
+      />
     </div>
   );
 }
