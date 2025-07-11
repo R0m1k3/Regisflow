@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { X } from 'lucide-react';
+import { X, Download } from 'lucide-react';
 import { Sale } from '@/types/sale';
 import { formatDate, formatDateTime } from '@/lib/export';
 
@@ -13,6 +13,16 @@ interface SaleDetailsModalProps {
 
 export default function SaleDetailsModal({ isOpen, sale, onClose }: SaleDetailsModalProps) {
   if (!sale) return null;
+
+  // Fonction pour télécharger une photo
+  const downloadPhoto = (photoData: string, fileName: string) => {
+    const link = document.createElement('a');
+    link.href = photoData;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -83,7 +93,18 @@ export default function SaleDetailsModal({ isOpen, sale, onClose }: SaleDetailsM
               <div>
                 <span className="text-sm font-medium">Photo Recto:</span>
                 {sale.photoRecto ? (
-                  <img src={sale.photoRecto} alt="Photo recto" className="mt-2 w-32 h-auto rounded border" />
+                  <div className="mt-2 space-y-2">
+                    <img src={sale.photoRecto} alt="Photo recto" className="w-32 h-auto rounded border" />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => downloadPhoto(sale.photoRecto!, `vente-${sale.id}-recto.jpg`)}
+                      className="w-full"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Télécharger Recto
+                    </Button>
+                  </div>
                 ) : (
                   <p className="text-sm text-gray-500 mt-2">Aucune photo</p>
                 )}
@@ -91,7 +112,18 @@ export default function SaleDetailsModal({ isOpen, sale, onClose }: SaleDetailsM
               <div>
                 <span className="text-sm font-medium">Photo Verso:</span>
                 {sale.photoVerso ? (
-                  <img src={sale.photoVerso} alt="Photo verso" className="mt-2 w-32 h-auto rounded border" />
+                  <div className="mt-2 space-y-2">
+                    <img src={sale.photoVerso} alt="Photo verso" className="w-32 h-auto rounded border" />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => downloadPhoto(sale.photoVerso!, `vente-${sale.id}-verso.jpg`)}
+                      className="w-full"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Télécharger Verso
+                    </Button>
+                  </div>
                 ) : (
                   <p className="text-sm text-gray-500 mt-2">Aucune photo</p>
                 )}
