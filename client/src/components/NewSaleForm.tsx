@@ -166,12 +166,14 @@ export default function NewSaleForm() {
         prenom: data.prenom,
         dateNaissance: data.dateNaissance,
         lieuNaissance: data.lieuNaissance,
+        modePaiement: data.modePaiement,
         typeIdentite: data.typeIdentite,
         numeroIdentite: data.numeroIdentite,
         autoriteDelivrance: data.autoriteDelivrance,
         dateDelivrance: data.dateDelivrance,
         photoRecto: data.photoRecto,
         photoVerso: data.photoVerso,
+        photoTicket: data.photoTicket,
       };
 
       await createSaleMutation.mutateAsync(saleData);
