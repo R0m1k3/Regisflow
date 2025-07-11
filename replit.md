@@ -248,6 +248,18 @@ Preferred communication style: Simple, everyday language.
 - ✅ Modern, crisp appearance with 4px border-radius for cards, inputs, and buttons
 - ✅ White background for all input fields for better contrast and readability
 
+### Photo Capture System & Tablet Support (January 11, 2025)
+- ✅ Restored complete photo capture functionality for identity documents (recto/verso)
+- ✅ Added photo download capability from sales history modal with structured filenames
+- ✅ Enhanced camera support for tablets with advanced constraint handling
+- ✅ Multi-fallback camera system: environment → user → basic video for maximum compatibility
+- ✅ Optimized video resolution for tablets (1280x720 ideal, up to 1920x1080)
+- ✅ Added visual framing overlay to help users position identity documents correctly
+- ✅ Improved CameraModal with better responsive design for tablet screens
+- ✅ Enhanced error handling with device-specific camera availability checks
+- ✅ Camera permission detection and clear error messages for troubleshooting
+- ✅ Support for both front and rear cameras on tablets and mobile devices
+
 ### Docker Configuration & Cleanup (January 9, 2025)
 - ✅ Complete Docker setup optimized for external PostgreSQL database
 - ✅ Docker Compose configuration with RegisFlow application only

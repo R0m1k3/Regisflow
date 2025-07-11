@@ -180,6 +180,16 @@ export default function NewSaleForm() {
 
   // Photo capture functions
   const handlePhotoCapture = async (photoType: PhotoType) => {
+    // Vérifier d'abord si les caméras sont supportées
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      toast({
+        title: "Caméra non supportée",
+        description: "Votre navigateur ne supporte pas l'accès aux caméras",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       await startCamera(photoType);
     } catch (error) {

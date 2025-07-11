@@ -12,9 +12,47 @@ export function useCamera() {
 
   const startCamera = useCallback(async (photoType: PhotoType) => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' }
-      });
+      // Configuration avancée pour tablettes et appareils mobiles
+      const constraints = {
+        video: {
+          facingMode: 'environment', // Caméra arrière par défaut
+          width: { ideal: 1280, max: 1920 }, // Résolution optimale
+          height: { ideal: 720, max: 1080 },
+          aspectRatio: { ideal: 16/9 },
+          frameRate: { ideal: 30 }
+        }
+      };
+
+      let stream: MediaStream;
+      
+      try {
+        // Essai avec caméra arrière
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
+      } catch (backCameraError) {
+        console.warn('Caméra arrière non disponible, essai avec caméra avant:', backCameraError);
+        
+        // Fallback vers caméra avant si arrière non disponible
+        const frontConstraints = {
+          video: {
+            facingMode: 'user',
+            width: { ideal: 1280, max: 1920 },
+            height: { ideal: 720, max: 1080 },
+            aspectRatio: { ideal: 16/9 },
+            frameRate: { ideal: 30 }
+          }
+        };
+        
+        try {
+          stream = await navigator.mediaDevices.getUserMedia(frontConstraints);
+        } catch (frontCameraError) {
+          console.warn('Caméra avant non disponible, essai basique:', frontCameraError);
+          
+          // Fallback minimal pour compatibilité maximale
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: true
+          });
+        }
+      }
       
       streamRef.current = stream;
       setCurrentPhotoType(photoType);
@@ -27,7 +65,7 @@ export function useCamera() {
       return true;
     } catch (error) {
       console.error('Camera error:', error);
-      throw new Error('Impossible d\'accéder à la caméra');
+      throw new Error('Impossible d\'accéder à la caméra. Vérifiez les permissions et la disponibilité des caméras.');
     }
   }, []);
 
