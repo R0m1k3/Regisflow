@@ -33,34 +33,29 @@ export default function SaleDetailsModal({ isOpen, sale, onClose }: SaleDetailsM
         
         <div className="mobile-spacing mobile-padding">
           {/* Seller Information */}
-          <div className="mobile-form-section border-l-4 border-primary pl-4">
-            <h4 className="responsive-subtitle text-gray-900 mb-3">Informations Vendeur</h4>
-            <div className="mobile-form-row responsive-body">
+          <div className="border border-gray-200 p-4 bg-gray-50">
+            <h4 className="font-medium text-gray-900 mb-3">Informations Vendeur</h4>
+            <div className="text-sm space-y-1">
               <div><span className="font-medium">Vendeur:</span> {sale.vendeur}</div>
               <div><span className="font-medium">Date de vente:</span> {formatDateTime(sale.timestamp)}</div>
             </div>
           </div>
           
           {/* Product Information */}
-          <div className="mobile-form-section border-l-4 border-blue-500 pl-4">
-            <h4 className="responsive-subtitle text-gray-900 mb-3">Informations Produit</h4>
-            <div className="mobile-form-row responsive-body">
+          <div className="border border-gray-200 p-4 bg-white">
+            <h4 className="font-medium text-gray-900 mb-3">Informations Produit</h4>
+            <div className="text-sm space-y-1">
               <div><span className="font-medium">Type d'article:</span> {sale.typeArticle}</div>
-              <div>
-                <span className="font-medium">Catégorie:</span>{' '}
-                <Badge variant={sale.categorie === 'F2' ? 'secondary' : 'destructive'}>
-                  {sale.categorie}
-                </Badge>
-              </div>
+              <div><span className="font-medium">Catégorie:</span> {sale.categorie}</div>
               <div><span className="font-medium">Quantité:</span> {sale.quantite}</div>
               <div><span className="font-medium">Code produit:</span> {sale.gencode || 'Non spécifié'}</div>
             </div>
           </div>
           
           {/* Customer Information */}
-          <div className="mobile-form-section border-l-4 border-green-500 pl-4">
-            <h4 className="responsive-subtitle text-gray-900 mb-3">Informations Client</h4>
-            <div className="mobile-form-row responsive-body">
+          <div className="border border-gray-200 p-4 bg-gray-50">
+            <h4 className="font-medium text-gray-900 mb-3">Informations Client</h4>
+            <div className="text-sm space-y-1">
               <div><span className="font-medium">Nom:</span> {sale.nom}</div>
               <div><span className="font-medium">Prénom:</span> {sale.prenom}</div>
               <div>
@@ -73,9 +68,9 @@ export default function SaleDetailsModal({ isOpen, sale, onClose }: SaleDetailsM
           </div>
           
           {/* Identity Document */}
-          <div className="mobile-form-section border-l-4 border-yellow-500 pl-4">
-            <h4 className="responsive-subtitle text-gray-900 mb-3">Pièce d'Identité</h4>
-            <div className="mobile-form-row responsive-body">
+          <div className="border border-gray-200 p-4 bg-white">
+            <h4 className="font-medium text-gray-900 mb-3">Pièce d'Identité</h4>
+            <div className="text-sm space-y-1">
               <div><span className="font-medium">Type:</span> {sale.typeIdentite || 'Non spécifié'}</div>
               <div><span className="font-medium">Numéro:</span> {sale.numeroIdentite || 'Non spécifié'}</div>
               <div><span className="font-medium">Autorité de délivrance:</span> {sale.autoriteDelivrance || 'Non spécifiée'}</div>
@@ -88,52 +83,44 @@ export default function SaleDetailsModal({ isOpen, sale, onClose }: SaleDetailsM
           
           {/* Photos */}
           {(sale.photo_recto || sale.photo_verso || sale.photo_ticket) && (
-            <div className="mobile-form-section border-l-4 border-purple-500 pl-4">
-              <h4 className="responsive-subtitle text-gray-900 mb-3">Photos</h4>
+            <div className="border border-gray-200 p-4 bg-white">
+              <h4 className="font-medium text-gray-900 mb-4">Photos</h4>
               
               {/* Photos de la pièce d'identité */}
               {(sale.photo_recto || sale.photo_verso) && (
-                <div className="mb-4">
-                  <h5 className="text-sm font-semibold text-gray-700 mb-3">Pièce d'identité</h5>
-                  <div className="mobile-form-row">
-                    <div>
-                      <span className="text-sm font-medium">Photo Recto:</span>
-                      {sale.photo_recto ? (
-                        <div className="mt-2 space-y-2">
-                          <img src={sale.photo_recto} alt="Photo recto" className="w-32 h-auto rounded border" />
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => downloadPhoto(sale.photo_recto!, `vente-${sale.id}-recto.jpg`)}
-                            className="w-full"
-                          >
-                            <Download className="h-4 w-4 mr-2" />
-                            Télécharger Recto
-                          </Button>
-                        </div>
-                      ) : (
-                        <p className="text-sm text-gray-500 mt-2">Aucune photo</p>
-                      )}
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium">Photo Verso:</span>
-                      {sale.photo_verso ? (
-                        <div className="mt-2 space-y-2">
-                          <img src={sale.photo_verso} alt="Photo verso" className="w-32 h-auto rounded border" />
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => downloadPhoto(sale.photo_verso!, `vente-${sale.id}-verso.jpg`)}
-                            className="w-full"
-                          >
-                            <Download className="h-4 w-4 mr-2" />
-                            Télécharger Verso
-                          </Button>
-                        </div>
-                      ) : (
-                        <p className="text-sm text-gray-500 mt-2">Aucune photo</p>
-                      )}
-                    </div>
+                <div className="mb-6">
+                  <h5 className="text-sm font-medium text-gray-700 mb-3">Pièce d'identité</h5>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {sale.photo_recto && (
+                      <div>
+                        <span className="text-xs text-gray-600 mb-2 block">Photo Recto</span>
+                        <img src={sale.photo_recto} alt="Photo recto" className="w-full h-48 object-cover border mb-2" />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => downloadPhoto(sale.photo_recto!, `vente-${sale.id}-recto.jpg`)}
+                          className="w-full"
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          Télécharger Recto
+                        </Button>
+                      </div>
+                    )}
+                    {sale.photo_verso && (
+                      <div>
+                        <span className="text-xs text-gray-600 mb-2 block">Photo Verso</span>
+                        <img src={sale.photo_verso} alt="Photo verso" className="w-full h-48 object-cover border mb-2" />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => downloadPhoto(sale.photo_verso!, `vente-${sale.id}-verso.jpg`)}
+                          className="w-full"
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          Télécharger Verso
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -141,9 +128,9 @@ export default function SaleDetailsModal({ isOpen, sale, onClose }: SaleDetailsM
               {/* Photo du ticket de caisse */}
               {sale.photo_ticket && (
                 <div>
-                  <h5 className="text-sm font-semibold text-gray-700 mb-3">Ticket de caisse</h5>
-                  <div className="max-w-xs">
-                    <img src={sale.photo_ticket} alt="Photo ticket" className="w-full h-auto rounded border mb-2" />
+                  <h5 className="text-sm font-medium text-gray-700 mb-3">Ticket de caisse</h5>
+                  <div className="max-w-sm">
+                    <img src={sale.photo_ticket} alt="Photo ticket" className="w-full h-auto border mb-2" />
                     <Button
                       variant="outline"
                       size="sm"
@@ -160,11 +147,16 @@ export default function SaleDetailsModal({ isOpen, sale, onClose }: SaleDetailsM
           )}
           
           {/* System Information */}
-          <div className="border-l-4 border-gray-400 pl-4">
-            <h4 className="font-medium text-gray-900 mb-2">Informations Système</h4>
-            <div className="text-sm">
-              <div><span className="font-medium">Timestamp:</span> {formatDateTime(sale.timestamp)}</div>
+          <div className="border border-gray-200 p-4 bg-gray-50">
+            <h4 className="font-medium text-gray-900 mb-3">Informations Système</h4>
+            <div className="text-sm space-y-1">
               <div><span className="font-medium">ID:</span> {sale.id}</div>
+              <div><span className="font-medium">Timestamp:</span> {formatDateTime(sale.timestamp)}</div>
+              {/* Debug temporaire */}
+              <div className="mt-2 p-2 bg-yellow-100 text-xs">
+                <div><span className="font-medium">Debug Photo Ticket:</span> {sale.photo_ticket ? 'PRÉSENTE' : 'ABSENTE'}</div>
+                <div><span className="font-medium">Longueur:</span> {sale.photo_ticket?.length || 0}</div>
+              </div>
             </div>
           </div>
         </div>
