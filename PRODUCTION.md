@@ -40,14 +40,29 @@ MAX_BACKUP_COUNT=20
 ### 3. Déploiement immédiat
 
 ```bash
-# Démarrer l'application
+# Option A: Démarrer avec Docker Compose
 docker-compose up -d --build
+
+# Option B: Utiliser le script automatisé
+chmod +x deploy-production.sh
+./deploy-production.sh
 
 # Vérifier le fonctionnement
 curl http://localhost:5000/health
 
 # Voir les logs
 docker-compose logs -f regisflow
+```
+
+### 3.1 Initialisation manuelle de la base (si nécessaire)
+
+```bash
+# Si les tables ne se créent pas automatiquement
+chmod +x init-db.sh
+./init-db.sh
+
+# Ou avec une DATABASE_URL spécifique
+./init-db.sh "postgresql://regisflow:password@localhost:5433/regisflow"
 ```
 
 ### 4. Accès initial
