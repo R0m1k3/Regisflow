@@ -33,6 +33,7 @@ interface FormData {
   numeroIdentite: string;
   autoriteDelivrance: string;
   dateDelivrance: string;
+  // Photos - using camelCase for form, converted to snake_case in API
   photoRecto?: string;
   photoVerso?: string;
   photoTicket?: string;
