@@ -24,10 +24,10 @@ export interface Sale {
   autoriteDelivrance: string;
   dateDelivrance: string;
   
-  // Photos
-  photoRecto?: string;
-  photoVerso?: string;
-  photoTicket?: string;
+  // Photos (snake_case to match database)
+  photo_recto?: string;
+  photo_verso?: string;
+  photo_ticket?: string;
 }
 
 export interface FormData {
@@ -45,6 +45,7 @@ export interface FormData {
   numeroIdentite: string;
   autoriteDelivrance: string;
   dateDelivrance: string;
+  // Photos (camelCase for form handling, snake_case conversion happens in API)
   photoRecto?: string;
   photoVerso?: string;
   photoTicket?: string;
