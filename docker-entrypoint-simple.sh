@@ -51,9 +51,9 @@ fi
 
 echo "✅ Base de données configurée"
 
-# Démarrer l'application avec le script de polyfill Node.js 18
+# Démarrer l'application
 echo "🎯 Démarrage de RegisFlow..."
 export NODE_ENV=production
 export PORT=5000
 cd /app
-exec node server/prod-start.js
+exec node dist/index.js
