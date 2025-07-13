@@ -349,6 +349,14 @@ Preferred communication style: Simple, everyday language.
 - ✅ Created .env.example template for environment configuration
 - ✅ Optimized Docker Compose for maximum deployment compatibility
 
+### Docker Application Startup Fix (January 13, 2025)
+- ✅ Fixed application startup loop after database migrations
+- ✅ Cleaned up duplicate ENTRYPOINT declarations in Dockerfile
+- ✅ Simplified docker-entrypoint-simple.sh script with proper exec
+- ✅ Added debugging output to track application startup process
+- ✅ Reduced PostgreSQL timeout to 60 seconds (20 retries × 3s)
+- ✅ Enhanced startup script with Node.js version and directory checks
+
 ### Portainer Deployment Fix (January 10, 2025)
 - ✅ Resolved Docker image pull error "regisflow-regisflow:latest" in Portainer
 - ✅ Created local image building solution with "regisflow:latest" tag

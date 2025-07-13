@@ -2,27 +2,27 @@
 set -e
 
 echo "🚀 RegisFlow Production Startup"
-echo "Database URL: ${DATABASE_URL:0:30}..."
+echo "Node.js version: $(node --version)"
+echo "Current directory: $(pwd)"
+echo "Available files:"
+ls -la
 
 # Attendre que PostgreSQL soit disponible
 echo "⏳ Waiting for PostgreSQL..."
-echo "Database URL: $DATABASE_URL"
-
-# Extraire les paramètres de connexion plus simplement
 DB_HOST="regisflow-db"
 DB_PORT="5432"
 DB_USER="regisflow"
 
-echo "Connecting to: $DB_HOST:$DB_PORT as $DB_USER"
+echo "Testing connection to: $DB_HOST:$DB_PORT as $DB_USER"
 
 # Attendre avec timeout
-RETRIES=30
+RETRIES=20
 while [ $RETRIES -gt 0 ]; do
   if pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" > /dev/null 2>&1; then
     echo "✅ PostgreSQL is ready!"
     break
   fi
-  echo "PostgreSQL is unavailable - sleeping ($((31-RETRIES))/30)"
+  echo "PostgreSQL is unavailable - sleeping ($((21-RETRIES))/20)"
   sleep 3
   RETRIES=$((RETRIES-1))
 done
@@ -32,11 +32,12 @@ if [ $RETRIES -eq 0 ]; then
   exit 1
 fi
 
-echo "✅ PostgreSQL is ready!"
-
-# Migrer la base de données
+# Migrer la base de données une seule fois
 echo "🔄 Running database migrations..."
 npm run db:push
 
 echo "🎯 Starting RegisFlow application..."
+echo "Command to execute: $@"
+
+# Démarrer l'application avec debugging
 exec "$@"

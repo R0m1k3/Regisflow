@@ -83,9 +83,3 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 # Point d'entrée avec script de démarrage
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["node", "dist/index.js"]
-
-# Utiliser dumb-init pour gérer les signaux
-ENTRYPOINT ["dumb-init", "--"]
-
-# Démarrer avec le script d'entrée
-CMD ["docker-entrypoint.sh"]
