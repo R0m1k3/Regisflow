@@ -1,43 +1,59 @@
 #!/bin/sh
 set -e
 
-echo "🚀 RegisFlow Production Startup"
-echo "Node.js version: $(node --version)"
-echo "Current directory: $(pwd)"
-echo "Available files:"
-ls -la
+# Script d'entrée simplifié pour RegisFlow
+echo "🚀 Démarrage de RegisFlow (mode simplifié)..."
 
-# Attendre que PostgreSQL soit disponible
-echo "⏳ Waiting for PostgreSQL..."
-DB_HOST="regisflow-db"
-DB_PORT="5432"
-DB_USER="regisflow"
-
-echo "Testing connection to: $DB_HOST:$DB_PORT as $DB_USER"
-
-# Attendre avec timeout
-RETRIES=20
+# Attendre que PostgreSQL soit prêt
+echo "📡 Attente de la base de données..."
+RETRIES=24
 while [ $RETRIES -gt 0 ]; do
-  if pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" > /dev/null 2>&1; then
-    echo "✅ PostgreSQL is ready!"
+  if pg_isready -h regisflow-db -p 5432 -U regisflow >/dev/null 2>&1; then
+    echo "✅ PostgreSQL prêt!"
     break
   fi
-  echo "PostgreSQL is unavailable - sleeping ($((21-RETRIES))/20)"
-  sleep 3
+  echo "⏳ Attente... ($((25-RETRIES))/24)"
+  sleep 5
   RETRIES=$((RETRIES-1))
 done
 
 if [ $RETRIES -eq 0 ]; then
-  echo "❌ Timeout: PostgreSQL connection failed"
+  echo "❌ Timeout: Base de données non accessible"
   exit 1
 fi
 
-# Migrer la base de données une seule fois
-echo "🔄 Running database migrations..."
-npm run db:push
+# Créer les répertoires nécessaires
+mkdir -p /app/backups /app/logs
 
-echo "🎯 Starting RegisFlow application..."
-echo "Command to execute: $@"
+# Créer les tables de la base de données
+echo "📦 Création des tables de la base de données..."
 
-# Démarrer l'application avec debugging
-exec "$@"
+# Méthode 1: Utiliser Drizzle Kit (recommandé)
+if npx drizzle-kit push --config=./drizzle.config.ts; then
+  echo "✅ Tables créées avec succès via Drizzle"
+else
+  echo "⚠️  Drizzle Kit failed, essai avec init.sql..."
+  
+  # Méthode 2: Fallback avec init.sql si Drizzle échoue
+  if [ -f "/app/init.sql" ]; then
+    export PGPASSWORD="$POSTGRES_PASSWORD"
+    if psql -h regisflow-db -p 5432 -U regisflow -d regisflow -f /app/init.sql; then
+      echo "✅ Tables créées avec succès via init.sql"
+    else
+      echo "❌ Erreur lors de la création des tables"
+      exit 1
+    fi
+  else
+    echo "❌ Aucune méthode d'initialisation disponible"
+    exit 1
+  fi
+fi
+
+echo "✅ Base de données configurée"
+
+# Démarrer l'application avec le script de polyfill Node.js 18
+echo "🎯 Démarrage de RegisFlow..."
+export NODE_ENV=production
+export PORT=5000
+cd /app
+exec node server/prod-start.js

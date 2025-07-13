@@ -44,6 +44,7 @@ RUN mkdir -p /app/backups /app/logs /app/data && \
 COPY --from=builder --chown=regisflow:nodejs /build/package*.json ./
 COPY --from=builder --chown=regisflow:nodejs /build/dist ./dist
 COPY --from=builder --chown=regisflow:nodejs /build/shared ./shared
+COPY --from=builder --chown=regisflow:nodejs /build/server/prod-start.js ./server/
 COPY --from=builder --chown=regisflow:nodejs /build/drizzle.config.ts ./
 COPY --from=builder --chown=regisflow:nodejs /build/node_modules ./node_modules
 COPY --from=builder --chown=regisflow:nodejs /build/init.sql ./
@@ -64,11 +65,11 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 USER regisflow
 
 # Exposer le port
-EXPOSE 3000
+EXPOSE 5000
 
 # Variables d'environnement de production
 ENV NODE_ENV=production
-ENV PORT=3000
+ENV PORT=5000
 ENV NODE_OPTIONS="--max-old-space-size=512"
 
 # Labels pour la documentation
@@ -76,10 +77,12 @@ LABEL maintainer="RegisFlow Team"
 LABEL version="1.0.0"
 LABEL description="Application RegisFlow pour la gestion des ventes de feux d'artifice"
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
+# Health check amélioré
+HEALTHCHECK --interval=30s --timeout=15s --start-period=90s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:5000/health || exit 1
 
-# Point d'entrée avec script de démarrage
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-CMD ["node", "dist/index.js"]
+# Utiliser dumb-init pour gérer les signaux
+ENTRYPOINT ["dumb-init", "--"]
+
+# Démarrer avec le script d'entrée
+CMD ["docker-entrypoint.sh"]
