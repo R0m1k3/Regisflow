@@ -51,6 +51,16 @@ fi
 
 echo "✅ Base de données configurée"
 
+# Corriger le problème import.meta.dirname pour Node.js 18
+echo "🔧 Application du patch Node.js 18..."
+if [ -f "/app/dist/index.js" ]; then
+    # Remplacer import.meta.dirname par "/app" (chemin fixe en production)
+    sed -i 's/import\.meta\.dirname/\"\/app\"/g' /app/dist/index.js
+    echo "✅ Patch appliqué avec succès"
+else
+    echo "⚠️ Fichier dist/index.js non trouvé"
+fi
+
 # Démarrer l'application
 echo "🎯 Démarrage de RegisFlow..."
 export NODE_ENV=production
