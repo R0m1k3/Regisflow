@@ -356,6 +356,8 @@ Preferred communication style: Simple, everyday language.
 - ✅ Added debugging output to track application startup process
 - ✅ Reduced PostgreSQL timeout to 60 seconds (20 retries × 3s)
 - ✅ Enhanced startup script with Node.js version and directory checks
+- ✅ Corrected port configuration from 5000 to 3000 for proper deployment
+- ✅ Updated all Docker and application configurations to use port 3000
 
 ### Portainer Deployment Fix (January 10, 2025)
 - ✅ Resolved Docker image pull error "regisflow-regisflow:latest" in Portainer
