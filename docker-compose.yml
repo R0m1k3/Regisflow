@@ -17,11 +17,11 @@ services:
       - "5433:5432"
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U regisflow -d regisflow"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
+      test: ["CMD-SHELL", "pg_isready -U regisflow -d regisflow || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
 
   # Application RegisFlow
   regisflow:
@@ -53,11 +53,11 @@ services:
       - "5000:5000"
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:5000/health || exit 1"]
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:5000/ || exit 1"]
       interval: 30s
-      timeout: 15s
-      retries: 3
-      start_period: 90s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
 
 # Volumes persistants (Docker gère automatiquement)
 volumes:
