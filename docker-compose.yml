@@ -7,8 +7,6 @@ services:
   regisflow-db:
     image: postgres:15-alpine
     container_name: regisflow-db
-    networks:
-      - regisflow_network
     environment:
       POSTGRES_DB: regisflow
       POSTGRES_USER: regisflow
@@ -34,8 +32,6 @@ services:
       args:
         - NODE_ENV=production
     container_name: regisflow-app
-    networks:
-      - regisflow_network
     depends_on:
       regisflow-db:
         condition: service_healthy
@@ -72,8 +68,8 @@ volumes:
   logs_data:
     driver: local
 
-# Configuration réseau flexible pour déploiement
+# Utilisation du réseau nginx_default existant
 networks:
-  regisflow_network:
-    driver: bridge
-    name: regisflow_network
+  default:
+    external: true
+    name: nginx_default
