@@ -198,7 +198,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/stores', requireAuth, async (req, res) => {
     try {
       const user = await storage.getUser(req.session.userId!);
-      if (!user || !user.storeId) {
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Administrators can access all stores
+      if (user.role === 'administrator') {
+        const allStores = await storage.getAllStores();
+        return res.json(allStores);
+      }
+
+      // Non-administrators only access their assigned store
+      if (!user.storeId) {
         return res.status(404).json({ error: "User store not found" });
       }
 
@@ -232,7 +243,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         targetStoreId = parseInt(storeId as string);
         
         // For non-admin users, verify they can only access their own store
-        if (user.role !== 'admin' && targetStoreId !== user.storeId) {
+        if (user.role !== 'administrator' && targetStoreId !== user.storeId) {
           return res.status(403).json({ error: "Access denied to this store" });
         }
       } else {
@@ -264,7 +275,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Determine which store to use for the sale
       let targetStoreId: number;
-      if (user.role === 'admin' && req.body.storeId) {
+      if (user.role === 'administrator' && req.body.storeId) {
         // Admin can create sales for any store
         targetStoreId = req.body.storeId;
       } else {
