@@ -117,12 +117,17 @@ docker-compose logs -f
 
 #### 1. Erreur "docker-entrypoint.sh: No such file or directory"
 ```bash
-# Solution : Rebuild avec cache vidé
+# Solution : Test rapide avec le script fourni
+./docker-test-quick.sh
+
+# Ou manuellement :
 docker-compose down
 docker system prune -f
 docker-compose build --no-cache
 docker-compose up -d
 ```
+
+**RÉSOLU** : Le script d'entrée est maintenant correctement placé dans `/app/docker-entrypoint.sh`
 
 #### 2. Base de données inaccessible
 ```bash
