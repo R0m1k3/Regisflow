@@ -17,6 +17,7 @@ export function useSimpleCamera() {
       // Nettoyer le stream précédent s'il existe
       if (stream) {
         stream.getTracks().forEach(track => track.stop());
+        setStream(null);
       }
 
       // Vérifier la disponibilité des médias
@@ -24,37 +25,47 @@ export function useSimpleCamera() {
         throw new Error('Votre navigateur ne supporte pas l\'accès à la caméra. Utilisez un navigateur moderne comme Chrome, Firefox ou Safari.');
       }
 
+      // État initial
+      setCurrentPhotoType(photoType);
+      setIsOpen(true);
+
       let mediaStream: MediaStream;
 
       try {
-        // Essayer d'abord avec des contraintes avancées
+        // Essayer d'abord avec des contraintes simples
+        console.log('Trying basic video constraints...');
         mediaStream = await navigator.mediaDevices.getUserMedia({
           video: {
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-            facingMode: 'environment'
+            width: { ideal: 1280, max: 1920 },
+            height: { ideal: 720, max: 1080 }
           }
         });
-      } catch (constraintError) {
-        console.warn('Failed with advanced constraints, trying basic video:', constraintError);
+        console.log('Basic video constraints successful');
+      } catch (basicError) {
+        console.warn('Basic constraints failed, trying minimal video:', basicError);
         
         try {
-          // Fallback avec des contraintes basiques
+          // Fallback ultra-simple
           mediaStream = await navigator.mediaDevices.getUserMedia({
             video: true
           });
-        } catch (basicError) {
-          console.error('Basic camera access failed:', basicError);
+          console.log('Minimal video constraints successful');
+        } catch (minimalError) {
+          console.error('All camera access failed:', minimalError);
+          
+          // Fermer la modal en cas d'erreur
+          setIsOpen(false);
+          setCurrentPhotoType(null);
           
           // Gestion des erreurs spécifiques
-          if (basicError instanceof Error) {
-            if (basicError.name === 'NotAllowedError') {
+          if (minimalError instanceof Error) {
+            if (minimalError.name === 'NotAllowedError') {
               throw new Error('Permission d\'accès à la caméra refusée. Veuillez autoriser l\'accès dans votre navigateur et actualiser la page.');
-            } else if (basicError.name === 'NotFoundError') {
+            } else if (minimalError.name === 'NotFoundError') {
               throw new Error('Aucune caméra trouvée sur cet appareil. Veuillez connecter une caméra ou utiliser l\'option d\'importation de fichier.');
-            } else if (basicError.name === 'NotReadableError') {
+            } else if (minimalError.name === 'NotReadableError') {
               throw new Error('Caméra déjà utilisée par une autre application. Fermez les autres applications utilisant la caméra.');
-            } else if (basicError.name === 'OverconstrainedError') {
+            } else if (minimalError.name === 'OverconstrainedError') {
               throw new Error('Contraintes de caméra non supportées par votre appareil.');
             }
           }
@@ -63,36 +74,41 @@ export function useSimpleCamera() {
         }
       }
 
-      console.log('Media stream obtained:', mediaStream);
+      console.log('Media stream obtained successfully:', mediaStream.getVideoTracks().length, 'video tracks');
       setStream(mediaStream);
-      setCurrentPhotoType(photoType);
-      setIsOpen(true);
 
-      // Attendre que la modal soit ouverte et l'élément vidéo soit prêt
+      // Attendre que la modal soit rendue avant d'assigner le stream
       setTimeout(() => {
-        if (videoRef.current && mediaStream) {
+        if (videoRef.current && mediaStream && mediaStream.active) {
           const video = videoRef.current;
           console.log('Assigning stream to video element');
           
           video.srcObject = mediaStream;
-          video.autoplay = true;
-          video.playsInline = true;
-          video.muted = true;
           
-          // Forcer le play
+          // Forcer le play avec gestion d'erreur
           video.play().then(() => {
             console.log('Video playing successfully');
-          }).catch(error => {
-            console.error('Video play failed:', error);
+          }).catch(playError => {
+            console.error('Video play failed:', playError);
+            // Réessayer après un délai
+            setTimeout(() => {
+              video.play().catch(e => console.error('Retry video play failed:', e));
+            }, 200);
           });
+        } else {
+          console.error('Video element not ready or stream inactive');
         }
-      }, 100);
+      }, 200);
 
     } catch (error) {
       console.error('Camera start failed:', error);
       // Nettoyer l'état en cas d'erreur
       setIsOpen(false);
       setCurrentPhotoType(null);
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        setStream(null);
+      }
       throw error;
     }
   }, [stream]);
