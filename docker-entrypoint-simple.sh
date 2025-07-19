@@ -1,69 +1,76 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
-# Script d'entrée simplifié pour RegisFlow
-echo "🚀 Démarrage de RegisFlow (mode simplifié)..."
+echo "🚀 RegisFlow Docker entrypoint started (Production v2025)"
 
-# Attendre que PostgreSQL soit prêt
-echo "📡 Attente de la base de données..."
-RETRIES=24
-while [ $RETRIES -gt 0 ]; do
-  if pg_isready -h regisflow-db -p 5432 -U regisflow >/dev/null 2>&1; then
-    echo "✅ PostgreSQL prêt!"
-    break
-  fi
-  echo "⏳ Attente... ($((25-RETRIES))/24)"
-  sleep 5
-  RETRIES=$((RETRIES-1))
+# Vérifier les variables d'environnement essentielles
+if [ -z "$DATABASE_URL" ]; then
+    echo "❌ ERROR: DATABASE_URL environment variable is not set"
+    exit 1
+fi
+
+if [ -z "$SESSION_SECRET" ]; then
+    echo "⚠️  WARNING: SESSION_SECRET not set, using default (not recommended for production)"
+fi
+
+echo "📊 Environment configured - NODE_ENV: $NODE_ENV"
+echo "🗄️  Database URL configured"
+echo "🌍 Timezone: $TZ"
+
+# Patch pour Node.js compatibility (import.meta.dirname)
+if [ -f "dist/index.js" ] && ! grep -q "__dirname" dist/index.js; then
+    echo "🔧 Applying Node.js compatibility patch..."
+    sed -i 's|import\.meta\.dirname|process.cwd()|g' dist/index.js
+    echo "✅ Compatibility patch applied"
+fi
+
+# Extraction des informations de connexion pour pg_isready
+DB_HOST=$(echo $DATABASE_URL | sed -n 's|.*@\([^:/]*\).*|\1|p')
+DB_PORT=$(echo $DATABASE_URL | sed -n 's|.*:\([0-9]*\)/.*|\1|p')
+DB_USER=$(echo $DATABASE_URL | sed -n 's|.*://\([^:]*\):.*|\1|p')
+
+echo "🔗 Connecting to: $DB_HOST:${DB_PORT:-5432}"
+
+# Attendre que la base de données soit prête avec retry amélioré
+echo "⏳ Waiting for database to be ready..."
+timeout=90
+while ! pg_isready -h "$DB_HOST" -p "${DB_PORT:-5432}" -U "$DB_USER" -q && [ $timeout -gt 0 ]; do
+    echo "Database not ready, waiting... ($timeout seconds left)"
+    sleep 3
+    timeout=$((timeout-3))
 done
 
-if [ $RETRIES -eq 0 ]; then
-  echo "❌ Timeout: Base de données non accessible"
-  exit 1
+if [ $timeout -le 0 ]; then
+    echo "❌ Database connection timeout after 90 seconds"
+    echo "🔍 Debug info:"
+    echo "   HOST: $DB_HOST"
+    echo "   PORT: ${DB_PORT:-5432}"  
+    echo "   USER: $DB_USER"
+    exit 1
 fi
+
+echo "✅ Database is ready and accessible"
 
 # Créer les répertoires nécessaires
-mkdir -p /app/backups /app/logs
+mkdir -p /app/logs /app/backups
+echo "📁 Created application directories"
 
-# Créer les tables de la base de données
-echo "📦 Création des tables de la base de données..."
-
-# Méthode 1: Utiliser Drizzle Kit (recommandé)
-if npx drizzle-kit push --config=./drizzle.config.ts; then
-  echo "✅ Tables créées avec succès via Drizzle"
+# Exécuter les migrations de base de données
+echo "🔄 Running database migrations..."
+if npm run db:push; then
+    echo "✅ Database migrations completed successfully"
 else
-  echo "⚠️  Drizzle Kit failed, essai avec init.sql..."
-  
-  # Méthode 2: Fallback avec init.sql si Drizzle échoue
-  if [ -f "/app/init.sql" ]; then
-    export PGPASSWORD="$POSTGRES_PASSWORD"
-    if psql -h regisflow-db -p 5432 -U regisflow -d regisflow -f /app/init.sql; then
-      echo "✅ Tables créées avec succès via init.sql"
-    else
-      echo "❌ Erreur lors de la création des tables"
-      exit 1
-    fi
-  else
-    echo "❌ Aucune méthode d'initialisation disponible"
+    echo "❌ Database migration failed"
     exit 1
-  fi
 fi
 
-echo "✅ Base de données configurée"
-
-# Corriger le problème import.meta.dirname pour Node.js 18
-echo "🔧 Application du patch Node.js 18..."
-if [ -f "/app/dist/index.js" ]; then
-    # Remplacer import.meta.dirname par "/app" (chemin fixe en production)
-    sed -i 's/import\.meta\.dirname/\"\/app\"/g' /app/dist/index.js
-    echo "✅ Patch appliqué avec succès"
-else
-    echo "⚠️ Fichier dist/index.js non trouvé"
-fi
+# Vérification des permissions et de l'espace disque
+echo "🔍 System checks:"
+echo "   Disk space: $(df -h /app | tail -1 | awk '{print $4}') available"
+echo "   Memory: $(free -h | grep Mem | awk '{print $7}') available"
+echo "   User: $(whoami)"
 
 # Démarrer l'application
-echo "🎯 Démarrage de RegisFlow..."
-export NODE_ENV=production
-export PORT=5000
-cd /app
-exec node dist/index.js
+echo "🌟 Starting RegisFlow application on port $PORT..."
+echo "🏥 Health check available at: http://localhost:$PORT/health"
+exec npm start

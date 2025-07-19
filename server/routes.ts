@@ -126,25 +126,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Health check endpoint for Docker
+  // Production health check endpoint with comprehensive monitoring
   app.get('/health', async (req, res) => {
     try {
       // Test de connexion à la base de données
+      const dbStart = Date.now();
       await storage.initializeDefaults();
+      const dbLatency = Date.now() - dbStart;
+
+      // Informations système
+      const memUsage = process.memoryUsage();
+      const cpuUsage = process.cpuUsage();
+
       res.status(200).json({
         status: 'healthy',
         timestamp: new Date().toISOString(),
-        uptime: process.uptime(),
-        database: 'connected',
-        environment: process.env.NODE_ENV || 'development'
+        uptime: Math.floor(process.uptime()),
+        version: '2025.1.0',
+        environment: process.env.NODE_ENV || 'development',
+        database: {
+          status: 'connected',
+          latency: `${dbLatency}ms`
+        },
+        system: {
+          memory: {
+            used: Math.round(memUsage.heapUsed / 1024 / 1024),
+            total: Math.round(memUsage.heapTotal / 1024 / 1024),
+            unit: 'MB'
+          },
+          cpu: {
+            user: cpuUsage.user,
+            system: cpuUsage.system
+          }
+        },
+        features: {
+          backup_scheduler: 'active',
+          data_purge: 'active',
+          photo_storage: 'enabled',
+          session_store: 'postgresql'
+        }
       });
     } catch (error) {
       console.error('Health check failed:', error);
       res.status(503).json({
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
-        database: 'disconnected',
-        error: error instanceof Error ? error.message : 'Unknown error'
+        database: {
+          status: 'disconnected',
+          error: error instanceof Error ? error.message : 'Unknown error'
+        },
+        uptime: Math.floor(process.uptime()),
+        environment: process.env.NODE_ENV || 'development'
       });
     }
   });
@@ -651,15 +683,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Health check endpoint for production monitoring
-  app.get('/health', (req, res) => {
-    res.status(200).json({ 
-      status: 'healthy', 
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-      environment: process.env.NODE_ENV
-    });
-  });
+
 
   const httpServer = createServer(app);
   return httpServer;

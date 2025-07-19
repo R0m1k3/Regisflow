@@ -1,9 +1,9 @@
 # Dockerfile multi-stage pour RegisFlow Production
 # Stage 1: Build
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 # Installer les dépendances de build
-RUN apk add --no-cache python3 make g++
+RUN apk add --no-cache python3 make g++ git
 
 # Créer le répertoire de build
 WORKDIR /build
@@ -12,16 +12,19 @@ WORKDIR /build
 COPY package*.json ./
 
 # Installer toutes les dépendances (dev + prod)
-RUN npm ci --include=dev
+RUN npm ci --include=dev --prefer-offline
 
-# Copier le code source
+# Copier le code source complet
 COPY . .
 
-# Construire l'application
+# Construire l'application client et serveur
 RUN npm run build
 
+# Vérifier que les fichiers de build existent
+RUN ls -la dist/ && test -f dist/index.js
+
 # Stage 2: Production
-FROM node:18-alpine AS production
+FROM node:20-alpine AS production
 
 # Installer uniquement les dépendances système nécessaires pour production
 RUN apk add --no-cache \
@@ -44,10 +47,11 @@ RUN mkdir -p /app/backups /app/logs /app/data && \
 COPY --from=builder --chown=regisflow:nodejs /build/package*.json ./
 COPY --from=builder --chown=regisflow:nodejs /build/dist ./dist
 COPY --from=builder --chown=regisflow:nodejs /build/shared ./shared
-
 COPY --from=builder --chown=regisflow:nodejs /build/drizzle.config.ts ./
-COPY --from=builder --chown=regisflow:nodejs /build/node_modules ./node_modules
 COPY --from=builder --chown=regisflow:nodejs /build/init.sql ./
+
+# Installer uniquement les dépendances de production
+RUN npm ci --omit=dev --prefer-offline
 
 # Copier les assets client au bon endroit pour serveStatic
 COPY --from=builder --chown=regisflow:nodejs /build/dist/public ./public
@@ -70,7 +74,8 @@ EXPOSE 5000
 # Variables d'environnement de production
 ENV NODE_ENV=production
 ENV PORT=5000
-ENV NODE_OPTIONS="--max-old-space-size=512"
+ENV NODE_OPTIONS="--max-old-space-size=768"
+ENV TZ=Europe/Paris
 
 # Labels pour la documentation
 LABEL maintainer="RegisFlow Team"

@@ -276,6 +276,8 @@ Preferred communication style: Simple, everyday language.
 - ✅ **Excel Export**: Enhanced with dedicated Photos sheet containing actual photo data links
 - ✅ **Production Ready**: All photo capture and export systems tested and validated for deployment
 - ✅ **UI Cleanup**: Removed "(optionnel)" text from ticket photo label for cleaner interface
+- ✅ **Camera System Enhanced**: Improved error handling and fallback mechanisms for photo capture
+- ✅ **Default Quantity Fix**: Set default product quantity to "1" in all forms and functions
 
 ### Production Deployment System (January 11, 2025)
 - ✅ Complete production deployment configuration with Docker Compose
@@ -306,24 +308,20 @@ Preferred communication style: Simple, everyday language.
 - ✅ **Production Ready**: All export functionalities operational with real database photos
 - ✅ **Excel Images**: Photos from sales (recto, verso, ticket) properly displayed in Excel export files
 
-### Docker Configuration & Cleanup (January 9, 2025)
-- ✅ Complete Docker setup optimized for external PostgreSQL database
-- ✅ Docker Compose configuration with RegisFlow application only
-- ✅ Automated database connection and migration scripts for external PostgreSQL
-- ✅ Health checks and proper container orchestration
-- ✅ Production-ready configuration with security best practices
-- ✅ Persistent volumes for backup data
-- ✅ Environment variable configuration with preconfigured PostgreSQL credentials
-- ✅ Removed all nginx configuration files and dependencies
-- ✅ Cleaned up redundant Docker scripts and deployment files
-- ✅ Simplified network configuration without IP presets to avoid conflicts
-- ✅ Default Docker bridge network usage for maximum compatibility
-- ✅ Ultra-simple installation process with single command: docker-compose up -d
-- ✅ Single docker-compose.yml file for all environments (dev, test, production)
-- ✅ Eliminated multiple configuration files to reduce complexity
-- ✅ Removed unnecessary documentation files and assets
-- ✅ Streamlined project structure with only essential files
-- ✅ Configured to use nginx_default network for reverse proxy integration
+### Production Deployment System 2025 Update (January 19, 2025)
+- ✅ **Complete Docker Configuration Overhaul** : Updated to Node.js 20 and PostgreSQL 16
+- ✅ **Enhanced Security** : Implemented non-root containers, security constraints, and resource limits
+- ✅ **Multi-stage Dockerfile** : Optimized build process with separate build and production stages
+- ✅ **Advanced Health Checks** : Comprehensive monitoring with detailed status endpoints
+- ✅ **Production Environment** : Created `.env.production.example` with all security variables
+- ✅ **Automated Deployment** : Enhanced docker-entrypoint script with improved error handling
+- ✅ **Resource Management** : Memory and CPU limits for optimal server performance
+- ✅ **Network Security** : Updated to use nginx_default network for reverse proxy integration
+- ✅ **Comprehensive Documentation** : Created DEPLOYMENT_GUIDE.md with complete setup instructions
+- ✅ **Environment Validation** : Enhanced startup scripts with database connection verification
+- ✅ **Security Hardening** : SCRAM-SHA-256 authentication, secure cookies, and session management
+- ✅ **Backup Integration** : Production-ready backup system with automatic retention policies
+- ✅ **Monitoring Ready** : Complete logging and health check system for production monitoring
 
 ### Docker Production Issues & Resolution (January 13, 2025)
 - ✅ Resolved cache corruption errors during Docker deployment
