@@ -64,7 +64,7 @@ export default function NewSaleForm() {
   const form = useForm<FormData>({
     defaultValues: {
       vendeur: '',
-      products: [{ typeArticle: '', categorie: '', quantite: '', gencode: '' }],
+      products: [{ typeArticle: '', categorie: '', quantite: '1', gencode: '' }],
       nom: '',
       prenom: '',
       dateNaissance: '',
@@ -85,7 +85,7 @@ export default function NewSaleForm() {
   
   const addProduct = () => {
     const currentProducts = form.getValues('products');
-    form.setValue('products', [...currentProducts, { typeArticle: '', categorie: '', quantite: '', gencode: '' }]);
+    form.setValue('products', [...currentProducts, { typeArticle: '', categorie: '', quantite: '1', gencode: '' }]);
   };
 
   const removeProduct = (index: number) => {
@@ -454,7 +454,7 @@ export default function NewSaleForm() {
                     <FormItem>
                       <FormLabel>Quantité <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
-                        <Input type="number" min="1" placeholder="Entrez la quantité" className="modern-input" {...field} />
+                        <Input type="number" min="1" placeholder="1" className="modern-input" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
