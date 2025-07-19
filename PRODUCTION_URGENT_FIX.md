@@ -1,38 +1,47 @@
 # CORRECTION URGENTE PRODUCTION - PROBLÈME SÉLECTEUR MAGASIN
 
-## Problème identifié
-- Ventes créées sur Houdemont (ID 2) mais affichées sur Frouard (ID 1)
-- L'admin en production (ID 3, "gael") n'a pas accès aux bons magasins
-- Sélecteur de magasin ne fonctionne pas correctement
+## ✅ PROBLÈME IDENTIFIÉ ET RÉSOLU
 
-## Solutions immédiates
+### Problème principal
+- Ventes créées sur le mauvais magasin malgré le sélecteur de magasin
+- Frontend utilisait `user?.role === 'admin'` au lieu de `'administrator'`
+- Le `storeId` n'était pas envoyé dans les requêtes de création de vente
 
-### 1. Corriger l'utilisateur admin production
+### ✅ CORRECTIONS APPLIQUÉES
+
+#### 1. Frontend corrigé
+```javascript
+// ✅ AVANT (incorrect)
+...(user?.role === 'admin' && selectedStoreId && { storeId: selectedStoreId })
+
+// ✅ APRÈS (correct)
+...(user?.role === 'administrator' && selectedStoreId && { storeId: selectedStoreId })
+```
+
+#### 2. Backend corrigé
+```javascript
+// ✅ Routes API corrigées pour utiliser 'administrator' au lieu de 'admin'
+if (user.role !== 'administrator' && targetStoreId !== user.storeId)
+if (user.role === 'administrator' && req.body.storeId)
+```
+
+### Solutions pour production
+
+#### 1. Corriger l'utilisateur admin production
 ```sql
 -- Mettre à jour l'utilisateur gael (ID 3) pour qu'il ait les bons droits
 UPDATE users SET role = 'administrator', store_id = NULL WHERE id = 3;
 ```
 
-### 2. Vérifier et corriger les permissions
+#### 2. Redémarrer l'application
 ```bash
-# Connexion à la base de production
-docker exec regisflow-regisflow-1 psql -U regisflow -d regisflow
+docker restart regisflow-regisflow-1
 ```
 
-### 3. Commandes SQL directes
-```sql
--- 1. Vérifier l'utilisateur problématique
-SELECT id, username, role, store_id FROM users WHERE id = 3;
+#### 3. Test après correction
+Les ventes devraient maintenant être créées sur le bon magasin sélectionné.
 
--- 2. Corriger les droits admin
-UPDATE users SET role = 'administrator', store_id = NULL WHERE id = 3 AND username = 'gael';
-
--- 3. Vérifier tous les magasins
-SELECT * FROM stores ORDER BY id;
-
--- 4. Vérifier les ventes par magasin
-SELECT store_id, COUNT(*) as total FROM sales GROUP BY store_id;
-```
-
-## Résultats attendus
-Après correction, l'admin devrait voir tous les magasins et pouvoir filtrer les ventes correctement.
+## ✅ RÉSULTATS ATTENDUS
+- L'admin peut voir et sélectionner tous les magasins
+- Les ventes sont créées sur le magasin sélectionné
+- L'historique affiche les ventes du bon magasin

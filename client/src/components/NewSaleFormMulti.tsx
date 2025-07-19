@@ -71,7 +71,7 @@ export default function NewSaleFormMulti() {
     mutationFn: async (saleData: any) => {
       const dataToSend = {
         ...saleData,
-        ...(user?.role === 'admin' && selectedStoreId && { storeId: selectedStoreId })
+        ...(user?.role === 'administrator' && selectedStoreId && { storeId: selectedStoreId })
       };
       
       const response = await apiRequest('/api/sales', {
