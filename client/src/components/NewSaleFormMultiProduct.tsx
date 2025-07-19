@@ -11,8 +11,10 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useStoreContext } from "@/hooks/useStoreContext";
-import { Package, User, Users, IdCard, Camera, Plus, Minus, Info, X } from "lucide-react";
+import { Package, User, Users, IdCard, Camera, Plus, Minus, Info } from "lucide-react";
 import { validateEAN13, ARTICLE_CATEGORY_MAPPING, PAYMENT_METHODS, IDENTITY_TYPES } from "@/lib/validation";
+import CameraModal from "@/components/CameraModal";
+import { useSimpleCamera } from "@/hooks/useSimpleCamera";
 
 // Types pour les photos
 type PhotoType = 'recto' | 'verso' | 'ticket';
@@ -50,9 +52,18 @@ export default function NewSaleFormMultiProduct() {
   const queryClient = useQueryClient();
   const { selectedStoreId } = useStoreContext();
   
-  // États pour les photos
-  const [currentPhotoType, setCurrentPhotoType] = useState<PhotoType | null>(null);
-  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  // Hook camera qui fonctionne
+  const {
+    isOpen: isCameraOpen,
+    currentPhotoType,
+    isCapturing,
+    videoRef,
+    canvasRef,
+    startCamera,
+    capturePhoto,
+    stopCamera
+  } = useSimpleCamera();
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Formulaire avec valeurs par défaut
@@ -183,28 +194,41 @@ export default function NewSaleFormMultiProduct() {
     }
   };
 
-  // Gestion des photos
-  const handlePhotoCapture = (photoType: PhotoType) => {
-    setCurrentPhotoType(photoType);
-    setIsCameraOpen(true);
+  // Gestion des photos avec le hook qui fonctionne
+  const handlePhotoCapture = async (photoType: PhotoType) => {
+    try {
+      await startCamera(photoType);
+    } catch (error) {
+      console.error('Erreur ouverture caméra:', error);
+      toast({
+        title: "Erreur caméra",
+        description: "Impossible d'accéder à la caméra. Vérifiez les autorisations.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handlePhotoTaken = (photoData: string) => {
-    if (currentPhotoType === 'recto') {
-      form.setValue('photoRecto', photoData);
-    } else if (currentPhotoType === 'verso') {
-      form.setValue('photoVerso', photoData);
-    } else if (currentPhotoType === 'ticket') {
-      form.setValue('photoTicket', photoData);
+  const handleCapture = async () => {
+    try {
+      const photoData = await capturePhoto();
+      if (currentPhotoType) {
+        const fieldName = `photo${currentPhotoType.charAt(0).toUpperCase() + currentPhotoType.slice(1)}` as keyof FormData;
+        form.setValue(fieldName, photoData);
+        
+        toast({
+          title: "Photo capturée",
+          description: `Photo ${currentPhotoType} enregistrée avec succès`,
+        });
+      }
+      stopCamera();
+    } catch (error) {
+      console.error('Erreur capture:', error);
+      toast({
+        title: "Erreur capture",
+        description: "Impossible de capturer la photo",
+        variant: "destructive",
+      });
     }
-    
-    toast({
-      title: "Photo capturée",
-      description: `Photo ${currentPhotoType} enregistrée avec succès`,
-    });
-    
-    setIsCameraOpen(false);
-    setCurrentPhotoType(null);
   };
 
   const handleRemovePhoto = (photoType: PhotoType) => {
@@ -667,60 +691,16 @@ export default function NewSaleFormMultiProduct() {
         </Form>
       </div>
 
-      {/* Modal Camera */}
-      {isCameraOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium">
-                Capturer photo {currentPhotoType}
-              </h3>
-              <Button
-                onClick={() => {
-                  setIsCameraOpen(false);
-                  setCurrentPhotoType(null);
-                }}
-                variant="outline"
-                size="sm"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            
-            <div className="space-y-4">
-              <div className="text-center">
-                <p className="text-sm text-gray-600 mb-4">
-                  La capture photo sera bientôt disponible.
-                </p>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      const reader = new FileReader();
-                      reader.onload = (event) => {
-                        const photoData = event.target?.result as string;
-                        handlePhotoTaken(photoData);
-                      };
-                      reader.readAsDataURL(file);
-                    }
-                  }}
-                  className="hidden"
-                  id="photo-upload"
-                />
-                <label
-                  htmlFor="photo-upload"
-                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700"
-                >
-                  <Camera className="h-4 w-4 mr-2" />
-                  Sélectionner une photo
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Modal Camera qui fonctionne */}
+      <CameraModal
+        isOpen={isCameraOpen}
+        photoType={currentPhotoType}
+        videoRef={videoRef}
+        canvasRef={canvasRef}
+        isCapturing={isCapturing}
+        onClose={stopCamera}
+        onCapture={handleCapture}
+      />
     </div>
   );
 }

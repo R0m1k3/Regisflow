@@ -14,7 +14,7 @@ import { useSimpleCamera } from '@/hooks/useSimpleCamera';
 import { apiRequest } from '@/lib/queryClient';
 import { validateRequiredFields, validateEAN13, ARTICLE_CATEGORY_MAPPING, IDENTITY_TYPES, PAYMENT_METHODS } from '@/lib/validation';
 import { Package, User, Users, Save, Calendar, BadgeCheck, Info, Camera, Upload, Trash2 } from 'lucide-react';
-import SimpleCameraModal from '@/components/SimpleCameraModal';
+import CameraModal from '@/components/CameraModal';
 import type { PhotoType } from '@/types/sale';
 
 interface Product {
@@ -245,7 +245,7 @@ export default function NewSaleForm() {
     }
   };
 
-  const handleTakePhoto = async () => {
+  const handleCapture = async () => {
     if (!currentPhotoType) return;
     
     try {
@@ -833,14 +833,14 @@ export default function NewSaleForm() {
       </div>
       
       {/* Camera Modal */}
-      <SimpleCameraModal
+      <CameraModal
         isOpen={isCameraOpen}
         photoType={currentPhotoType}
         videoRef={videoRef}
         canvasRef={canvasRef}
         isCapturing={isCapturing}
         onClose={stopCamera}
-        onCapture={handleTakePhoto}
+        onCapture={handleCapture}
       />
     </div>
   );
