@@ -19,14 +19,49 @@ export function useSimpleCamera() {
         stream.getTracks().forEach(track => track.stop());
       }
 
-      // Demander l'accès à la caméra
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-          facingMode: 'environment'
+      // Vérifier la disponibilité des médias
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('Votre navigateur ne supporte pas l\'accès à la caméra. Utilisez un navigateur moderne comme Chrome, Firefox ou Safari.');
+      }
+
+      let mediaStream: MediaStream;
+
+      try {
+        // Essayer d'abord avec des contraintes avancées
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            facingMode: 'environment'
+          }
+        });
+      } catch (constraintError) {
+        console.warn('Failed with advanced constraints, trying basic video:', constraintError);
+        
+        try {
+          // Fallback avec des contraintes basiques
+          mediaStream = await navigator.mediaDevices.getUserMedia({
+            video: true
+          });
+        } catch (basicError) {
+          console.error('Basic camera access failed:', basicError);
+          
+          // Gestion des erreurs spécifiques
+          if (basicError instanceof Error) {
+            if (basicError.name === 'NotAllowedError') {
+              throw new Error('Permission d\'accès à la caméra refusée. Veuillez autoriser l\'accès dans votre navigateur et actualiser la page.');
+            } else if (basicError.name === 'NotFoundError') {
+              throw new Error('Aucune caméra trouvée sur cet appareil. Veuillez connecter une caméra ou utiliser l\'option d\'importation de fichier.');
+            } else if (basicError.name === 'NotReadableError') {
+              throw new Error('Caméra déjà utilisée par une autre application. Fermez les autres applications utilisant la caméra.');
+            } else if (basicError.name === 'OverconstrainedError') {
+              throw new Error('Contraintes de caméra non supportées par votre appareil.');
+            }
+          }
+          
+          throw new Error('Erreur d\'accès à la caméra. Utilisez l\'option d\'importation de fichier comme alternative.');
         }
-      });
+      }
 
       console.log('Media stream obtained:', mediaStream);
       setStream(mediaStream);
@@ -55,6 +90,9 @@ export function useSimpleCamera() {
 
     } catch (error) {
       console.error('Camera start failed:', error);
+      // Nettoyer l'état en cas d'erreur
+      setIsOpen(false);
+      setCurrentPhotoType(null);
       throw error;
     }
   }, [stream]);

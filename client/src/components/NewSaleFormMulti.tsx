@@ -137,7 +137,84 @@ export default function NewSaleFormMulti() {
   };
 
   const handlePhotoCapture = async (photoType: PhotoType) => {
-    await startCamera(photoType);
+    console.log('=== PHOTO CAPTURE REQUESTED ===');
+    console.log('Photo type:', photoType);
+    
+    // Vérifications préliminaires
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      toast({
+        title: "Navigateur non compatible",
+        description: "Votre navigateur ne supporte pas la capture photo. Utilisez Chrome, Firefox ou Safari récent.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Vérifier si nous sommes en HTTPS (requis par certains navigateurs)
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+      toast({
+        title: "Connexion sécurisée requise",
+        description: "L'accès à la caméra nécessite une connexion HTTPS.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      console.log('Attempting to start camera...');
+      
+      // Afficher toast de démarrage
+      toast({
+        title: "Démarrage de la caméra",
+        description: "Préparation de la caméra en cours...",
+      });
+      
+      // Démarrer la caméra simple
+      await startCamera(photoType);
+      console.log('Simple camera started successfully');
+      
+    } catch (error) {
+      console.error('Camera start failed:', error);
+      toast({
+        title: "Erreur d'accès à la caméra",
+        description: error instanceof Error ? error.message : "Impossible d'accéder à la caméra",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCapturePhoto = async () => {
+    if (!currentPhotoType) return;
+    
+    try {
+      console.log('Attempting to capture photo...');
+      const photoData = await capturePhoto();
+      console.log('Photo captured successfully, data length:', photoData.length);
+      
+      if (currentPhotoType === 'recto') {
+        form.setValue('photoRecto', photoData);
+      } else if (currentPhotoType === 'verso') {
+        form.setValue('photoVerso', photoData);
+      } else if (currentPhotoType === 'ticket') {
+        form.setValue('photoTicket', photoData);
+      }
+      
+      toast({
+        title: "Photo capturée",
+        description: `Photo ${currentPhotoType} enregistrée avec succès`,
+        variant: "success",
+      });
+      
+      stopCamera();
+      
+    } catch (error) {
+      console.error('Photo capture failed:', error);
+      toast({
+        title: "Erreur de capture",
+        description: error instanceof Error ? error.message : "Impossible de capturer la photo",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleRemovePhoto = (photoType: PhotoType) => {
@@ -188,7 +265,7 @@ export default function NewSaleFormMulti() {
         canvasRef={canvasRef}
         isCapturing={isCapturing}
         onClose={stopCamera}
-        onCapture={capturePhoto}
+        onCapture={handleCapturePhoto}
       />
 
       <Form {...form}>
