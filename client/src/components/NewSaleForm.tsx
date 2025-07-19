@@ -644,7 +644,8 @@ export default function NewSaleForm() {
               {/* Section Photos */}
               <div className="mt-6 space-y-4">
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700">Photos de la pièce d'identité</h4>
+                  <h4 className="text-sm font-medium text-gray-700">Photos de la pièce d'identité (optionnel)</h4>
+                  <p className="text-xs text-gray-500 mt-1">Les photos d'identité ne sont pas obligatoires</p>
                 </div>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -755,7 +756,8 @@ export default function NewSaleForm() {
               {/* Photo Ticket de caisse */}
               <div className="mt-6 space-y-4">
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700">Photo du ticket de caisse</h4>
+                  <h4 className="text-sm font-medium text-gray-700">Photo du ticket de caisse (optionnel)</h4>
+                  <p className="text-xs text-gray-500 mt-1">La photo du ticket n'est pas obligatoire</p>
                 </div>
                 
                 <div className="space-y-2">

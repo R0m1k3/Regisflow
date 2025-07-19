@@ -325,6 +325,13 @@ Preferred communication style: Simple, everyday language.
 - ✅ **Data Integrity**: SQL format preserves all database structure, constraints, and relationships
 - ✅ **User Interface**: Updated backup management UI with SQL-specific messaging and file extensions
 
+### Photo Requirements Optimization (January 19, 2025)
+- ✅ **Optional Identity Photos**: Made identity document photos (recto/verso) optional as per user request
+- ✅ **Optional Receipt Photos**: Clarified that receipt/ticket photos are also optional
+- ✅ **UI Updates**: Updated form labels to clearly indicate photo fields are not mandatory
+- ✅ **Validation Adjustment**: Photos no longer required for form submission compliance
+- ✅ **User Experience**: Added explanatory text to reduce confusion about photo requirements
+
 ### Docker Configuration & Cleanup (January 9, 2025)
 - ✅ Complete Docker setup optimized for external PostgreSQL database
 - ✅ Docker Compose configuration with RegisFlow application only
