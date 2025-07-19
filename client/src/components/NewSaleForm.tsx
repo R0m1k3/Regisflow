@@ -370,7 +370,7 @@ export default function NewSaleForm() {
             <div className="section-vendor">
               <div className="section-header">
                 <User className="h-5 w-5" />
-                <span>Informations Vendeur</span>
+                <span>Informations vendeur</span>
               </div>
               <div className="grid grid-cols-1 gap-4">
                 <FormField
@@ -378,7 +378,7 @@ export default function NewSaleForm() {
                   name="vendeur"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Vendeur <span className="text-destructive">*</span></FormLabel>
+                      <FormLabel>Nom du vendeur <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
                         <Input placeholder="Nom du vendeur" className="modern-input" {...field} />
                       </FormControl>
@@ -389,11 +389,14 @@ export default function NewSaleForm() {
               </div>
             </div>
 
-            {/* Section Produit */}
+            {/* Section Produits */}
             <div className="section-product">
               <div className="section-header">
                 <Package className="h-5 w-5" />
-                <span>Informations Produit</span>
+                <span>Produits</span>
+                {products.length > 1 && (
+                  <span className="text-sm text-gray-600 ml-2">({products.length} produits)</span>
+                )}
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
@@ -487,7 +490,7 @@ export default function NewSaleForm() {
             <div className="section-client">
               <div className="section-header">
                 <Users className="h-5 w-5" />
-                <span>Informations Client</span>
+                <span>Informations client</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
@@ -573,7 +576,7 @@ export default function NewSaleForm() {
             <div className="section-identity">
               <div className="section-header">
                 <BadgeCheck className="h-5 w-5" />
-                <span>Pièce d'Identité</span>
+                <span>Pièce d'identité</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
