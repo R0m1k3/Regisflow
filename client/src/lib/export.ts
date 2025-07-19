@@ -1,5 +1,28 @@
 import { Sale } from '@/types/sale';
 
+// Fonction utilitaire pour télécharger un fichier
+function downloadFile(content: string, filename: string, mimeType: string) {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+// Fonction utilitaire pour télécharger une image base64
+function downloadImage(dataUrl: string, filename: string) {
+  const link = document.createElement('a');
+  link.href = dataUrl;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
 export async function exportToExcel(sales: Sale[]): Promise<void> {
   if (sales.length === 0) return;
 
@@ -188,9 +211,17 @@ export async function exportToExcel(sales: Sale[]): Promise<void> {
       utils.book_append_sheet(workbook, photosWorksheet, 'Photos');
     }
 
-    // Exporter le fichier
+    // Exporter le fichier Excel
     const fileName = `registre-feux-artifice-${new Date().toISOString().split('T')[0]}.xlsx`;
     writeFile(workbook, fileName);
+    
+    // Télécharger les photos séparément si disponibles
+    if (salesWithPhotos.length > 0) {
+      // Attendre un peu pour que l'Excel se télécharge d'abord
+      setTimeout(() => {
+        downloadPhotosForSales(salesWithPhotos);
+      }, 1000);
+    }
     
   } catch (error) {
     console.error('Erreur lors de l\'export Excel:', error);
@@ -204,6 +235,50 @@ export function formatDate(dateString: string): string {
 
 export function formatDateTime(dateString: string): string {
   return new Date(dateString).toLocaleString('fr-FR');
+}
+
+// Nouvelle fonction pour télécharger toutes les photos d'une sélection de ventes
+export function downloadPhotosForSales(sales: Sale[]): void {
+  let photoCount = 0;
+  
+  sales.forEach(sale => {
+    const saleDate = new Date(sale.timestamp).toLocaleDateString('fr-FR').replace(/\//g, '-');
+    const clientName = `${sale.nom}_${sale.prenom}`.replace(/\s+/g, '_');
+    
+    if (sale.photoRecto) {
+      photoCount++;
+      downloadImage(
+        sale.photoRecto, 
+        `Vente_${sale.id}_${saleDate}_${clientName}_Recto.jpg`
+      );
+    }
+    
+    if (sale.photoVerso) {
+      photoCount++;
+      downloadImage(
+        sale.photoVerso, 
+        `Vente_${sale.id}_${saleDate}_${clientName}_Verso.jpg`
+      );
+    }
+    
+    if (sale.photoTicket) {
+      photoCount++;
+      downloadImage(
+        sale.photoTicket, 
+        `Vente_${sale.id}_${saleDate}_${clientName}_Ticket.jpg`
+      );
+    }
+  });
+  
+  if (photoCount > 0) {
+    // Afficher une notification à l'utilisateur
+    const message = `${photoCount} photo(s) vont être téléchargées séparément.`;
+    if (window.confirm) {
+      alert(message);
+    } else {
+      console.log(message);
+    }
+  }
 }
 
 // Fonction CSV basique maintenue pour compatibilité si nécessaire
