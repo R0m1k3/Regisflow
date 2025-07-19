@@ -92,7 +92,7 @@ function DashboardContent() {
                     {user?.firstName} {user?.lastName}
                   </p>
                   <div className="flex items-center gap-1">
-                    {user?.role === 'admin' && <Shield className="h-3 w-3 text-primary" />}
+                    {user?.role === 'administrator' && <Shield className="h-3 w-3 text-primary" />}
                     <p className="text-xs text-muted-foreground capitalize">{user?.role}</p>
                   </div>
                 </div>
@@ -176,7 +176,7 @@ export default function Dashboard() {
   return (
     <StoreProvider 
       userStoreId={user?.storeId} 
-      isAdmin={user?.role === "admin"}
+      isAdmin={user?.role === "administrator"}
     >
       <DashboardContent />
     </StoreProvider>

@@ -347,7 +347,7 @@ export class DatabaseStorage implements IStorage {
         email: "admin@example.com",
         firstName: "Administrateur",
         lastName: "Principal",
-        role: "admin",
+        role: "administrator",
         storeId: defaultStore.id,
         isActive: true,
       });
