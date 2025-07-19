@@ -262,9 +262,9 @@ export class DatabaseStorage implements IStorage {
           numeroIdentite: row.numeroIdentite,
           autoriteDelivrance: row.autoriteDelivrance,
           dateDelivrance: row.dateDelivrance,
-          photo_recto: row.photo_recto,
-          photo_verso: row.photo_verso,
-          photo_ticket: row.photo_ticket,
+          photoRecto: row.photo_recto,
+          photoVerso: row.photo_verso,
+          photoTicket: row.photo_ticket,
           products: []
         });
       }
