@@ -281,7 +281,9 @@ export class DatabaseStorage implements IStorage {
       }
     });
     
-    return Array.from(salesMap.values());
+    const result = Array.from(salesMap.values());
+    console.log('DEBUG: Sample sale with photos:', result.find(s => s.photoRecto || s.photoVerso || s.photoTicket));
+    return result;
   }
 
   async deleteSale(id: number): Promise<void> {
