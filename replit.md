@@ -275,6 +275,7 @@ Preferred communication style: Simple, everyday language.
 - ✅ **MAJOR FIX**: Resolved photo display in exports by correcting column mapping in getSalesByStore()
 - ✅ **Excel Export**: Enhanced with dedicated Photos sheet containing actual photo data links
 - ✅ **Production Ready**: All photo capture and export systems tested and validated for deployment
+- ✅ **UI Cleanup**: Removed "(optionnel)" text from ticket photo label for cleaner interface
 
 ### Production Deployment System (January 11, 2025)
 - ✅ Complete production deployment configuration with Docker Compose

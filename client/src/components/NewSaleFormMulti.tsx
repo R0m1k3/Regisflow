@@ -691,7 +691,7 @@ export default function NewSaleFormMulti() {
 
               {/* Photo Ticket */}
               <div className="space-y-2">
-                <label className="text-sm font-medium">Photo du ticket (optionnel)</label>
+                <label className="text-sm font-medium">Photo du ticket</label>
                 <div className="flex gap-2 max-w-md">
                   <Button
                     type="button"
