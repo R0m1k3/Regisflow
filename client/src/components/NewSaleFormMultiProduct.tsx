@@ -13,7 +13,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useStoreContext } from "@/hooks/useStoreContext";
 import { Package, User, Users, IdCard, Camera, Plus, Minus, Info } from "lucide-react";
 import { validateEAN13, ARTICLE_CATEGORY_MAPPING, PAYMENT_METHODS, IDENTITY_TYPES } from "@/lib/validation";
-import CameraModal from "@/components/CameraModal";
+import SimpleCameraModal from "@/components/SimpleCameraModal";
 import { useSimpleCamera } from "@/hooks/useSimpleCamera";
 
 // Types pour les photos
@@ -692,7 +692,7 @@ export default function NewSaleFormMultiProduct() {
       </div>
 
       {/* Modal Camera qui fonctionne */}
-      <CameraModal
+      <SimpleCameraModal
         isOpen={isCameraOpen}
         photoType={currentPhotoType}
         videoRef={videoRef}
