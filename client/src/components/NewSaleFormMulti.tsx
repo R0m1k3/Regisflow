@@ -43,7 +43,7 @@ export default function NewSaleFormMulti() {
         {
           typeArticle: '',
           categorie: '',
-          quantite: '',
+          quantite: '1',
           gencode: '',
         }
       ],
@@ -241,7 +241,7 @@ export default function NewSaleFormMulti() {
     append({
       typeArticle: '',
       categorie: '',
-      quantite: '',
+      quantite: '1',
       gencode: '',
     });
   };
