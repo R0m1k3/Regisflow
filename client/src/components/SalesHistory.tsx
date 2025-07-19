@@ -12,6 +12,7 @@ import { apiRequest } from '@/lib/queryClient';
 import type { Sale } from '@shared/schema';
 import { History, Download, Trash2, Eye, Filter, FileText, Search, X, Calendar, Users } from 'lucide-react';
 import SaleDetailsModal from '@/components/SaleDetailsModal';
+import { formatDateTime } from '@/lib/export';
 
 interface SalesHistoryProps {
   canDelete?: boolean;
@@ -364,6 +365,35 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
     setSearchQuery('');
   };
 
+  const exportToExcel = async () => {
+    if (filteredSales.length === 0) {
+      toast({
+        title: "Aucune donnée",
+        description: "Aucune vente à exporter",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { exportToExcel } = await import('@/lib/export');
+      await exportToExcel(filteredSales);
+      
+      toast({
+        title: "Export réussi",
+        description: "Le fichier Excel a été téléchargé",
+        variant: "success",
+      });
+    } catch (error) {
+      console.error('Erreur lors de l\'export Excel:', error);
+      toast({
+        title: "Erreur d'export",
+        description: "Impossible de générer le fichier Excel",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="elegant-card">
@@ -475,12 +505,12 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
                 Registre PDF Détaillé
               </button>
               <button
-                onClick={exportToCSV}
+                onClick={exportToExcel}
                 disabled={filteredSales.length === 0}
                 className="modern-button modern-button-secondary"
               >
                 <Download className="h-4 w-4" />
-                Export CSV
+                Export Excel (.xlsx)
               </button>
             </div>
           </div>
