@@ -27,206 +27,261 @@ export async function exportToExcel(sales: Sale[]): Promise<void> {
   if (sales.length === 0) return;
 
   try {
-    const XLSX = await import('xlsx');
-    const { utils, writeFile } = XLSX;
+    const ExcelJS = await import('exceljs');
+    const workbook = new ExcelJS.Workbook();
 
-    // Créer un nouveau classeur
-    const workbook = utils.book_new();
-
-    // Préparer les données pour la feuille principale
-    const salesData: any[] = [];
+    // Créer la feuille principale des ventes
+    const mainWorksheet = workbook.addWorksheet('Ventes');
     
+    // Définir les colonnes
+    mainWorksheet.columns = [
+      { header: 'ID Vente', key: 'id', width: 8 },
+      { header: 'Date', key: 'date', width: 12 },
+      { header: 'Heure', key: 'heure', width: 8 },
+      { header: 'Vendeur', key: 'vendeur', width: 15 },
+      { header: 'Nom', key: 'nom', width: 15 },
+      { header: 'Prénom', key: 'prenom', width: 15 },
+      { header: 'Date de naissance', key: 'dateNaissance', width: 15 },
+      { header: 'Lieu de naissance', key: 'lieuNaissance', width: 20 },
+      { header: 'Type d\'identité', key: 'typeIdentite', width: 15 },
+      { header: 'Numéro d\'identité', key: 'numeroIdentite', width: 15 },
+      { header: 'Autorité de délivrance', key: 'autoriteDeLivrance', width: 20 },
+      { header: 'Date de délivrance', key: 'dateDelivrance', width: 15 },
+      { header: 'Mode de paiement', key: 'modePaiement', width: 15 },
+      { header: 'Produit N°', key: 'produitNumero', width: 8 },
+      { header: 'Type d\'article', key: 'typeArticle', width: 20 },
+      { header: 'Catégorie', key: 'categorie', width: 15 },
+      { header: 'Quantité', key: 'quantite', width: 8 },
+      { header: 'Code générique', key: 'gencode', width: 15 }
+    ];
+    
+    // Ajouter les données des ventes
     sales.forEach(sale => {
       if (sale.products && sale.products.length > 0) {
-        // Pour chaque produit, créer une ligne avec les infos de la vente
-        sale.products.forEach((product, productIndex) => {
-          salesData.push({
-            'ID Vente': sale.id,
-            'Date et Heure': new Date(sale.timestamp).toLocaleString('fr-FR'),
-            'Vendeur': sale.vendeur,
-            'Produit N°': productIndex + 1,
-            'Type Article': product.typeArticle,
-            'Catégorie': product.categorie,
-            'Quantité': product.quantite,
-            'Code Générique': product.gencode || '',
-            'Nom Client': sale.nom,
-            'Prénom Client': sale.prenom,
-            'Date Naissance': sale.dateNaissance || '',
-            'Lieu Naissance': sale.lieuNaissance || '',
-            'Mode Paiement': sale.modePaiement || '',
-            'Type Identité': sale.typeIdentite || '',
-            'Numéro Identité': sale.numeroIdentite || '',
-            'Autorité Délivrance': sale.autoriteDelivrance || '',
-            'Date Délivrance': sale.dateDelivrance || '',
-            'Photo Recto': sale.photoRecto ? 'Oui' : 'Non',
-            'Photo Verso': sale.photoVerso ? 'Oui' : 'Non',
-            'Photo Ticket': sale.photoTicket ? 'Oui' : 'Non'
+        sale.products.forEach((product, index) => {
+          mainWorksheet.addRow({
+            id: sale.id,
+            date: formatDate(sale.timestamp),
+            heure: new Date(sale.timestamp).toLocaleTimeString('fr-FR'),
+            vendeur: sale.vendeur,
+            nom: sale.nom,
+            prenom: sale.prenom,
+            dateNaissance: sale.dateNaissance || '',
+            lieuNaissance: sale.lieuNaissance || '',
+            typeIdentite: sale.typeIdentite || '',
+            numeroIdentite: sale.numeroIdentite || '',
+            autoriteDeLivrance: sale.autoriteDelivrance || '',
+            dateDelivrance: sale.dateDelivrance || '',
+            modePaiement: sale.modePaiement || '',
+            produitNumero: index + 1,
+            typeArticle: product.typeArticle,
+            categorie: product.categorie,
+            quantite: product.quantite,
+            gencode: product.gencode || ''
           });
         });
       } else {
         // Fallback pour les ventes sans produits
-        salesData.push({
-          'ID Vente': sale.id,
-          'Date et Heure': new Date(sale.timestamp).toLocaleString('fr-FR'),
-          'Vendeur': sale.vendeur,
-          'Produit N°': 'N/A',
-          'Type Article': 'N/A',
-          'Catégorie': 'N/A',
-          'Quantité': 0,
-          'Code Générique': '',
-          'Nom Client': sale.nom,
-          'Prénom Client': sale.prenom,
-          'Date Naissance': sale.dateNaissance || '',
-          'Lieu Naissance': sale.lieuNaissance || '',
-          'Mode Paiement': sale.modePaiement || '',
-          'Type Identité': sale.typeIdentite || '',
-          'Numéro Identité': sale.numeroIdentite || '',
-          'Autorité Délivrance': sale.autoriteDelivrance || '',
-          'Date Délivrance': sale.dateDelivrance || '',
-          'Photo Recto': sale.photoRecto ? 'Oui' : 'Non',
-          'Photo Verso': sale.photoVerso ? 'Oui' : 'Non',
-          'Photo Ticket': sale.photoTicket ? 'Oui' : 'Non'
+        mainWorksheet.addRow({
+          id: sale.id,
+          date: formatDate(sale.timestamp),
+          heure: new Date(sale.timestamp).toLocaleTimeString('fr-FR'),
+          vendeur: sale.vendeur,
+          nom: sale.nom,
+          prenom: sale.prenom,
+          dateNaissance: sale.dateNaissance || '',
+          lieuNaissance: sale.lieuNaissance || '',
+          typeIdentite: sale.typeIdentite || '',
+          numeroIdentite: sale.numeroIdentite || '',
+          autoriteDeLivrance: sale.autoriteDelivrance || '',
+          dateDelivrance: sale.dateDelivrance || '',
+          modePaiement: sale.modePaiement || '',
+          produitNumero: 'N/A',
+          typeArticle: 'N/A',
+          categorie: 'N/A',
+          quantite: 0,
+          gencode: ''
         });
       }
     });
 
-    // Créer la feuille des ventes
-    const salesWorksheet = utils.json_to_sheet(salesData);
-    
-    // Ajuster la largeur des colonnes
-    const columnWidths = [
-      { wch: 10 }, // ID Vente
-      { wch: 18 }, // Date et Heure
-      { wch: 15 }, // Vendeur
-      { wch: 10 }, // Produit N°
-      { wch: 25 }, // Type Article
-      { wch: 10 }, // Catégorie
-      { wch: 8 },  // Quantité
-      { wch: 15 }, // Code Générique
-      { wch: 15 }, // Nom Client
-      { wch: 15 }, // Prénom Client
-      { wch: 12 }, // Date Naissance
-      { wch: 15 }, // Lieu Naissance
-      { wch: 12 }, // Mode Paiement
-      { wch: 12 }, // Type Identité
-      { wch: 15 }, // Numéro Identité
-      { wch: 18 }, // Autorité Délivrance
-      { wch: 12 }, // Date Délivrance
-      { wch: 10 }, // Photo Recto
-      { wch: 10 }, // Photo Verso
-      { wch: 10 }  // Photo Ticket
-    ];
-    
-    salesWorksheet['!cols'] = columnWidths;
-
-    // Ajouter la feuille au classeur
-    utils.book_append_sheet(workbook, salesWorksheet, 'Ventes Détaillées');
-
-    // Créer une feuille de résumé
-    const summaryData = [
-      { 'Statistique': 'Nombre total de ventes', 'Valeur': sales.length },
-      { 'Statistique': 'Nombre total de produits vendus', 'Valeur': salesData.length },
-      { 'Statistique': 'Date de génération', 'Valeur': new Date().toLocaleString('fr-FR') },
-      { 'Statistique': 'Ventes avec photos recto', 'Valeur': sales.filter(s => s.photoRecto).length },
-      { 'Statistique': 'Ventes avec photos verso', 'Valeur': sales.filter(s => s.photoVerso).length },
-      { 'Statistique': 'Ventes avec photos ticket', 'Valeur': sales.filter(s => s.photoTicket).length }
-    ];
-
-    const summaryWorksheet = utils.json_to_sheet(summaryData);
-    summaryWorksheet['!cols'] = [{ wch: 30 }, { wch: 20 }];
-    utils.book_append_sheet(workbook, summaryWorksheet, 'Résumé');
-
-    // Créer une feuille de photos si il y a des ventes avec photos
+    // Créer une feuille pour les photos si disponibles
     const salesWithPhotos = sales.filter(sale => sale.photoRecto || sale.photoVerso || sale.photoTicket);
     
     if (salesWithPhotos.length > 0) {
-      const photosData: any[] = [];
+      const photosWorksheet = workbook.addWorksheet('Photos');
       
-      salesWithPhotos.forEach(sale => {
-        // Ajouter une ligne pour chaque vente avec photos
-        const photoRow: any = {
-          'ID Vente': sale.id,
-          'Date': new Date(sale.timestamp).toLocaleDateString('fr-FR'),
-          'Client': `${sale.nom} ${sale.prenom}`,
-          'Vendeur': sale.vendeur
-        };
-        
-        // Ajouter les informations sur les photos disponibles
-        photoRow['Photo Recto'] = sale.photoRecto ? 'DISPONIBLE' : 'NON DISPONIBLE';
-        photoRow['Photo Verso'] = sale.photoVerso ? 'DISPONIBLE' : 'NON DISPONIBLE';
-        photoRow['Photo Ticket'] = sale.photoTicket ? 'DISPONIBLE' : 'NON DISPONIBLE';
-        
-        // Ajouter des informations sur la taille des photos pour référence
-        if (sale.photoRecto) {
-          const rectoSize = Math.round(sale.photoRecto.length / 1024);
-          photoRow['Taille Recto (KB)'] = `${rectoSize} KB`;
-        } else {
-          photoRow['Taille Recto (KB)'] = 'N/A';
-        }
-        
-        if (sale.photoVerso) {
-          const versoSize = Math.round(sale.photoVerso.length / 1024);
-          photoRow['Taille Verso (KB)'] = `${versoSize} KB`;
-        } else {
-          photoRow['Taille Verso (KB)'] = 'N/A';
-        }
-        
-        if (sale.photoTicket) {
-          const ticketSize = Math.round(sale.photoTicket.length / 1024);
-          photoRow['Taille Ticket (KB)'] = `${ticketSize} KB`;
-        } else {
-          photoRow['Taille Ticket (KB)'] = 'N/A';
-        }
-        
-        // Information pour accéder aux photos
-        photoRow['Instructions'] = 'Voir détails de la vente dans l\'application pour télécharger les photos';
-        
-        photosData.push(photoRow);
-      });
-      
-      const photosWorksheet = utils.json_to_sheet(photosData);
-      
-      // Ajuster la largeur des colonnes pour les photos
-      photosWorksheet['!cols'] = [
-        { wch: 10 }, // ID Vente
-        { wch: 12 }, // Date
-        { wch: 20 }, // Client
-        { wch: 15 }, // Vendeur
-        { wch: 15 }, // Photo Recto
-        { wch: 15 }, // Photo Verso
-        { wch: 15 }, // Photo Ticket
-        { wch: 15 }, // Taille Recto (KB)
-        { wch: 15 }, // Taille Verso (KB)
-        { wch: 15 }, // Taille Ticket (KB)
-        { wch: 40 }  // Instructions
+      // Définir les colonnes pour les photos (plus larges pour les images)
+      photosWorksheet.columns = [
+        { header: 'ID Vente', key: 'id', width: 10 },
+        { header: 'Date', key: 'date', width: 12 },
+        { header: 'Client', key: 'client', width: 25 },
+        { header: 'Vendeur', key: 'vendeur', width: 15 },
+        { header: 'Photo Recto', key: 'photoRecto', width: 25 },
+        { header: 'Photo Verso', key: 'photoVerso', width: 25 },
+        { header: 'Photo Ticket', key: 'photoTicket', width: 25 }
       ];
       
-      // Ajuster la hauteur des lignes pour mieux voir les liens
-      const rowHeights: any[] = [];
-      for (let i = 0; i <= photosData.length; i++) {
-        rowHeights.push({ hpt: 20 });
+      // Ajouter les données et images
+      for (let i = 0; i < salesWithPhotos.length; i++) {
+        const sale = salesWithPhotos[i];
+        const rowIndex = i + 2; // +2 car la ligne 1 est l'en-tête
+        
+        // Ajouter les données de base
+        photosWorksheet.addRow({
+          id: sale.id,
+          date: formatDate(sale.timestamp),
+          client: `${sale.nom} ${sale.prenom}`,
+          vendeur: sale.vendeur,
+          photoRecto: sale.photoRecto ? 'Image intégrée ci-dessous' : 'Non disponible',
+          photoVerso: sale.photoVerso ? 'Image intégrée ci-dessous' : 'Non disponible',
+          photoTicket: sale.photoTicket ? 'Image intégrée ci-dessous' : 'Non disponible'
+        });
+        
+        // Définir la hauteur de ligne pour les images (150 pixels = ~2cm)
+        photosWorksheet.getRow(rowIndex).height = 150;
+        
+        try {
+          // Ajouter l'image recto si disponible
+          if (sale.photoRecto) {
+            const rectoBase64 = sale.photoRecto.includes(',') ? sale.photoRecto.split(',')[1] : sale.photoRecto;
+            const rectoBuffer = Buffer.from(rectoBase64, 'base64');
+            const rectoImageId = workbook.addImage({
+              buffer: rectoBuffer,
+              extension: 'jpeg',
+            });
+            
+            photosWorksheet.addImage(rectoImageId, {
+              tl: { col: 4, row: rowIndex - 1 }, // colonne E (photoRecto)
+              ext: { width: 120, height: 90 }
+            });
+          }
+          
+          // Ajouter l'image verso si disponible
+          if (sale.photoVerso) {
+            const versoBase64 = sale.photoVerso.includes(',') ? sale.photoVerso.split(',')[1] : sale.photoVerso;
+            const versoBuffer = Buffer.from(versoBase64, 'base64');
+            const versoImageId = workbook.addImage({
+              buffer: versoBuffer,
+              extension: 'jpeg',
+            });
+            
+            photosWorksheet.addImage(versoImageId, {
+              tl: { col: 5, row: rowIndex - 1 }, // colonne F (photoVerso)
+              ext: { width: 120, height: 90 }
+            });
+          }
+          
+          // Ajouter l'image ticket si disponible
+          if (sale.photoTicket) {
+            const ticketBase64 = sale.photoTicket.includes(',') ? sale.photoTicket.split(',')[1] : sale.photoTicket;
+            const ticketBuffer = Buffer.from(ticketBase64, 'base64');
+            const ticketImageId = workbook.addImage({
+              buffer: ticketBuffer,
+              extension: 'jpeg',
+            });
+            
+            photosWorksheet.addImage(ticketImageId, {
+              tl: { col: 6, row: rowIndex - 1 }, // colonne G (photoTicket)
+              ext: { width: 120, height: 90 }
+            });
+          }
+        } catch (error) {
+          console.error('Erreur lors de l\'ajout d\'images pour la vente', sale.id, error);
+        }
       }
-      photosWorksheet['!rows'] = rowHeights;
-      
-      utils.book_append_sheet(workbook, photosWorksheet, 'Photos');
     }
 
     // Exporter le fichier Excel
     const fileName = `registre-feux-artifice-${new Date().toISOString().split('T')[0]}.xlsx`;
-    writeFile(workbook, fileName);
+    const buffer = await workbook.xlsx.writeBuffer();
     
-    // Télécharger les photos séparément si disponibles
-    if (salesWithPhotos.length > 0) {
-      // Attendre un peu pour que l'Excel se télécharge d'abord
-      setTimeout(() => {
-        downloadPhotosForSales(salesWithPhotos);
-      }, 1000);
-    }
+    // Créer et télécharger le fichier
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
     
   } catch (error) {
     console.error('Erreur lors de l\'export Excel:', error);
-    throw error;
+    alert('Erreur lors de l\'export Excel. Veuillez réessayer.');
   }
+}
+
+export async function exportToCSV(sales: Sale[]): Promise<void> {
+  if (sales.length === 0) return;
+
+  const csvData: string[] = [];
+  
+  // En-têtes CSV
+  const headers = [
+    'ID Vente', 'Date', 'Heure', 'Vendeur', 'Nom', 'Prénom', 
+    'Date de naissance', 'Lieu de naissance', 'Type d\'identité', 'Numéro d\'identité',
+    'Autorité de délivrance', 'Date de délivrance', 'Mode de paiement',
+    'Produit N°', 'Type d\'article', 'Catégorie', 'Quantité', 'Code générique'
+  ];
+  csvData.push(headers.join(';'));
+
+  // Données
+  sales.forEach(sale => {
+    if (sale.products && sale.products.length > 0) {
+      sale.products.forEach((product, index) => {
+        const row = [
+          sale.id,
+          formatDate(sale.timestamp),
+          new Date(sale.timestamp).toLocaleTimeString('fr-FR'),
+          sale.vendeur,
+          sale.nom,
+          sale.prenom,
+          sale.dateNaissance || '',
+          sale.lieuNaissance || '',
+          sale.typeIdentite || '',
+          sale.numeroIdentite || '',
+          sale.autoriteDelivrance || '',
+          sale.dateDelivrance || '',
+          sale.modePaiement || '',
+          index + 1,
+          product.typeArticle,
+          product.categorie,
+          product.quantite,
+          product.gencode || ''
+        ];
+        csvData.push(row.join(';'));
+      });
+    } else {
+      const row = [
+        sale.id,
+        formatDate(sale.timestamp),
+        new Date(sale.timestamp).toLocaleTimeString('fr-FR'),
+        sale.vendeur,
+        sale.nom,
+        sale.prenom,
+        sale.dateNaissance || '',
+        sale.lieuNaissance || '',
+        sale.typeIdentite || '',
+        sale.numeroIdentite || '',
+        sale.autoriteDelivrance || '',
+        sale.dateDelivrance || '',
+        sale.modePaiement || '',
+        'N/A',
+        'N/A',
+        'N/A',
+        0,
+        ''
+      ];
+      csvData.push(row.join(';'));
+    }
+  });
+
+  const csvContent = csvData.join('\n');
+  const fileName = `registre-feux-artifice-${new Date().toISOString().split('T')[0]}.csv`;
+  
+  downloadFile(csvContent, fileName, 'text/csv;charset=utf-8;');
 }
 
 export function formatDate(dateString: string): string {
@@ -279,91 +334,4 @@ export function downloadPhotosForSales(sales: Sale[]): void {
       console.log(message);
     }
   }
-}
-
-// Fonction CSV basique maintenue pour compatibilité si nécessaire
-export function exportToCSV(sales: Sale[]): void {
-  if (sales.length === 0) return;
-
-  const headers = [
-    'Date et heure de vente',
-    'Vendeur',
-    'Type d\'article',
-    'Catégorie',
-    'Quantité',
-    'Code générique',
-    'Nom client',
-    'Prénom client',
-    'Date de naissance',
-    'Lieu de naissance',
-    'Mode de paiement',
-    'Type d\'identité',
-    'Numéro d\'identité',
-    'Autorité de délivrance',
-    'Date de délivrance'
-  ];
-
-  // Créer une ligne pour chaque produit de chaque vente
-  const rows: string[][] = [];
-  
-  sales.forEach(sale => {
-    if (sale.products && sale.products.length > 0) {
-      // Pour chaque produit, créer une ligne avec les infos de la vente
-      sale.products.forEach(product => {
-        rows.push([
-          new Date(sale.timestamp).toLocaleString('fr-FR'),
-          sale.vendeur,
-          product.typeArticle,
-          product.categorie,
-          product.quantite.toString(),
-          product.gencode || '',
-          sale.nom,
-          sale.prenom,
-          sale.dateNaissance || '',
-          sale.lieuNaissance || '',
-          sale.modePaiement || '',
-          sale.typeIdentite || '',
-          sale.numeroIdentite || '',
-          sale.autoriteDelivrance || '',
-          sale.dateDelivrance || ''
-        ]);
-      });
-    } else {
-      // Fallback pour les ventes sans produits (anciennes données)
-      rows.push([
-        new Date(sale.timestamp).toLocaleString('fr-FR'),
-        sale.vendeur,
-        'N/A',
-        'N/A',
-        '0',
-        '',
-        sale.nom,
-        sale.prenom,
-        sale.dateNaissance || '',
-        sale.lieuNaissance || '',
-        sale.modePaiement || '',
-        sale.typeIdentite || '',
-        sale.numeroIdentite || '',
-        sale.autoriteDelivrance || '',
-        sale.dateDelivrance || ''
-      ]);
-    }
-  });
-
-  const csvContent = [headers, ...rows]
-    .map(row => row.map(field => `"${String(field).replace(/"/g, '""')}"`).join(';'))
-    .join('\n');
-
-  // Add BOM for UTF-8 Excel compatibility
-  const bom = '\uFEFF';
-  const blob = new Blob([bom + csvContent], { 
-    type: 'text/csv;charset=utf-8;' 
-  });
-
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = `ventes_petards_${new Date().toISOString().split('T')[0]}.csv`;
-  link.click();
-  
-  URL.revokeObjectURL(link.href);
 }
