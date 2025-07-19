@@ -477,8 +477,8 @@ export default function NewSaleFormMultiProduct() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {PAYMENT_METHODS.map((method) => (
-                            <SelectItem key={`payment-${method}`} value={method}>
+                          {PAYMENT_METHODS.map((method, methodIndex) => (
+                            <SelectItem key={`payment-method-${methodIndex}`} value={method}>
                               {method}
                             </SelectItem>
                           ))}
@@ -511,8 +511,8 @@ export default function NewSaleFormMultiProduct() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {IDENTITY_TYPES.map((type) => (
-                            <SelectItem key={`identity-${type}`} value={type}>
+                          {IDENTITY_TYPES.map((type, typeIndex) => (
+                            <SelectItem key={`identity-type-${typeIndex}`} value={type}>
                               {type}
                             </SelectItem>
                           ))}
