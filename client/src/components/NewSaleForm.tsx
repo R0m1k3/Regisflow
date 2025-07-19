@@ -64,7 +64,7 @@ export default function NewSaleForm() {
   const form = useForm<FormData>({
     defaultValues: {
       vendeur: '',
-      products: [{ typeArticle: '', categorie: '', quantite: '1', gencode: '' }],
+      products: [{ typeArticle: '', categorie: '', quantite: '', gencode: '' }],
       nom: '',
       prenom: '',
       dateNaissance: '',
@@ -85,7 +85,7 @@ export default function NewSaleForm() {
   
   const addProduct = () => {
     const currentProducts = form.getValues('products');
-    form.setValue('products', [...currentProducts, { typeArticle: '', categorie: '', quantite: '1', gencode: '' }]);
+    form.setValue('products', [...currentProducts, { typeArticle: '', categorie: '', quantite: '', gencode: '' }]);
   };
 
   const removeProduct = (index: number) => {
@@ -370,7 +370,7 @@ export default function NewSaleForm() {
             <div className="section-vendor">
               <div className="section-header">
                 <User className="h-5 w-5" />
-                <span>Informations vendeur</span>
+                <span>Informations Vendeur</span>
               </div>
               <div className="grid grid-cols-1 gap-4">
                 <FormField
@@ -378,7 +378,7 @@ export default function NewSaleForm() {
                   name="vendeur"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nom du vendeur <span className="text-destructive">*</span></FormLabel>
+                      <FormLabel>Vendeur <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
                         <Input placeholder="Nom du vendeur" className="modern-input" {...field} />
                       </FormControl>
@@ -389,14 +389,11 @@ export default function NewSaleForm() {
               </div>
             </div>
 
-            {/* Section Produits */}
+            {/* Section Produit */}
             <div className="section-product">
               <div className="section-header">
                 <Package className="h-5 w-5" />
-                <span>Produits</span>
-                {products.length > 1 && (
-                  <span className="text-sm text-gray-600 ml-2">({products.length} produits)</span>
-                )}
+                <span>Informations Produit</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
@@ -457,7 +454,7 @@ export default function NewSaleForm() {
                     <FormItem>
                       <FormLabel>Quantité <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
-                        <Input type="number" min="1" placeholder="1" className="modern-input" {...field} />
+                        <Input type="number" min="1" placeholder="Entrez la quantité" className="modern-input" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -490,7 +487,7 @@ export default function NewSaleForm() {
             <div className="section-client">
               <div className="section-header">
                 <Users className="h-5 w-5" />
-                <span>Informations client</span>
+                <span>Informations Client</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
@@ -576,7 +573,7 @@ export default function NewSaleForm() {
             <div className="section-identity">
               <div className="section-header">
                 <BadgeCheck className="h-5 w-5" />
-                <span>Pièce d'identité</span>
+                <span>Pièce d'Identité</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
@@ -647,8 +644,7 @@ export default function NewSaleForm() {
               {/* Section Photos */}
               <div className="mt-6 space-y-4">
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700">Photos de la pièce d'identité (optionnel)</h4>
-                  <p className="text-xs text-gray-500 mt-1">Les photos d'identité ne sont pas obligatoires</p>
+                  <h4 className="text-sm font-medium text-gray-700">Photos de la pièce d'identité</h4>
                 </div>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -759,8 +755,7 @@ export default function NewSaleForm() {
               {/* Photo Ticket de caisse */}
               <div className="mt-6 space-y-4">
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700">Photo du ticket de caisse (optionnel)</h4>
-                  <p className="text-xs text-gray-500 mt-1">La photo du ticket n'est pas obligatoire</p>
+                  <h4 className="text-sm font-medium text-gray-700">Photo du ticket de caisse</h4>
                 </div>
                 
                 <div className="space-y-2">

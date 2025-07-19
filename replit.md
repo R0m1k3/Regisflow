@@ -315,28 +315,6 @@ Preferred communication style: Simple, everyday language.
 - ✅ **Database Schema**: Sales and sale_products tables properly configured for multi-product sales
 - ✅ **Export Compatibility**: All export functions (Excel, PDF, CSV) support multiple products per sale
 
-### SQL Backup System Implementation (January 19, 2025)
-- ✅ **SQL Backup Format**: Migrated from JSON to native PostgreSQL SQL format using pg_dump
-- ✅ **Database Restoration**: Implemented SQL import capability using psql for complete database restoration
-- ✅ **Automatic SQL Backups**: Modified scheduler to create SQL dumps instead of JSON exports
-- ✅ **Manual Export/Import**: Updated administration interface to handle SQL files (.sql)
-- ✅ **Buffer Optimization**: Increased maxBuffer to 50MB for handling large databases with photo data
-- ✅ **Production Compatibility**: Native PostgreSQL backup format ensures full compatibility with production systems
-- ✅ **Data Integrity**: SQL format preserves all database structure, constraints, and relationships
-- ✅ **User Interface**: Updated backup management UI with SQL-specific messaging and file extensions
-
-### Photo Requirements Optimization (January 19, 2025)
-- ✅ **Optional Identity Photos**: Made identity document photos (recto/verso) optional as per user request
-- ✅ **Optional Receipt Photos**: Clarified that receipt/ticket photos are also optional
-- ✅ **UI Updates**: Updated form labels to clearly indicate photo fields are not mandatory
-- ✅ **Validation Adjustment**: Photos no longer required for form submission compliance
-- ✅ **User Experience**: Added explanatory text to reduce confusion about photo requirements
-
-### Form Usability Improvements (January 19, 2025)
-- ✅ **Default Quantity**: Set product quantity field to default value of 1 for better user experience
-- ✅ **Streamlined Input**: Users no longer need to manually enter quantity for single item purchases
-- ✅ **Placeholder Update**: Changed placeholder text to reflect default value
-
 ### Docker Configuration & Cleanup (January 9, 2025)
 - ✅ Complete Docker setup optimized for external PostgreSQL database
 - ✅ Docker Compose configuration with RegisFlow application only

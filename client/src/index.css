@@ -409,21 +409,21 @@ body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-/* Fonds de couleur unis harmonisés selon la nouvelle interface */
+/* Fonds de couleur unis harmonisés avec des teintes distinctes */
 .section-vendor {
-  background: #e0f2fe !important; /* Fond bleu clair comme l'image */
+  background: #f0f9ff !important; /* Fond bleu très clair */
 }
 
 .section-product {
-  background: #e8f5e8 !important; /* Fond vert clair comme l'image */
+  background: #f0fdf4 !important; /* Fond vert très clair */
 }
 
 .section-client {
-  background: #f3e8ff !important; /* Fond violet clair comme l'image */
+  background: #fef3c7 !important; /* Fond jaune clair */
 }
 
 .section-identity {
-  background: #fff3e0 !important; /* Fond orange clair comme l'image */
+  background: #fce7f3 !important; /* Fond rose très clair */
 }
 
 /* S'assurer que tous les inputs ont un fond blanc dans toutes les sections */

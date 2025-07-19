@@ -5,9 +5,7 @@ import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { loginSchema, insertUserSchema, insertStoreSchema, insertSaleSchema } from "@shared/schema";
 import { z } from "zod";
-import fs from "fs";
-import path from "path";
-import { createAutomaticBackup, getBackupStats, createSQLBackup, restoreSQLBackup } from "./backup-scheduler";
+import { createAutomaticBackup, getBackupStats } from "./backup-scheduler";
 import { executePurgeManually, getPurgeStats } from "./data-purge";
 
 declare module 'express-session' {
@@ -466,65 +464,139 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // SQL Backup routes
+  // Backup routes
   app.get('/api/admin/backup/export', requireRole(['admin']), async (req, res) => {
     try {
-      // Create a temporary SQL backup
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const filename = `manual-backup-${timestamp}.sql`;
-      const filepath = path.join(process.cwd(), 'backups', filename);
+      // Get all data from the database
+      const users = await storage.getAllUsers();
+      const stores = await storage.getAllStores();
       
-      await createSQLBackup(filepath);
-      
-      // Send the SQL file
-      res.setHeader('Content-Type', 'application/sql');
-      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-      
-      const sqlContent = fs.readFileSync(filepath, 'utf8');
-      res.send(sqlContent);
-      
-      // Optionally delete the temporary file after sending
-      // fs.unlinkSync(filepath);
-      
+      // Get all sales from all stores
+      const allSales = [];
+      for (const store of stores) {
+        const storeSales = await storage.getSalesByStore(store.id);
+        allSales.push(...storeSales);
+      }
+
+      const backupData = {
+        timestamp: new Date().toISOString(),
+        version: "1.0",
+        data: {
+          users: users.map(user => ({
+            ...user,
+            // Don't include the password hash in backup for security
+            password: undefined
+          })),
+          stores,
+          sales: allSales
+        },
+        metadata: {
+          totalUsers: users.length,
+          totalStores: stores.length,
+          totalSales: allSales.length,
+          exportedBy: req.user.username
+        }
+      };
+
+      res.json(backupData);
     } catch (error) {
-      console.error('Export SQL backup error:', error);
-      res.status(500).json({ error: "Failed to export SQL backup" });
+      console.error('Export backup error:', error);
+      res.status(500).json({ error: "Failed to export backup" });
     }
   });
 
-  // SQL Backup import route (receives SQL file content)
   app.post('/api/admin/backup/import', requireRole(['admin']), async (req, res) => {
     try {
-      const { sqlContent } = req.body;
+      const backupData = req.body;
       
-      if (!sqlContent || typeof sqlContent !== 'string') {
-        return res.status(400).json({ error: "SQL content is required" });
+      // Validate backup structure
+      if (!backupData.data || !backupData.data.users || !backupData.data.stores || !backupData.data.sales) {
+        return res.status(400).json({ error: "Invalid backup file format" });
       }
 
-      // Create a temporary file for the SQL content
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const filename = `restore-${timestamp}.sql`;
-      const filepath = path.join(process.cwd(), 'backups', filename);
+      // Clear existing data (in reverse order due to foreign keys)
+      // First delete all sales
+      const existingSales = [];
+      const existingStores = await storage.getAllStores();
+      for (const store of existingStores) {
+        const storeSales = await storage.getSalesByStore(store.id);
+        existingSales.push(...storeSales);
+      }
       
-      // Write SQL content to temporary file
-      fs.writeFileSync(filepath, sqlContent);
-      
-      // Restore the backup
-      await restoreSQLBackup(filepath);
-      
-      // Clean up temporary file
-      fs.unlinkSync(filepath);
-      
+      for (const sale of existingSales) {
+        await storage.deleteSale(sale.id);
+      }
+
+      // Then delete users (except admin to avoid locking out)
+      const existingUsers = await storage.getAllUsers();
+      for (const user of existingUsers) {
+        if (user.role !== 'administrator' || user.username !== 'admin') {
+          await storage.deleteUser(user.id);
+        }
+      }
+
+      // Then delete stores
+      for (const store of existingStores) {
+        await storage.deleteStore(store.id);
+      }
+
+      // Import new data
+      // First import stores
+      const storeIdMapping = new Map();
+      for (const storeData of backupData.data.stores) {
+        const { id, ...storeWithoutId } = storeData;
+        const newStore = await storage.createStore(storeWithoutId);
+        storeIdMapping.set(id, newStore.id);
+      }
+
+      // Then import users (excluding admin and users with passwords)
+      const userIdMapping = new Map();
+      for (const userData of backupData.data.users) {
+        if (userData.username === 'admin') continue; // Skip admin user
+        
+        const { id, password, ...userWithoutIdAndPassword } = userData;
+        
+        // Map store ID if it exists
+        if (userData.storeId && storeIdMapping.has(userData.storeId)) {
+          userWithoutIdAndPassword.storeId = storeIdMapping.get(userData.storeId);
+        }
+        
+        // Set a default password since we can't restore the original
+        const userWithPassword = {
+          ...userWithoutIdAndPassword,
+          password: 'restored123' // Users will need to change this
+        };
+        
+        const newUser = await storage.createUser(userWithPassword);
+        userIdMapping.set(id, newUser.id);
+      }
+
+      // Finally import sales
+      for (const saleData of backupData.data.sales) {
+        const { id, ...saleWithoutId } = saleData;
+        
+        // Map store and user IDs
+        if (saleData.storeId && storeIdMapping.has(saleData.storeId)) {
+          saleWithoutId.storeId = storeIdMapping.get(saleData.storeId);
+        }
+        if (saleData.userId && userIdMapping.has(saleData.userId)) {
+          saleWithoutId.userId = userIdMapping.get(saleData.userId);
+        }
+        
+        await storage.createSale(saleWithoutId);
+      }
+
       res.json({ 
-        message: "SQL backup restored successfully",
-        timestamp: new Date().toISOString()
+        message: "Backup imported successfully",
+        imported: {
+          stores: backupData.data.stores.length,
+          users: backupData.data.users.filter((u: any) => u.username !== 'admin').length,
+          sales: backupData.data.sales.length
+        }
       });
     } catch (error) {
-      console.error('Import SQL backup error:', error);
-      res.status(500).json({ 
-        error: "Failed to restore SQL backup", 
-        details: error instanceof Error ? error.message : 'Unknown error' 
-      });
+      console.error('Import backup error:', error);
+      res.status(500).json({ error: "Failed to import backup", details: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 

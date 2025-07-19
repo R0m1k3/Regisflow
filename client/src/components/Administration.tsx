@@ -308,52 +308,44 @@ export default function Administration() {
     deleteStoreMutation.mutate(store.id);
   };
 
-  // SQL Backup mutations
+  // Backup mutations
   const exportBackupMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch('/api/admin/backup/export', {
-        method: 'GET',
-        credentials: 'include',
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to export SQL backup');
-      }
-      
-      return response.text(); // Get SQL content as text
+      const response = await apiRequest('/api/admin/backup/export');
+      return response.json();
     },
-    onSuccess: (sqlContent) => {
-      // Create and download SQL file
-      const blob = new Blob([sqlContent], { type: 'application/sql' });
+    onSuccess: (data) => {
+      // Créer et télécharger le fichier JSON
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `backup_${new Date().toISOString().split('T')[0]}_${Date.now()}.sql`;
+      link.download = `backup_${new Date().toISOString().split('T')[0]}_${Date.now()}.json`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
       
       toast({
-        title: "Sauvegarde SQL exportée",
-        description: "Le fichier de sauvegarde SQL a été téléchargé",
+        title: "Sauvegarde exportée",
+        description: "Le fichier de sauvegarde a été téléchargé",
         variant: "success",
       });
     },
-    onError: (error) => {
+    onError: () => {
       toast({
-        title: "Erreur d'export SQL",
-        description: error instanceof Error ? error.message : "Impossible d'exporter la sauvegarde SQL",
+        title: "Erreur",
+        description: "Impossible d'exporter la sauvegarde",
         variant: "destructive",
       });
     },
   });
 
   const importBackupMutation = useMutation({
-    mutationFn: async (sqlContent: string) => {
+    mutationFn: async (backupData: any) => {
       const response = await apiRequest('/api/admin/backup/import', {
         method: 'POST',
-        body: JSON.stringify({ sqlContent }),
+        body: JSON.stringify(backupData),
       });
       return response.json();
     },
@@ -361,15 +353,15 @@ export default function Administration() {
       // Invalider toutes les queries pour forcer un refresh
       queryClient.clear();
       toast({
-        title: "Sauvegarde SQL importée",
-        description: "La base de données a été restaurée avec succès",
+        title: "Sauvegarde importée",
+        description: "Les données ont été restaurées avec succès",
         variant: "success",
       });
     },
-    onError: (error) => {
+    onError: () => {
       toast({
-        title: "Erreur d'import SQL",
-        description: error instanceof Error ? error.message : "Impossible d'importer la sauvegarde SQL",
+        title: "Erreur",
+        description: "Impossible d'importer la sauvegarde",
         variant: "destructive",
       });
     },
@@ -406,22 +398,19 @@ export default function Administration() {
   const handleImportBackup = () => {
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = '.sql';
+    input.accept = '.json';
     input.onchange = (event) => {
       const file = (event.target as HTMLInputElement).files?.[0];
       if (file) {
         const reader = new FileReader();
         reader.onload = (e) => {
           try {
-            const sqlContent = e.target?.result as string;
-            if (!sqlContent.trim()) {
-              throw new Error('Le fichier SQL est vide');
-            }
-            importBackupMutation.mutate(sqlContent);
+            const backupData = JSON.parse(e.target?.result as string);
+            importBackupMutation.mutate(backupData);
           } catch (error) {
             toast({
               title: "Erreur",
-              description: error instanceof Error ? error.message : "Fichier de sauvegarde SQL invalide",
+              description: "Fichier de sauvegarde invalide",
               variant: "destructive",
             });
           }
@@ -1235,7 +1224,7 @@ export default function Administration() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-sm text-muted-foreground">
-                    Téléchargez une sauvegarde SQL complète de toutes les données (utilisateurs, magasins, ventes) compatible avec PostgreSQL.
+                    Téléchargez une sauvegarde complète de toutes les données (utilisateurs, magasins, ventes).
                   </p>
                   <Button 
                     onClick={handleExportBackup} 
@@ -1243,7 +1232,7 @@ export default function Administration() {
                     className="w-full"
                   >
                     <Download className="h-4 w-4 mr-2" />
-                    {exportBackupMutation.isPending ? "Export SQL en cours..." : "Télécharger la Sauvegarde SQL"}
+                    {exportBackupMutation.isPending ? "Export en cours..." : "Télécharger la Sauvegarde"}
                   </Button>
                 </CardContent>
               </Card>
@@ -1258,7 +1247,7 @@ export default function Administration() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-sm text-muted-foreground">
-                    Restaurez la base de données à partir d'un fichier de sauvegarde SQL PostgreSQL. 
+                    Restaurez les données à partir d'un fichier de sauvegarde. 
                     <strong className="text-red-600"> Attention : cette action remplacera toutes les données existantes.</strong>
                   </p>
                   <AlertDialog>
@@ -1269,18 +1258,18 @@ export default function Administration() {
                         className="w-full"
                       >
                         <Upload className="h-4 w-4 mr-2" />
-                        {importBackupMutation.isPending ? "Import SQL en cours..." : "Restaurer depuis un Fichier SQL"}
+                        {importBackupMutation.isPending ? "Import en cours..." : "Restaurer depuis un Fichier"}
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Confirmer la restauration SQL</AlertDialogTitle>
+                        <AlertDialogTitle>Confirmer la restauration</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Êtes-vous sûr de vouloir restaurer la base de données depuis un fichier de sauvegarde SQL ?
+                          Êtes-vous sûr de vouloir restaurer les données depuis un fichier de sauvegarde ?
                           <br /><br />
                           <strong className="text-red-600">
-                            ⚠️ ATTENTION : Cette action exécutera le script SQL qui remplacera complètement 
-                            la structure et les données de la base de données PostgreSQL.
+                            ⚠️ ATTENTION : Cette action supprimera définitivement toutes les données actuelles 
+                            (utilisateurs, magasins, ventes) et les remplacera par celles du fichier de sauvegarde.
                           </strong>
                           <br /><br />
                           Cette action est irréversible. Assurez-vous d'avoir une sauvegarde des données actuelles 
@@ -1293,7 +1282,7 @@ export default function Administration() {
                           onClick={handleImportBackup}
                           className="bg-red-600 hover:bg-red-700"
                         >
-                          Confirmer la Restauration SQL
+                          Confirmer la Restauration
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
@@ -1310,19 +1299,16 @@ export default function Administration() {
               <CardContent>
                 <div className="space-y-3 text-sm">
                   <div>
-                    <strong>Sauvegarde automatique :</strong> Le système crée automatiquement une sauvegarde SQL toutes les 12 heures (00:00 et 12:00) et conserve les 10 plus récentes.
+                    <strong>Sauvegarde automatique :</strong> Le système crée automatiquement une sauvegarde toutes les 12 heures (00:00 et 12:00) et conserve les 10 plus récentes.
                   </div>
                   <div>
-                    <strong>Format des fichiers :</strong> Les sauvegardes sont au format SQL PostgreSQL (.sql) et contiennent la structure complète et les données de la base.
+                    <strong>Format des fichiers :</strong> Les sauvegardes sont au format JSON et contiennent toutes les données de l'application.
                   </div>
                   <div>
-                    <strong>Contenu inclus :</strong> Schéma de base de données, utilisateurs, magasins, ventes, et toutes les relations entre ces données.
+                    <strong>Contenu inclus :</strong> Utilisateurs, magasins, ventes, et toutes les relations entre ces données.
                   </div>
                   <div>
-                    <strong>Avantages SQL :</strong> Sauvegarde native PostgreSQL compatible avec pg_dump/pg_restore, structure et données préservées.
-                  </div>
-                  <div>
-                    <strong>Restauration :</strong> Remplace complètement la base de données existante par le contenu du fichier SQL importé.
+                    <strong>Sécurité :</strong> Les mots de passe sont hachés et ne peuvent pas être récupérés depuis une sauvegarde.
                   </div>
                   <div>
                     <strong>Recommandation :</strong> Les sauvegardes automatiques couvrent la plupart des besoins, mais vous pouvez créer des sauvegardes manuelles avant des modifications importantes.
