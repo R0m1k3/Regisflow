@@ -106,7 +106,7 @@ export async function exportToExcel(sales: Sale[]): Promise<void> {
     });
 
     // Créer une feuille pour les photos si disponibles
-    const salesWithPhotos = sales.filter(sale => sale.photoRecto || sale.photoVerso || sale.photoTicket);
+    const salesWithPhotos = sales.filter(sale => sale.photo_recto || sale.photo_verso || sale.photo_ticket);
     
     if (salesWithPhotos.length > 0) {
       const photosWorksheet = workbook.addWorksheet('Photos');
@@ -133,9 +133,9 @@ export async function exportToExcel(sales: Sale[]): Promise<void> {
           date: formatDate(sale.timestamp),
           client: `${sale.nom} ${sale.prenom}`,
           vendeur: sale.vendeur,
-          photoRecto: sale.photoRecto ? 'Image intégrée ci-dessous' : 'Non disponible',
-          photoVerso: sale.photoVerso ? 'Image intégrée ci-dessous' : 'Non disponible',
-          photoTicket: sale.photoTicket ? 'Image intégrée ci-dessous' : 'Non disponible'
+          photoRecto: sale.photo_recto ? 'Image intégrée ci-dessous' : 'Non disponible',
+          photoVerso: sale.photo_verso ? 'Image intégrée ci-dessous' : 'Non disponible',
+          photoTicket: sale.photo_ticket ? 'Image intégrée ci-dessous' : 'Non disponible'
         });
         
         // Définir la hauteur de ligne pour les images (150 pixels = ~2cm)
@@ -143,8 +143,8 @@ export async function exportToExcel(sales: Sale[]): Promise<void> {
         
         try {
           // Ajouter l'image recto si disponible
-          if (sale.photoRecto) {
-            const rectoBase64 = sale.photoRecto.includes(',') ? sale.photoRecto.split(',')[1] : sale.photoRecto;
+          if (sale.photo_recto) {
+            const rectoBase64 = sale.photo_recto.includes(',') ? sale.photo_recto.split(',')[1] : sale.photo_recto;
             const rectoBuffer = Buffer.from(rectoBase64, 'base64');
             const rectoImageId = workbook.addImage({
               buffer: rectoBuffer,
@@ -158,8 +158,8 @@ export async function exportToExcel(sales: Sale[]): Promise<void> {
           }
           
           // Ajouter l'image verso si disponible
-          if (sale.photoVerso) {
-            const versoBase64 = sale.photoVerso.includes(',') ? sale.photoVerso.split(',')[1] : sale.photoVerso;
+          if (sale.photo_verso) {
+            const versoBase64 = sale.photo_verso.includes(',') ? sale.photo_verso.split(',')[1] : sale.photo_verso;
             const versoBuffer = Buffer.from(versoBase64, 'base64');
             const versoImageId = workbook.addImage({
               buffer: versoBuffer,
@@ -173,8 +173,8 @@ export async function exportToExcel(sales: Sale[]): Promise<void> {
           }
           
           // Ajouter l'image ticket si disponible
-          if (sale.photoTicket) {
-            const ticketBase64 = sale.photoTicket.includes(',') ? sale.photoTicket.split(',')[1] : sale.photoTicket;
+          if (sale.photo_ticket) {
+            const ticketBase64 = sale.photo_ticket.includes(',') ? sale.photo_ticket.split(',')[1] : sale.photo_ticket;
             const ticketBuffer = Buffer.from(ticketBase64, 'base64');
             const ticketImageId = workbook.addImage({
               buffer: ticketBuffer,
@@ -300,26 +300,26 @@ export function downloadPhotosForSales(sales: Sale[]): void {
     const saleDate = new Date(sale.timestamp).toLocaleDateString('fr-FR').replace(/\//g, '-');
     const clientName = `${sale.nom}_${sale.prenom}`.replace(/\s+/g, '_');
     
-    if (sale.photoRecto) {
+    if (sale.photo_recto) {
       photoCount++;
       downloadImage(
-        sale.photoRecto, 
+        sale.photo_recto, 
         `Vente_${sale.id}_${saleDate}_${clientName}_Recto.jpg`
       );
     }
     
-    if (sale.photoVerso) {
+    if (sale.photo_verso) {
       photoCount++;
       downloadImage(
-        sale.photoVerso, 
+        sale.photo_verso, 
         `Vente_${sale.id}_${saleDate}_${clientName}_Verso.jpg`
       );
     }
     
-    if (sale.photoTicket) {
+    if (sale.photo_ticket) {
       photoCount++;
       downloadImage(
-        sale.photoTicket, 
+        sale.photo_ticket, 
         `Vente_${sale.id}_${saleDate}_${clientName}_Ticket.jpg`
       );
     }

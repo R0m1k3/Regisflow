@@ -23,7 +23,7 @@ export interface Sale {
   // Identité
   typeIdentite: string;
   numeroIdentite: string;
-  autoriteDelivrance: string;
+  autoriteDelivrance?: string;
   dateDelivrance: string;
   
   // Photos (snake_case to match database)
