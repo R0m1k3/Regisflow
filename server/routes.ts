@@ -615,6 +615,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           saleWithoutId.userId = userIdMapping.get(saleData.userId);
         }
         
+        // Convert timestamp string to Date object
+        if (saleWithoutId.timestamp && typeof saleWithoutId.timestamp === 'string') {
+          saleWithoutId.timestamp = new Date(saleWithoutId.timestamp);
+        }
+        
+        // Convert date strings to Date objects - fix for backup import
+        if (saleWithoutId.dateNaissance && typeof saleWithoutId.dateNaissance === 'string') {
+          // Handle date format YYYY-MM-DD
+          saleWithoutId.dateNaissance = saleWithoutId.dateNaissance;
+        }
+        if (saleWithoutId.dateDelivrance && typeof saleWithoutId.dateDelivrance === 'string') {
+          // Handle date format YYYY-MM-DD
+          saleWithoutId.dateDelivrance = saleWithoutId.dateDelivrance;
+        }
+        
         await storage.createSale(saleWithoutId);
       }
 

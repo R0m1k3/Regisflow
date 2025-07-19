@@ -1,0 +1,53 @@
+4:35:13 PM [express] GET /api/auth/me 401 in 2ms :: {"error":"Authentication required"}
+
+4:35:13 PM [express] GET /api/auth/default-credentials-status 200 in 311ms :: {"showDefaultCredentia…
+
+4:35:34 PM [express] POST /api/auth/login 200 in 327ms :: {"user":{"id":1,"username":"admin","email"…
+
+4:35:35 PM [express] GET /api/auth/me 200 in 5ms :: {"id":1,"username":"admin","email":"admin@exampl…
+
+4:35:35 PM [express] GET /api/auth/me 304 in 4ms :: {"id":1,"username":"admin","email":"admin@exampl…
+
+4:35:35 PM [express] GET /api/auth/me 304 in 3ms :: {"id":1,"username":"admin","email":"admin@exampl…
+
+4:35:35 PM [express] GET /api/auth/me 304 in 4ms :: {"id":1,"username":"admin","email":"admin@exampl…
+
+4:35:35 PM [express] GET /api/admin/stores 200 in 5ms :: [{"id":1,"name":"Magasin Principal","addres…
+
+4:36:29 PM [express] POST /api/sales 201 in 181ms :: {"id":1,"storeId":1,"userId":1,"timestamp":"202…
+
+4:36:32 PM [express] GET /api/auth/me 304 in 4ms :: {"id":1,"username":"admin","email":"admin@exampl…
+
+4:36:32 PM [express] GET /api/sales 200 in 62ms :: [{"id":1,"storeId":1,"userId":1,"timestamp":"2025…
+
+4:37:01 PM [express] GET /api/auth/me 304 in 30ms :: {"id":1,"username":"admin","email":"admin@examp…
+
+4:37:01 PM [express] GET /api/admin/users 200 in 7ms :: [{"id":1,"username":"admin","email":"admin@e…
+
+4:37:01 PM [express] GET /api/admin/purge/stats 200 in 11ms :: {"totalSales":1,"oldSales":0,"cutoffD…
+
+4:37:01 PM [express] GET /api/admin/backup/stats 304 in 28ms :: {"totalBackups":10,"backupDirectory"…
+
+Import backup error: TypeError: value.toISOString is not a function
+
+    at PgTimestamp.mapToDriverValue (file:///app/node_modules/drizzle-orm/pg-core/columns/timestamp.js:34:18)
+
+    at file:///app/node_modules/drizzle-orm/sql/sql.js:131:73
+
+    at Array.map (<anonymous>)
+
+    at SQL.buildQueryFromSourceParams (file:///app/node_modules/drizzle-orm/sql/sql.js:73:32)
+
+    at file:///app/node_modules/drizzle-orm/sql/sql.js:92:21
+
+    at Array.map (<anonymous>)
+
+    at SQL.buildQueryFromSourceParams (file:///app/node_modules/drizzle-orm/sql/sql.js:73:32)
+
+    at file:///app/node_modules/drizzle-orm/sql/sql.js:95:21
+
+    at Array.map (<anonymous>)
+
+    at SQL.buildQueryFromSourceParams (file:///app/node_modules/drizzle-orm/sql/sql.js:73:32)
+
+4:37:16 PM [express] POST /api/admin/backup/import 500 in 70ms :: {"error":"Failed to import backup"…
