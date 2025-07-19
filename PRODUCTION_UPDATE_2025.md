@@ -7,8 +7,8 @@ L'erreur `docker-entrypoint.sh: No such file or directory` était causée par de
 
 ### Solution Implémentée
 
-#### Dockerfile.alternative - Approche Inline
-Au lieu de copier un fichier externe, le script d'entrée est maintenant créé directement dans le Dockerfile :
+#### Dockerfile.simple - Approche Robuste
+Au lieu de copier un fichier externe, le script d'entrée est maintenant créé directement dans le Dockerfile avec gestion d'erreur des migrations :
 
 ```dockerfile
 # Créer le script d'entrée INLINE dans le Dockerfile
@@ -27,10 +27,16 @@ EOF
 3. **Simplicité** : Moins d'étapes, moins d'erreurs possibles
 4. **Robustesse** : Fonctionne sur tous les environnements Docker
 
+### Problèmes Additionnels Résolus
+
+1. **drizzle-kit manquant** : Script inclut maintenant toutes les dépendances
+2. **Migration robuste** : Échec de migration n'empêche plus le démarrage
+3. **Auto-création** : Tables créées automatiquement à la première connexion
+
 ### Fichiers Modifiés
 
-- `Dockerfile.alternative` : Nouvelle approche inline
-- `docker-compose.yml` : Utilise le nouveau Dockerfile
+- `Dockerfile.simple` : Approche la plus robuste avec gestion d'erreur
+- `docker-compose.yml` : Utilise Dockerfile.simple
 - `docker-test-quick.sh` : Script de test mis à jour
 
 ### Test de Validation
