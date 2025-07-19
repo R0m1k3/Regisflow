@@ -45,3 +45,10 @@ Les ventes devraient maintenant être créées sur le bon magasin sélectionné.
 - L'admin peut voir et sélectionner tous les magasins
 - Les ventes sont créées sur le magasin sélectionné
 - L'historique affiche les ventes du bon magasin
+- La suppression de ventes fonctionne correctement
+
+### ✅ CORRECTION SUPPLÉMENTAIRE - Suppression des ventes
+Route DELETE corrigée pour utiliser 'administrator' au lieu de 'admin':
+```javascript
+app.delete('/api/sales/:id', requireRole(['administrator', 'manager']), ...)
+```

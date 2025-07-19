@@ -340,7 +340,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/sales/:id', requireRole(['admin', 'manager']), async (req, res) => {
+  app.delete('/api/sales/:id', requireRole(['administrator', 'manager']), async (req, res) => {
     try {
       const saleId = parseInt(req.params.id);
       await storage.deleteSale(saleId);
