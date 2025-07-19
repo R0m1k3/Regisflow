@@ -50,7 +50,6 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
   });
 
   const sales = Array.isArray(salesData) ? salesData : [];
-  console.log('DEBUG: Sample sale with photos:', sales.find(s => s.photoRecto || s.photoVerso || s.photoTicket));
 
   // Filtrer les ventes selon la recherche
   const filteredSales = useMemo(() => {

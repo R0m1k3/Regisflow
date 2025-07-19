@@ -272,7 +272,9 @@ Preferred communication style: Simple, everyday language.
 - ✅ **API Routes**: Fixed camelCase to snake_case mapping (photoTicket → photo_ticket)
 - ✅ **Frontend**: Corrected NewSaleForm.tsx to include photoTicket in submission data
 - ✅ **Database**: Verified photo_ticket column exists and stores data correctly
-- ✅ **Production Ready**: All photo capture systems tested and validated for deployment
+- ✅ **MAJOR FIX**: Resolved photo display in exports by correcting column mapping in getSalesByStore()
+- ✅ **Excel Export**: Enhanced with dedicated Photos sheet containing actual photo data links
+- ✅ **Production Ready**: All photo capture and export systems tested and validated for deployment
 
 ### Production Deployment System (January 11, 2025)
 - ✅ Complete production deployment configuration with Docker Compose

@@ -4,7 +4,7 @@ export async function exportToExcel(sales: Sale[]): Promise<void> {
   if (sales.length === 0) return;
 
   try {
-    const XLSX = await import('xlsx');
+    const XLSX = await import('xlsx-js-style');
     const { utils, writeFile } = XLSX;
 
     // Créer un nouveau classeur
@@ -112,6 +112,75 @@ export async function exportToExcel(sales: Sale[]): Promise<void> {
     const summaryWorksheet = utils.json_to_sheet(summaryData);
     summaryWorksheet['!cols'] = [{ wch: 30 }, { wch: 20 }];
     utils.book_append_sheet(workbook, summaryWorksheet, 'Résumé');
+
+    // Créer une feuille de photos si il y a des ventes avec photos
+    const salesWithPhotos = sales.filter(sale => sale.photoRecto || sale.photoVerso || sale.photoTicket);
+    
+    if (salesWithPhotos.length > 0) {
+      const photosData: any[] = [];
+      
+      salesWithPhotos.forEach(sale => {
+        // Ajouter une ligne pour chaque vente avec photos
+        const photoRow: any = {
+          'ID Vente': sale.id,
+          'Date': new Date(sale.timestamp).toLocaleDateString('fr-FR'),
+          'Client': `${sale.nom} ${sale.prenom}`,
+          'Vendeur': sale.vendeur
+        };
+        
+        // Ajouter les informations sur les photos disponibles
+        if (sale.photoRecto) {
+          photoRow['Photo Recto'] = 'DISPONIBLE';
+          photoRow['Lien Recto'] = `data:image/jpeg;base64,${sale.photoRecto.split(',')[1] || sale.photoRecto}`;
+        } else {
+          photoRow['Photo Recto'] = 'NON DISPONIBLE';
+          photoRow['Lien Recto'] = '';
+        }
+        
+        if (sale.photoVerso) {
+          photoRow['Photo Verso'] = 'DISPONIBLE';
+          photoRow['Lien Verso'] = `data:image/jpeg;base64,${sale.photoVerso.split(',')[1] || sale.photoVerso}`;
+        } else {
+          photoRow['Photo Verso'] = 'NON DISPONIBLE';
+          photoRow['Lien Verso'] = '';
+        }
+        
+        if (sale.photoTicket) {
+          photoRow['Photo Ticket'] = 'DISPONIBLE';
+          photoRow['Lien Ticket'] = `data:image/jpeg;base64,${sale.photoTicket.split(',')[1] || sale.photoTicket}`;
+        } else {
+          photoRow['Photo Ticket'] = 'NON DISPONIBLE';
+          photoRow['Lien Ticket'] = '';
+        }
+        
+        photosData.push(photoRow);
+      });
+      
+      const photosWorksheet = utils.json_to_sheet(photosData);
+      
+      // Ajuster la largeur des colonnes pour les photos
+      photosWorksheet['!cols'] = [
+        { wch: 10 }, // ID Vente
+        { wch: 12 }, // Date
+        { wch: 20 }, // Client
+        { wch: 15 }, // Vendeur
+        { wch: 15 }, // Photo Recto
+        { wch: 50 }, // Lien Recto
+        { wch: 15 }, // Photo Verso
+        { wch: 50 }, // Lien Verso
+        { wch: 15 }, // Photo Ticket
+        { wch: 50 }  // Lien Ticket
+      ];
+      
+      // Ajuster la hauteur des lignes pour mieux voir les liens
+      const rowHeights: any[] = [];
+      for (let i = 0; i <= photosData.length; i++) {
+        rowHeights.push({ hpt: 20 });
+      }
+      photosWorksheet['!rows'] = rowHeights;
+      
+      utils.book_append_sheet(workbook, photosWorksheet, 'Photos');
+    }
 
     // Exporter le fichier
     const fileName = `registre-feux-artifice-${new Date().toISOString().split('T')[0]}.xlsx`;
