@@ -51,7 +51,7 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Sales table
+// Sales table - Informations générales de la vente
 export const sales = pgTable("sales", {
   id: serial("id").primaryKey(),
   storeId: integer("store_id").references(() => stores.id).notNull(),
@@ -60,12 +60,6 @@ export const sales = pgTable("sales", {
   
   // Vendeur
   vendeur: varchar("vendeur", { length: 255 }).notNull(),
-  
-  // Produit
-  typeArticle: varchar("type_article", { length: 255 }).notNull(),
-  categorie: varchar("categorie", { length: 2 }).notNull(),
-  quantite: integer("quantite").notNull(),
-  gencode: varchar("gencode", { length: 13 }).notNull(),
   
   // Client
   nom: varchar("nom", { length: 255 }).notNull(),
@@ -77,13 +71,24 @@ export const sales = pgTable("sales", {
   // Identité
   typeIdentite: varchar("type_identite", { length: 50 }).notNull(),
   numeroIdentite: varchar("numero_identite", { length: 100 }).notNull(),
-  autoriteDelivrance: varchar("autorite_delivrance", { length: 255 }).notNull(),
+  autoriteDelivrance: varchar("autorite_delivrance", { length: 255 }),
   dateDelivrance: varchar("date_delivrance", { length: 10 }).notNull(),
   
   // Photos
   photo_recto: text("photo_recto"),
   photo_verso: text("photo_verso"),
   photo_ticket: text("photo_ticket"),
+});
+
+// Table des produits vendus (nouveau)
+export const saleProducts = pgTable("sale_products", {
+  id: serial("id").primaryKey(),
+  saleId: integer("sale_id").references(() => sales.id, { onDelete: "cascade" }).notNull(),
+  typeArticle: varchar("type_article", { length: 255 }).notNull(),
+  categorie: varchar("categorie", { length: 2 }).notNull(),
+  quantite: integer("quantite").notNull(),
+  gencode: varchar("gencode", { length: 13 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Relations
@@ -100,7 +105,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   sales: many(sales),
 }));
 
-export const salesRelations = relations(sales, ({ one }) => ({
+export const salesRelations = relations(sales, ({ one, many }) => ({
   store: one(stores, {
     fields: [sales.storeId],
     references: [stores.id],
@@ -108,6 +113,14 @@ export const salesRelations = relations(sales, ({ one }) => ({
   user: one(users, {
     fields: [sales.userId],
     references: [users.id],
+  }),
+  products: many(saleProducts),
+}));
+
+export const saleProductsRelations = relations(saleProducts, ({ one }) => ({
+  sale: one(sales, {
+    fields: [saleProducts.saleId],
+    references: [sales.id],
   }),
 }));
 
@@ -129,6 +142,11 @@ export const insertSaleSchema = createInsertSchema(sales).omit({
   timestamp: true,
 });
 
+export const insertSaleProductSchema = createInsertSchema(saleProducts).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Login schema
 export const loginSchema = z.object({
   username: z.string().min(1, "Nom d'utilisateur requis"),
@@ -142,4 +160,6 @@ export type Store = typeof stores.$inferSelect;
 export type InsertStore = typeof stores.$inferInsert;
 export type Sale = typeof sales.$inferSelect;
 export type InsertSale = typeof sales.$inferInsert;
+export type SaleProduct = typeof saleProducts.$inferSelect;
+export type InsertSaleProduct = typeof saleProducts.$inferInsert;
 export type LoginData = z.infer<typeof loginSchema>;

@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Table des ventes
+-- Table des ventes (informations générales)
 CREATE TABLE IF NOT EXISTS sales (
     id SERIAL PRIMARY KEY,
     store_id INTEGER REFERENCES stores(id) NOT NULL,
@@ -61,12 +61,6 @@ CREATE TABLE IF NOT EXISTS sales (
     
     -- Informations vendeur
     vendeur VARCHAR(255) NOT NULL,
-    
-    -- Informations produit
-    type_article VARCHAR(255) NOT NULL,
-    categorie VARCHAR(2) NOT NULL,
-    quantite INTEGER NOT NULL,
-    gencode VARCHAR(13) NOT NULL,
     
     -- Informations client
     nom VARCHAR(255) NOT NULL,
@@ -87,19 +81,33 @@ CREATE TABLE IF NOT EXISTS sales (
     photo_ticket TEXT
 );
 
+-- Table des produits vendus (nouveau)
+CREATE TABLE IF NOT EXISTS sale_products (
+    id SERIAL PRIMARY KEY,
+    sale_id INTEGER REFERENCES sales(id) ON DELETE CASCADE NOT NULL,
+    type_article VARCHAR(255) NOT NULL,
+    categorie VARCHAR(2) NOT NULL,
+    quantite INTEGER NOT NULL,
+    gencode VARCHAR(13) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Index pour optimiser les recherches
 CREATE INDEX IF NOT EXISTS idx_sales_store_id ON sales(store_id);
 CREATE INDEX IF NOT EXISTS idx_sales_user_id ON sales(user_id);
 CREATE INDEX IF NOT EXISTS idx_sales_timestamp ON sales(timestamp);
 CREATE INDEX IF NOT EXISTS idx_sales_nom ON sales(nom);
 CREATE INDEX IF NOT EXISTS idx_sales_prenom ON sales(prenom);
-CREATE INDEX IF NOT EXISTS idx_sales_gencode ON sales(gencode);
+
+-- Index pour la table des produits
+CREATE INDEX IF NOT EXISTS idx_sale_products_sale_id ON sale_products(sale_id);
+CREATE INDEX IF NOT EXISTS idx_sale_products_gencode ON sale_products(gencode);
 
 -- Relations et contraintes
 ALTER TABLE users ADD CONSTRAINT chk_user_role 
     CHECK (role IN ('admin', 'manager', 'employee'));
 
-ALTER TABLE sales ADD CONSTRAINT chk_sales_categorie 
+ALTER TABLE sale_products ADD CONSTRAINT chk_sale_products_categorie 
     CHECK (categorie IN ('F2', 'F3'));
 
 -- Trigger pour mettre à jour updated_at automatiquement
@@ -136,6 +144,7 @@ ON CONFLICT (username) DO NOTHING;
 SELECT setval('stores_id_seq', (SELECT COALESCE(MAX(id), 1) FROM stores));
 SELECT setval('users_id_seq', (SELECT COALESCE(MAX(id), 1) FROM users));
 SELECT setval('sales_id_seq', (SELECT COALESCE(MAX(id), 1) FROM sales));
+SELECT setval('sale_products_id_seq', (SELECT COALESCE(MAX(id), 1) FROM sale_products));
 
 -- Permissions et sécurité
 GRANT CONNECT ON DATABASE regisflow TO regisflow;

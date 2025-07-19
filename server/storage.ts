@@ -2,12 +2,15 @@ import {
   users,
   stores,
   sales,
+  saleProducts,
   type User,
   type InsertUser,
   type Store,
   type InsertStore,
   type Sale,
   type InsertSale,
+  type SaleProduct,
+  type InsertSaleProduct,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, lte, desc } from "drizzle-orm";
@@ -31,8 +34,9 @@ export interface IStorage {
   
   // Sale operations
   getSale(id: number): Promise<Sale | undefined>;
-  createSale(sale: InsertSale): Promise<Sale>;
+  createSaleWithProducts(sale: InsertSale, products: InsertSaleProduct[]): Promise<Sale>;
   getSalesByStore(storeId: number, startDate?: string, endDate?: string): Promise<Sale[]>;
+  getSaleWithProducts(id: number): Promise<(Sale & { products: SaleProduct[] }) | undefined>;
   deleteSale(id: number): Promise<void>;
   
   // Auth operations
@@ -136,12 +140,35 @@ export class DatabaseStorage implements IStorage {
     return sale;
   }
 
-  async createSale(saleData: InsertSale): Promise<Sale> {
-    const [sale] = await db
-      .insert(sales)
-      .values(saleData)
-      .returning();
-    return sale;
+  async createSaleWithProducts(saleData: InsertSale, products: InsertSaleProduct[]): Promise<Sale> {
+    // Use transaction to ensure data consistency
+    return await db.transaction(async (tx) => {
+      // Create the sale first
+      const [sale] = await tx
+        .insert(sales)
+        .values(saleData)
+        .returning();
+
+      // Create all products for this sale
+      if (products.length > 0) {
+        await tx
+          .insert(saleProducts)
+          .values(products.map(product => ({
+            ...product,
+            saleId: sale.id
+          })));
+      }
+
+      return sale;
+    });
+  }
+
+  async getSaleWithProducts(id: number): Promise<(Sale & { products: SaleProduct[] }) | undefined> {
+    const [sale] = await db.select().from(sales).where(eq(sales.id, id));
+    if (!sale) return undefined;
+
+    const products = await db.select().from(saleProducts).where(eq(saleProducts.saleId, id));
+    return { ...sale, products };
   }
 
   async getSalesByStore(storeId: number, startDate?: string, endDate?: string): Promise<Sale[]> {
@@ -161,10 +188,22 @@ export class DatabaseStorage implements IStorage {
       );
     }
     
-    return await query.orderBy(desc(sales.timestamp));
+    const salesData = await query.orderBy(desc(sales.timestamp));
+    
+    // Get products for each sale
+    const salesWithProducts = await Promise.all(
+      salesData.map(async (sale) => {
+        const products = await db.select().from(saleProducts).where(eq(saleProducts.saleId, sale.id));
+        return { ...sale, products };
+      })
+    );
+    
+    return salesWithProducts;
   }
 
   async deleteSale(id: number): Promise<void> {
+    // Delete sale products first (cascade should handle this, but being explicit)
+    await db.delete(saleProducts).where(eq(saleProducts.saleId, id));
     await db.delete(sales).where(eq(sales.id, id));
   }
 

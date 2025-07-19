@@ -243,9 +243,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         targetStoreId = user.storeId;
       }
 
+      // Extract products from request body
+      const { products = [], ...saleFields } = req.body;
+      
+      // Validate products
+      if (!Array.isArray(products) || products.length === 0) {
+        return res.status(400).json({ error: "Au moins un produit est requis" });
+      }
+
       // Map frontend camelCase to database snake_case for photos
       const mappedBody = {
-        ...req.body,
+        ...saleFields,
       };
       
       // Add photo fields with proper mapping, only if they exist and are not empty
@@ -270,7 +278,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId: user.id
       });
 
-      const sale = await storage.createSale(saleData);
+      // Parse and validate products
+      const validatedProducts = products.map((product: any) => ({
+        typeArticle: product.typeArticle,
+        categorie: product.categorie,
+        quantite: parseInt(product.quantite),
+        gencode: product.gencode
+      }));
+
+      const sale = await storage.createSaleWithProducts(saleData, validatedProducts);
       res.status(201).json(sale);
     } catch (error) {
       console.error('Create sale error:', error);

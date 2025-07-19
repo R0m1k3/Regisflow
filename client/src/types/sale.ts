@@ -1,15 +1,17 @@
+export interface SaleProduct {
+  id?: number;
+  typeArticle: string;
+  categorie: 'F2' | 'F3';
+  quantite: number;
+  gencode: string;
+}
+
 export interface Sale {
   id: number;
   timestamp: string;
   
   // Vendeur
   vendeur: string;
-  
-  // Produit
-  typeArticle: string;
-  categorie: 'F2' | 'F3';
-  quantite: number;
-  gencode: string;
   
   // Client
   nom: string;
@@ -28,14 +30,19 @@ export interface Sale {
   photo_recto?: string;
   photo_verso?: string;
   photo_ticket?: string;
+  
+  // Produits (nouveaux)
+  products?: SaleProduct[];
 }
 
 export interface FormData {
   vendeur: string;
-  typeArticle: string;
-  categorie: string;
-  quantite: string;
-  gencode: string;
+  products: {
+    typeArticle: string;
+    categorie: string;
+    quantite: string;
+    gencode: string;
+  }[];
   nom: string;
   prenom: string;
   dateNaissance: string;

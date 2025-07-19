@@ -16,10 +16,6 @@ export function validateEAN13(code: string): boolean {
 export function validateRequiredFields(formData: any): string[] {
   const requiredFields = [
     { key: 'vendeur', label: 'Vendeur' },
-    { key: 'typeArticle', label: 'Type d\'article' },
-    { key: 'categorie', label: 'Catégorie' },
-    { key: 'quantite', label: 'Quantité' },
-    { key: 'gencode', label: 'Gencode' },
     { key: 'nom', label: 'Nom' },
     { key: 'prenom', label: 'Prénom' },
     { key: 'dateNaissance', label: 'Date de naissance' },
@@ -31,17 +27,43 @@ export function validateRequiredFields(formData: any): string[] {
     // Note: autoriteDelivrance n'est plus obligatoire
   ];
   
-  return requiredFields
+  const missingFields = requiredFields
     .filter(field => {
       const value = formData[field.key];
-      // Pour la quantité, accepter 0 comme valeur valide
-      if (field.key === 'quantite') {
-        return value === '' || value === null || value === undefined;
-      }
-      // Pour les autres champs, vérifier si vide ou juste des espaces
       return !value || value.toString().trim() === '';
     })
     .map(field => field.label);
+
+  // Validation des produits
+  if (!formData.products || !Array.isArray(formData.products) || formData.products.length === 0) {
+    missingFields.push('Au moins un produit');
+  } else {
+    formData.products.forEach((product: any, index: number) => {
+      const productFields = [
+        { key: 'typeArticle', label: `Type d'article (produit ${index + 1})` },
+        { key: 'categorie', label: `Catégorie (produit ${index + 1})` },
+        { key: 'quantite', label: `Quantité (produit ${index + 1})` },
+        { key: 'gencode', label: `Code EAN-13 (produit ${index + 1})` }
+      ];
+      
+      productFields.forEach(field => {
+        const value = product[field.key];
+        if (field.key === 'quantite') {
+          // Pour la quantité, vérifier si c'est un nombre valide > 0
+          if (!value || isNaN(Number(value)) || Number(value) <= 0) {
+            missingFields.push(field.label);
+          }
+        } else {
+          // Pour les autres champs produit
+          if (!value || value.toString().trim() === '') {
+            missingFields.push(field.label);
+          }
+        }
+      });
+    });
+  }
+  
+  return missingFields;
 }
 
 export const ARTICLE_CATEGORY_MAPPING = {
