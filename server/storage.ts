@@ -331,6 +331,17 @@ export class DatabaseStorage implements IStorage {
   async initializeDefaults(): Promise<{ defaultAdminCredentials?: { username: string; password: string } }> {
     const existingUsers = await this.getAllUsers();
     
+    // FORCE ADMIN ROLE CORRECTION - Production fix
+    const adminUsers = existingUsers.filter(u => u.username === 'admin');
+    for (const adminUser of adminUsers) {
+      if (adminUser.role !== 'administrator') {
+        console.log(`🔧 FIXING ADMIN ROLE: User ID ${adminUser.id} role "${adminUser.role}" -> "administrator"`);
+        await db.update(users)
+          .set({ role: 'administrator' })
+          .where(eq(users.id, adminUser.id));
+      }
+    }
+    
     if (existingUsers.length === 0) {
       // Create default store
       const defaultStore = await this.createStore({
