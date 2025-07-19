@@ -202,6 +202,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllSales(storeId?: number): Promise<any[]> {
+    console.log('DEBUG: getAllSales called with storeId:', storeId);
     // Récupérer les ventes avec leurs produits
     const query = db
       .select({
@@ -290,7 +291,16 @@ export class DatabaseStorage implements IStorage {
     });
     
     const result = Array.from(salesMap.values());
-    console.log('DEBUG: Sample sale with photos:', result.find(s => s.photoRecto || s.photoVerso || s.photoTicket));
+    const saleWithPhotos = result.find(s => s.photoRecto || s.photoVerso || s.photoTicket);
+    console.log('DEBUG: Total sales returned:', result.length);
+    console.log('DEBUG: Sample sale with photos:', saleWithPhotos);
+    if (saleWithPhotos) {
+      console.log('DEBUG: Photos found in sale:', saleWithPhotos.id, {
+        photoRecto: saleWithPhotos.photoRecto ? 'PRESENT' : 'NULL',
+        photoVerso: saleWithPhotos.photoVerso ? 'PRESENT' : 'NULL',
+        photoTicket: saleWithPhotos.photoTicket ? 'PRESENT' : 'NULL'
+      });
+    }
     return result;
   }
 
