@@ -111,7 +111,7 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
       doc.setFont('helvetica');
       
       doc.setFontSize(16);
-      doc.text('Historique des Ventes de Feux d\'Artifice', 20, 20);
+      doc.text('Registre Détaillé des Ventes de Feux d\'Artifice', 20, 20);
       
       doc.setFontSize(10);
       doc.text(`Généré le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}`, 20, 30);
@@ -121,53 +121,116 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
         doc.text(period, 20, 35);
       }
 
-      // Créer une ligne pour chaque produit de chaque vente
-      const tableData: string[][] = [];
-      
-      filteredSales.forEach(sale => {
+      let currentY = startDate || endDate ? 50 : 45;
+
+      // Pour chaque vente, créer une section complète
+      filteredSales.forEach((sale, saleIndex) => {
+        // Vérifier si on a assez de place, sinon nouvelle page
+        if (currentY > 250) {
+          doc.addPage();
+          currentY = 20;
+        }
+
+        // Titre de la vente
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`VENTE #${sale.id} - ${new Date(sale.timestamp).toLocaleDateString('fr-FR')} ${new Date(sale.timestamp).toLocaleTimeString('fr-FR')}`, 20, currentY);
+        currentY += 10;
+
+        // Informations vendeur
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Vendeur: ${sale.vendeur}`, 20, currentY);
+        currentY += 8;
+
+        // Informations client
+        doc.setFont('helvetica', 'bold');
+        doc.text('INFORMATIONS CLIENT:', 20, currentY);
+        currentY += 6;
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Nom: ${sale.nom} ${sale.prenom}`, 25, currentY);
+        currentY += 5;
+        doc.text(`Date de naissance: ${sale.dateNaissance || 'Non spécifiée'}`, 25, currentY);
+        currentY += 5;
+        doc.text(`Lieu de naissance: ${sale.lieuNaissance || 'Non spécifié'}`, 25, currentY);
+        currentY += 5;
+        doc.text(`Mode de paiement: ${sale.modePaiement || 'Non spécifié'}`, 25, currentY);
+        currentY += 8;
+
+        // Informations identité
+        doc.setFont('helvetica', 'bold');
+        doc.text('PIÈCE D\'IDENTITÉ:', 20, currentY);
+        currentY += 6;
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Type: ${sale.typeIdentite || 'Non spécifié'}`, 25, currentY);
+        currentY += 5;
+        doc.text(`Numéro: ${sale.numeroIdentite || 'Non spécifié'}`, 25, currentY);
+        currentY += 5;
+        doc.text(`Autorité de délivrance: ${sale.autoriteDelivrance || 'Non spécifiée'}`, 25, currentY);
+        currentY += 5;
+        doc.text(`Date de délivrance: ${sale.dateDelivrance || 'Non spécifiée'}`, 25, currentY);
+        currentY += 8;
+
+        // Produits
+        doc.setFont('helvetica', 'bold');
+        doc.text('PRODUITS VENDUS:', 20, currentY);
+        currentY += 6;
+
         if (sale.products && sale.products.length > 0) {
-          // Pour chaque produit, créer une ligne avec les infos de la vente
-          sale.products.forEach(product => {
-            tableData.push([
-              new Date(sale.timestamp).toLocaleDateString('fr-FR'),
-              sale.vendeur,
-              `${sale.nom} ${sale.prenom}`,
-              product.typeArticle,
-              product.categorie,
-              product.quantite.toString(),
-              sale.modePaiement,
-              product.gencode || ''
-            ]);
+          sale.products.forEach((product, productIndex) => {
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Produit ${productIndex + 1}:`, 25, currentY);
+            currentY += 5;
+            doc.text(`  • Type: ${product.typeArticle}`, 30, currentY);
+            currentY += 4;
+            doc.text(`  • Catégorie: ${product.categorie}`, 30, currentY);
+            currentY += 4;
+            doc.text(`  • Quantité: ${product.quantite}`, 30, currentY);
+            currentY += 4;
+            doc.text(`  • Code: ${product.gencode || 'Non spécifié'}`, 30, currentY);
+            currentY += 6;
           });
         } else {
-          // Fallback pour les ventes sans produits (anciennes données)
-          tableData.push([
-            new Date(sale.timestamp).toLocaleDateString('fr-FR'),
-            sale.vendeur,
-            `${sale.nom} ${sale.prenom}`,
-            'N/A',
-            'N/A',
-            '0',
-            sale.modePaiement,
-            ''
-          ]);
+          doc.setFont('helvetica', 'normal');
+          doc.text('Aucun produit enregistré', 25, currentY);
+          currentY += 6;
+        }
+
+        // Photos
+        if (sale.photoRecto || sale.photoVerso || sale.photoTicket) {
+          doc.setFont('helvetica', 'bold');
+          doc.text('DOCUMENTS PHOTOGRAPHIÉS:', 20, currentY);
+          currentY += 6;
+          doc.setFont('helvetica', 'normal');
+          
+          if (sale.photoRecto) {
+            doc.text('✓ Photo recto pièce d\'identité', 25, currentY);
+            currentY += 5;
+          }
+          if (sale.photoVerso) {
+            doc.text('✓ Photo verso pièce d\'identité', 25, currentY);
+            currentY += 5;
+          }
+          if (sale.photoTicket) {
+            doc.text('✓ Photo ticket/reçu', 25, currentY);
+            currentY += 5;
+          }
+          currentY += 5;
+        }
+
+        // Ligne de séparation si pas la dernière vente
+        if (saleIndex < filteredSales.length - 1) {
+          doc.setLineWidth(0.5);
+          doc.line(20, currentY, 190, currentY);
+          currentY += 15;
         }
       });
 
-      autoTable(doc, {
-        head: [['Date', 'Vendeur', 'Client', 'Article', 'Cat.', 'Qty', 'Paiement', 'Code']],
-        body: tableData,
-        startY: startDate || endDate ? 45 : 40,
-        styles: { fontSize: 8 },
-        headStyles: { fillColor: [64, 64, 64] },
-        margin: { top: 40, left: 20, right: 20 },
-      });
-
-      doc.save(`ventes-feux-artifice-${new Date().toISOString().split('T')[0]}.pdf`);
+      doc.save(`registre-detaille-feux-artifice-${new Date().toISOString().split('T')[0]}.pdf`);
       
       toast({
         title: "Export réussi",
-        description: "Le fichier PDF a été téléchargé",
+        description: "Le registre détaillé PDF a été téléchargé",
         variant: "success",
       });
     } catch (error) {
@@ -358,7 +421,7 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
                 className="modern-button modern-button-secondary"
               >
                 <FileText className="h-4 w-4" />
-                Export PDF
+                Registre PDF Détaillé
               </button>
               <button
                 onClick={exportToCSV}
