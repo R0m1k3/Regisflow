@@ -220,9 +220,9 @@ export class DatabaseStorage implements IStorage {
         numeroIdentite: sales.numeroIdentite,
         autoriteDelivrance: sales.autoriteDelivrance,
         dateDelivrance: sales.dateDelivrance,
-        photo_recto: sales.photo_recto,
-        photo_verso: sales.photo_verso,
-        photo_ticket: sales.photo_ticket,
+        photoRecto: sales.photo_recto,
+        photoVerso: sales.photo_verso,
+        photoTicket: sales.photo_ticket,
         // Product fields
         productId: saleProducts.id,
         typeArticle: saleProducts.typeArticle,
@@ -249,9 +249,9 @@ export class DatabaseStorage implements IStorage {
       if (row.id === 17) {
         console.log('DEBUG: Row data for sale 17:', {
           id: row.id,
-          photo_recto: row.photo_recto ? 'PRESENT' : 'NULL',
-          photo_verso: row.photo_verso ? 'PRESENT' : 'NULL', 
-          photo_ticket: row.photo_ticket ? 'PRESENT' : 'NULL'
+          photoRecto: row.photoRecto ? 'PRESENT' : 'NULL',
+          photoVerso: row.photoVerso ? 'PRESENT' : 'NULL', 
+          photoTicket: row.photoTicket ? 'PRESENT' : 'NULL'
         });
       }
       if (!salesMap.has(row.id)) {
@@ -270,9 +270,9 @@ export class DatabaseStorage implements IStorage {
           numeroIdentite: row.numeroIdentite,
           autoriteDelivrance: row.autoriteDelivrance,
           dateDelivrance: row.dateDelivrance,
-          photoRecto: row.photo_recto,
-          photoVerso: row.photo_verso,
-          photoTicket: row.photo_ticket,
+          photoRecto: row.photoRecto,
+          photoVerso: row.photoVerso,
+          photoTicket: row.photoTicket,
           products: []
         });
       }
