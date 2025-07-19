@@ -59,6 +59,11 @@ curl http://localhost:5000/health
    - **Implémentation** : sslmode=disable dans DATABASE_URL
    - **Robustesse** : Détection automatique du mode SSL nécessaire
 
+5. **Erreur Permissions Admin** : "Insufficient permissions" pour admin
+   - **Problème** : Incohérence entre rôle 'admin' en DB et 'administrator' dans code
+   - **Solution** : Mise à jour rôle admin vers 'administrator' et correction routes
+   - **Implémentation** : UPDATE users + correction toutes routes requireRole()
+
 ### Status : ✅ RÉSOLU COMPLET
 
 Cette solution garantit un déploiement Docker fiable en production sans les problèmes de fichiers manquants, migrations échouées, ou erreurs SSL.

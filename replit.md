@@ -330,7 +330,9 @@ Preferred communication style: Simple, everyday language.
 - ✅ **Graceful Degradation**: Application starts even if migrations fail
 - ✅ **Auto-Creation**: Database tables created automatically on first connection
 - ✅ **SSL Configuration**: Fixed PostgreSQL SSL errors with sslmode=disable for Docker
-- ✅ **Backup Import Fix**: Corrected timestamp conversion in backup import functionality
+- ✅ **Backup Import Fix**: Corrected timestamp conversion in backup import functionality  
+- ✅ **Admin Permissions Fix**: Corrected user role 'admin' to 'administrator' for production consistency
+- ✅ **Role Middleware Fix**: Updated all admin routes to use 'administrator' role instead of 'admin'
 - ✅ **Production Guide**: Created comprehensive DEPLOYMENT_GUIDE.md with troubleshooting
 - ✅ **Environment Templates**: Updated .env.production.example with security defaults
 - ✅ **Health Diagnostics**: Added production-ready health checks and monitoring

@@ -341,7 +341,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin routes - Users
-  app.get('/api/admin/users', requireRole(['admin']), async (req, res) => {
+  app.get('/api/admin/users', requireRole(['administrator']), async (req, res) => {
     try {
       const users = await storage.getAllUsers();
       const safeUsers = users.map(user => ({ ...user, password: undefined }));
@@ -352,7 +352,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/admin/users', requireRole(['admin']), async (req, res) => {
+  app.post('/api/admin/users', requireRole(['administrator']), async (req, res) => {
     try {
       const userData = insertUserSchema.parse(req.body);
       const user = await storage.createUser(userData);
@@ -366,7 +366,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/admin/users/:id', requireRole(['admin']), async (req, res) => {
+  app.put('/api/admin/users/:id', requireRole(['administrator']), async (req, res) => {
     try {
       const userId = parseInt(req.params.id);
       const currentUser = await storage.getUser(req.session.userId!);
@@ -409,7 +409,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/admin/users/:id', requireRole(['admin']), async (req, res) => {
+  app.delete('/api/admin/users/:id', requireRole(['administrator']), async (req, res) => {
     try {
       const userId = parseInt(req.params.id);
       
@@ -431,7 +431,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin routes - Stores
-  app.get('/api/admin/stores', requireRole(['admin']), async (req, res) => {
+  app.get('/api/admin/stores', requireRole(['administrator']), async (req, res) => {
     try {
       const stores = await storage.getAllStores();
       res.json(stores);
@@ -441,7 +441,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/admin/stores', requireRole(['admin']), async (req, res) => {
+  app.post('/api/admin/stores', requireRole(['administrator']), async (req, res) => {
     try {
       const storeData = insertStoreSchema.parse(req.body);
       const store = await storage.createStore(storeData);
@@ -455,7 +455,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/admin/stores/:id', requireRole(['admin']), async (req, res) => {
+  app.put('/api/admin/stores/:id', requireRole(['administrator']), async (req, res) => {
     try {
       const storeId = parseInt(req.params.id);
       const storeData = insertStoreSchema.partial().parse(req.body);
@@ -473,7 +473,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/admin/stores/:id', requireRole(['admin']), async (req, res) => {
+  app.delete('/api/admin/stores/:id', requireRole(['administrator']), async (req, res) => {
     try {
       const storeId = parseInt(req.params.id);
       
@@ -497,7 +497,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Backup routes
-  app.get('/api/admin/backup/export', requireRole(['admin']), async (req, res) => {
+  app.get('/api/admin/backup/export', requireRole(['administrator']), async (req, res) => {
     try {
       // Get all data from the database
       const users = await storage.getAllUsers();
@@ -537,7 +537,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/admin/backup/import', requireRole(['admin']), async (req, res) => {
+  app.post('/api/admin/backup/import', requireRole(['administrator']), async (req, res) => {
     try {
       const backupData = req.body;
       
@@ -648,7 +648,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Manual backup trigger route
-  app.post('/api/admin/backup/create', requireRole(['admin']), async (req, res) => {
+  app.post('/api/admin/backup/create', requireRole(['administrator']), async (req, res) => {
     try {
       const result = await createAutomaticBackup();
       if (result.success) {
@@ -667,7 +667,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Backup statistics route
-  app.get('/api/admin/backup/stats', requireRole(['admin']), async (req, res) => {
+  app.get('/api/admin/backup/stats', requireRole(['administrator']), async (req, res) => {
     try {
       const stats = getBackupStats();
       res.json(stats);
@@ -678,7 +678,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin routes - Data Purge
-  app.get('/api/admin/purge/stats', requireRole(['admin']), async (req, res) => {
+  app.get('/api/admin/purge/stats', requireRole(['administrator']), async (req, res) => {
     try {
       const stats = await getPurgeStats();
       res.json(stats);
@@ -688,7 +688,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/admin/purge/execute', requireRole(['admin']), async (req, res) => {
+  app.post('/api/admin/purge/execute', requireRole(['administrator']), async (req, res) => {
     try {
       const result = await executePurgeManually();
       res.json(result);
