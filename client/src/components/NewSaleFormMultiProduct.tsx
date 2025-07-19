@@ -11,9 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useStoreContext } from "@/hooks/useStoreContext";
-import { Package, User, Users, IdCard, Camera, Plus, Minus, Info } from "lucide-react";
+import { Package, User, Users, IdCard, Camera, Plus, Minus, Info, X } from "lucide-react";
 import { validateEAN13, ARTICLE_CATEGORY_MAPPING, PAYMENT_METHODS, IDENTITY_TYPES } from "@/lib/validation";
-import SimpleCameraModal from "@/components/SimpleCameraModal";
 
 // Types pour les photos
 type PhotoType = 'recto' | 'verso' | 'ticket';
@@ -669,15 +668,59 @@ export default function NewSaleFormMultiProduct() {
       </div>
 
       {/* Modal Camera */}
-      <SimpleCameraModal
-        isOpen={isCameraOpen}
-        onClose={() => {
-          setIsCameraOpen(false);
-          setCurrentPhotoType(null);
-        }}
-        onPhotoTaken={handlePhotoTaken}
-        title={`Capturer la photo ${currentPhotoType}`}
-      />
+      {isCameraOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium">
+                Capturer photo {currentPhotoType}
+              </h3>
+              <Button
+                onClick={() => {
+                  setIsCameraOpen(false);
+                  setCurrentPhotoType(null);
+                }}
+                variant="outline"
+                size="sm"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="text-center">
+                <p className="text-sm text-gray-600 mb-4">
+                  La capture photo sera bientôt disponible.
+                </p>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = (event) => {
+                        const photoData = event.target?.result as string;
+                        handlePhotoTaken(photoData);
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                  className="hidden"
+                  id="photo-upload"
+                />
+                <label
+                  htmlFor="photo-upload"
+                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700"
+                >
+                  <Camera className="h-4 w-4 mr-2" />
+                  Sélectionner une photo
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
