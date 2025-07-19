@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Shield, Flame, Plus, History } from 'lucide-react';
-import NewSaleFormMultiProduct from './NewSaleFormMultiProduct';
+import NewSaleForm from './NewSaleForm';
 import SalesHistory from './SalesHistory';
 import { useAuth } from '@/hooks/useAuth';
 import { useStoreContext } from '@/hooks/useStoreContext';
@@ -68,7 +68,7 @@ export default function FireworksApp() {
           </TabsList>
 
           <TabsContent value="nouvelle-vente">
-            <NewSaleFormMultiProduct />
+            <NewSaleForm />
           </TabsContent>
 
           <TabsContent value="historique">

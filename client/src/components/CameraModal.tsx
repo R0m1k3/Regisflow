@@ -74,14 +74,11 @@ export default function CameraModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-lg w-full mx-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center justify-between">
-            <span>Capturer photo {photoType}</span>
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              <X className="h-4 w-4" />
-            </Button>
+          <DialogTitle>
+            Photo {photoType ? photoType.charAt(0).toUpperCase() + photoType.slice(1) : ''}
           </DialogTitle>
         </DialogHeader>
-
+        
         <div className="space-y-4">
           <div className="relative">
             <video
@@ -89,25 +86,44 @@ export default function CameraModal({
               autoPlay
               playsInline
               muted
-              className="w-full h-64 object-cover bg-black rounded"
+              className="w-full max-w-full h-auto camera-preview rounded-lg border bg-black"
+              style={{ 
+                aspectRatio: '16/9',
+                objectFit: 'cover',
+                maxHeight: '400px',
+                minHeight: '200px'
+              }}
+              onLoadedMetadata={() => console.log('CameraModal: Video metadata loaded')}
+              onCanPlay={() => console.log('CameraModal: Video can play')}
+              onPlay={() => console.log('CameraModal: Video playing')}
+              onError={(e) => console.error('CameraModal: Video error:', e)}
             />
-            <canvas
-              ref={canvasRef}
-              className="hidden"
-            />
+            <canvas ref={canvasRef} className="hidden" />
+            
+            {/* Overlay pour aider à cadrer la pièce d'identité */}
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute inset-4 border-2 border-white border-dashed rounded-lg opacity-70"></div>
+              <div className="absolute bottom-2 left-2 text-white text-sm bg-black bg-opacity-70 px-2 py-1 rounded">
+                Cadrez la pièce d'identité dans le rectangle
+              </div>
+              <div className="absolute top-2 right-2 text-white text-xs bg-black bg-opacity-70 px-2 py-1 rounded">
+                {photoType === 'recto' ? 'RECTO' : 'VERSO'}
+              </div>
+            </div>
           </div>
-
-          <div className="flex justify-center gap-4">
-            <Button
-              onClick={onCapture}
-              disabled={isCapturing}
-              className="flex items-center gap-2"
-            >
-              <Camera className="h-4 w-4" />
-              {isCapturing ? 'Capture...' : 'Prendre la photo'}
+          
+          <div className="flex justify-between space-x-3">
+            <Button variant="outline" onClick={onClose} className="flex-1">
+              <X className="h-4 w-4 mr-2" />
+              Fermer
             </Button>
-            <Button variant="outline" onClick={onClose}>
-              Annuler
+            <Button 
+              onClick={onCapture} 
+              disabled={isCapturing}
+              className="bg-green-600 hover:bg-green-700 text-white flex-1"
+            >
+              <Camera className="h-4 w-4 mr-2" />
+              {isCapturing ? 'Capture...' : 'Prendre la photo'}
             </Button>
           </div>
         </div>

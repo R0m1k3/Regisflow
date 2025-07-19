@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,23 +9,21 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useStoreContext } from '@/hooks/useStoreContext';
+import { useSimpleCamera } from '@/hooks/useSimpleCamera';
 
 import { apiRequest } from '@/lib/queryClient';
 import { validateRequiredFields, validateEAN13, ARTICLE_CATEGORY_MAPPING, IDENTITY_TYPES, PAYMENT_METHODS } from '@/lib/validation';
-import { Package, User, Users, Save, Calendar, BadgeCheck, Info, Camera, Upload, Trash2, Plus, X } from 'lucide-react';
-import CameraModal from '@/components/CameraModal';
+import { Package, User, Users, Save, Calendar, BadgeCheck, Info, Camera, Upload, Trash2 } from 'lucide-react';
+import SimpleCameraModal from '@/components/SimpleCameraModal';
 import type { PhotoType } from '@/types/sale';
 
-interface Product {
+interface FormData {
+  vendeur: string;
+  dateVente: string;
   typeArticle: string;
   categorie: string;
   quantite: string;
   gencode: string;
-}
-
-interface FormData {
-  vendeur: string;
-  products: Product[];
   nom: string;
   prenom: string;
   dateNaissance: string;
@@ -48,14 +46,26 @@ export default function NewSaleForm() {
   const { selectedStoreId } = useStoreContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Camera state
-  const [isCameraOpen, setIsCameraOpen] = useState(false);
-  const [currentPhotoType, setCurrentPhotoType] = useState<PhotoType | null>(null);
+  // Camera functionality
+  const {
+    isOpen: isCameraOpen,
+    currentPhotoType,
+    isCapturing,
+    videoRef,
+    canvasRef,
+    startCamera,
+    capturePhoto,
+    stopCamera
+  } = useSimpleCamera();
 
   const form = useForm<FormData>({
     defaultValues: {
       vendeur: '',
-      products: [{ typeArticle: '', categorie: '', quantite: '1', gencode: '' }],
+      dateVente: new Date().toISOString().split('T')[0],
+      typeArticle: '',
+      categorie: '',
+      quantite: '',
+      gencode: '',
       nom: '',
       prenom: '',
       dateNaissance: '',
@@ -71,10 +81,8 @@ export default function NewSaleForm() {
     }
   });
 
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: "products"
-  });
+  const typeArticle = form.watch('typeArticle');
+  const availableCategories = typeArticle ? ARTICLE_CATEGORY_MAPPING[typeArticle as keyof typeof ARTICLE_CATEGORY_MAPPING] || [] : [];
 
   const createSaleMutation = useMutation({
     mutationFn: async (saleData: any) => {
@@ -98,7 +106,11 @@ export default function NewSaleForm() {
       });
       form.reset({
         vendeur: '',
-        products: [{ typeArticle: '', categorie: '', quantite: '1', gencode: '' }],
+        dateVente: new Date().toISOString().split('T')[0],
+        typeArticle: '',
+        categorie: '',
+        quantite: '',
+        gencode: '',
         nom: '',
         prenom: '',
         dateNaissance: '',
@@ -136,26 +148,21 @@ export default function NewSaleForm() {
         return;
       }
 
-      // Validation EAN13 pour chaque produit
-      for (const product of data.products) {
-        if (!validateEAN13(product.gencode)) {
-          toast({
-            title: "Code EAN13 invalide",
-            description: `Le gencode "${product.gencode}" doit être un code EAN13 valide à 13 chiffres`,
-            variant: "destructive",
-          });
-          return;
-        }
+      if (!validateEAN13(data.gencode)) {
+        toast({
+          title: "Code EAN13 invalide",
+          description: "Le gencode doit être un code EAN13 valide à 13 chiffres",
+          variant: "destructive",
+        });
+        return;
       }
 
       const saleData = {
         vendeur: data.vendeur,
-        products: data.products.map(product => ({
-          typeArticle: product.typeArticle,
-          categorie: product.categorie as 'F2' | 'F3',
-          quantite: parseInt(product.quantite),
-          gencode: product.gencode,
-        })),
+        typeArticle: data.typeArticle,
+        categorie: data.categorie as 'F2' | 'F3',
+        quantite: parseInt(data.quantite),
+        gencode: data.gencode,
         nom: data.nom,
         prenom: data.prenom,
         dateNaissance: data.dateNaissance,
@@ -179,28 +186,84 @@ export default function NewSaleForm() {
   };
 
   // Photo capture functions
-  const handlePhotoCapture = (photoType: PhotoType) => {
-    setCurrentPhotoType(photoType);
-    setIsCameraOpen(true);
+  const handlePhotoCapture = async (photoType: PhotoType) => {
+    console.log('=== PHOTO CAPTURE REQUESTED ===');
+    console.log('Photo type:', photoType);
+    
+    // Vérifications préliminaires
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      toast({
+        title: "Navigateur non compatible",
+        description: "Votre navigateur ne supporte pas la capture photo. Utilisez Chrome, Firefox ou Safari récent.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Vérifier si nous sommes en HTTPS (requis par certains navigateurs)
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+      toast({
+        title: "Connexion sécurisée requise",
+        description: "L'accès à la caméra nécessite une connexion HTTPS.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      console.log('Attempting to start camera...');
+      
+      // Afficher toast de démarrage
+      toast({
+        title: "Démarrage de la caméra",
+        description: "Préparation de la caméra en cours...",
+      });
+      
+      // Démarrer la caméra simple
+      await startCamera(photoType);
+      console.log('Simple camera started successfully');
+      
+    } catch (error) {
+      console.error('Camera start failed:', error);
+      toast({
+        title: "Erreur d'accès à la caméra",
+        description: error instanceof Error ? error.message : "Impossible d'accéder à la caméra",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handlePhotoTaken = (photoData: string) => {
-    if (currentPhotoType === 'recto') {
-      form.setValue('photoRecto', photoData);
-    } else if (currentPhotoType === 'verso') {
-      form.setValue('photoVerso', photoData);
-    } else if (currentPhotoType === 'ticket') {
-      form.setValue('photoTicket', photoData);
+  const handleTakePhoto = async () => {
+    if (!currentPhotoType) return;
+    
+    try {
+      console.log('Attempting to capture photo...');
+      const photoData = await capturePhoto();
+      console.log('Photo captured successfully, data length:', photoData.length);
+      
+      if (currentPhotoType === 'recto') {
+        form.setValue('photoRecto', photoData);
+      } else if (currentPhotoType === 'verso') {
+        form.setValue('photoVerso', photoData);
+      } else if (currentPhotoType === 'ticket') {
+        form.setValue('photoTicket', photoData);
+      }
+      
+      toast({
+        title: "Photo capturée",
+        description: `Photo ${currentPhotoType} enregistrée avec succès`,
+        variant: "success",
+      });
+      
+      stopCamera();
+    } catch (error) {
+      console.error('Photo capture error:', error);
+      toast({
+        title: "Erreur de capture",
+        description: error instanceof Error ? error.message : "Erreur lors de la capture",
+        variant: "destructive",
+      });
     }
-    
-    toast({
-      title: "Photo capturée",
-      description: `Photo ${currentPhotoType} enregistrée avec succès`,
-      variant: "success",
-    });
-    
-    setIsCameraOpen(false);
-    setCurrentPhotoType(null);
   };
 
   const handleRemovePhoto = (photoType: PhotoType) => {
@@ -253,222 +316,236 @@ export default function NewSaleForm() {
       toast({
         title: "Photo ajoutée",
         description: `Photo ${photoType} ajoutée avec succès`,
-        variant: "success",
       });
     };
     reader.readAsDataURL(file);
   };
 
+  // Camera test function
+  const handleCameraTest = async () => {
+    toast({
+      title: "Test en cours...",
+      description: "Vérification de l'accès aux caméras",
+    });
+    
+    const results = await runCameraTest();
+    
+    let message = `Test de caméra terminé:\n`;
+    message += `✓ Navigateur compatible: ${results.hasMediaDevices ? 'Oui' : 'Non'}\n`;
+    message += `✓ getUserMedia disponible: ${results.hasGetUserMedia ? 'Oui' : 'Non'}\n`;
+    message += `✓ Caméras détectées: ${results.videoDevicesCount}\n`;
+    message += `✓ Permissions: ${results.permissions}\n`;
+    
+    if (results.error) {
+      message += `❌ Erreur: ${results.error}`;
+    } else {
+      message += `✅ Caméra fonctionnelle`;
+    }
+    
+    toast({
+      title: results.error ? "Test échoué" : "Test réussi",
+      description: message,
+      variant: results.error ? "destructive" : "default",
+    });
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="modern-card">
+    <div className="elegant-card animate-slide-in">
+      <div className="p-6">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Section Vendeur */}
-            <div className="modern-section" style={{ backgroundColor: '#f0f9ff' }}>
-              <div className="flex items-center gap-2 mb-4">
-                <User className="h-5 w-5 text-primary" />
-                <h3 className="text-lg font-semibold text-gray-900">Informations Vendeur</h3>
+            <div className="section-vendor">
+              <div className="section-header">
+                <User className="h-5 w-5" />
+                <span>Informations Vendeur</span>
               </div>
-              
-              <FormField
-                control={form.control}
-                name="vendeur"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nom du vendeur *</FormLabel>
-                    <FormControl>
-                      <Input {...field} className="modern-input" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="grid grid-cols-1 gap-4">
+                <FormField
+                  control={form.control}
+                  name="vendeur"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Vendeur <span className="text-destructive">*</span></FormLabel>
+                      <FormControl>
+                        <Input placeholder="Nom du vendeur" className="modern-input" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
 
-            {/* Section Produits */}
-            <div className="modern-section" style={{ backgroundColor: '#f0fdf4' }}>
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <Package className="h-5 w-5 text-primary" />
-                  <h3 className="text-lg font-semibold text-gray-900">Produits</h3>
-                </div>
-                <Button
-                  type="button"
-                  onClick={() => append({ typeArticle: '', categorie: '', quantite: '1', gencode: '' })}
-                  variant="outline"
-                  size="sm"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Ajouter un produit
-                </Button>
+            {/* Section Produit */}
+            <div className="section-product">
+              <div className="section-header">
+                <Package className="h-5 w-5" />
+                <span>Informations Produit</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="typeArticle"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Type d'article <span className="text-destructive">*</span></FormLabel>
+                      <Select value={field.value} onValueChange={(value) => {
+                        field.onChange(value);
+                        form.setValue('categorie', '');
+                      }}>
+                        <FormControl>
+                          <SelectTrigger className="modern-input">
+                            <SelectValue placeholder="Sélectionner un type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {Object.keys(ARTICLE_CATEGORY_MAPPING).map((type) => (
+                            <SelectItem key={type} value={type}>
+                              {type}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="categorie"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Catégorie réglementaire <span className="text-destructive">*</span></FormLabel>
+                      <Select value={field.value} onValueChange={field.onChange} disabled={!typeArticle}>
+                        <FormControl>
+                          <SelectTrigger className="modern-input">
+                            <SelectValue placeholder="Sélectionner une catégorie" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {availableCategories.map((category) => (
+                            <SelectItem key={category} value={category}>
+                              {category}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="quantite"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Quantité <span className="text-destructive">*</span></FormLabel>
+                      <FormControl>
+                        <Input type="number" min="1" placeholder="Entrez la quantité" className="modern-input" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="gencode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Gencode (EAN13) <span className="text-destructive">*</span></FormLabel>
+                      <FormControl>
+                        <Input placeholder="Code EAN13 à 13 chiffres" className="modern-input" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
 
-              <div className="space-y-4">
-                {fields.map((field, index) => (
-                  <div key={field.id} className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 border rounded-lg bg-white">
-                    <FormField
-                      control={form.control}
-                      name={`products.${index}.typeArticle`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Type d'article *</FormLabel>
-                          <FormControl>
-                            <Input {...field} className="modern-input" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name={`products.${index}.categorie`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Catégorie *</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
-                            <FormControl>
-                              <SelectTrigger className="modern-input">
-                                <SelectValue placeholder="Choisir" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="F2">F2</SelectItem>
-                              <SelectItem value="F3">F3</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name={`products.${index}.quantite`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Quantité *</FormLabel>
-                          <FormControl>
-                            <Input {...field} type="number" min="1" className="modern-input" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name={`products.${index}.gencode`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Gencode EAN13 *</FormLabel>
-                          <FormControl>
-                            <Input {...field} className="modern-input" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <div className="flex items-end">
-                      {fields.length > 1 && (
-                        <Button
-                          type="button"
-                          onClick={() => remove(index)}
-                          variant="outline"
-                          size="sm"
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <Alert className="mt-4 border-blue-200 bg-blue-50">
+                <Info className="h-4 w-4 text-blue-600" />
+                <AlertDescription className="text-blue-800">
+                  <strong>Information réglementaire :</strong> F1 = vente interdite aux mineurs de moins de 12 ans • F2/F3 = artifices puissants réservés aux majeurs, vente encadrée
+                </AlertDescription>
+              </Alert>
             </div>
 
             {/* Section Client */}
-            <div className="modern-section" style={{ backgroundColor: '#fefce8' }}>
-              <div className="flex items-center gap-2 mb-4">
-                <Users className="h-5 w-5 text-primary" />
-                <h3 className="text-lg font-semibold text-gray-900">Informations Client</h3>
+            <div className="section-client">
+              <div className="section-header">
+                <Users className="h-5 w-5" />
+                <span>Informations Client</span>
               </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="nom"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nom *</FormLabel>
+                      <FormLabel>Nom de famille <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
-                        <Input {...field} className="modern-input" />
+                        <Input placeholder="Nom de famille" className="modern-input" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={form.control}
                   name="prenom"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Prénom *</FormLabel>
+                      <FormLabel>Prénom <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
-                        <Input {...field} className="modern-input" />
+                        <Input placeholder="Prénom" className="modern-input" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={form.control}
                   name="dateNaissance"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Date de naissance *</FormLabel>
+                      <FormLabel>Date de naissance <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
-                        <Input {...field} type="date" className="modern-input" />
+                        <Input type="date" className="modern-input" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={form.control}
                   name="lieuNaissance"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Lieu de naissance *</FormLabel>
+                      <FormLabel>Lieu de naissance <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
-                        <Input {...field} className="modern-input" />
+                        <Input placeholder="Ville de naissance" className="modern-input" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={form.control}
                   name="modePaiement"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Mode de paiement *</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <FormLabel>Mode de paiement <span className="text-destructive">*</span></FormLabel>
+                      <Select value={field.value} onValueChange={field.onChange}>
                         <FormControl>
                           <SelectTrigger className="modern-input">
-                            <SelectValue />
+                            <SelectValue placeholder="Sélectionner le mode de paiement" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           {PAYMENT_METHODS.map((method) => (
-                            <SelectItem key={method} value={method}>
-                              {method}
+                            <SelectItem key={method.value} value={method.value}>
+                              {method.label}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -481,29 +558,28 @@ export default function NewSaleForm() {
             </div>
 
             {/* Section Identité */}
-            <div className="modern-section" style={{ backgroundColor: '#fdf2f8' }}>
-              <div className="flex items-center gap-2 mb-4">
-                <BadgeCheck className="h-5 w-5 text-primary" />
-                <h3 className="text-lg font-semibold text-gray-900">Pièce d'Identité</h3>
+            <div className="section-identity">
+              <div className="section-header">
+                <BadgeCheck className="h-5 w-5" />
+                <span>Pièce d'Identité</span>
               </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="typeIdentite"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Type de pièce d'identité *</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <FormLabel>Type de pièce d'identité <span className="text-destructive">*</span></FormLabel>
+                      <Select value={field.value} onValueChange={field.onChange}>
                         <FormControl>
                           <SelectTrigger className="modern-input">
-                            <SelectValue placeholder="Choisir un type" />
+                            <SelectValue placeholder="Sélectionner le type" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           {IDENTITY_TYPES.map((type) => (
-                            <SelectItem key={type} value={type}>
-                              {type}
+                            <SelectItem key={type.value} value={type.value}>
+                              {type.label}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -512,21 +588,19 @@ export default function NewSaleForm() {
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={form.control}
                   name="numeroIdentite"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Numéro de pièce d'identité *</FormLabel>
+                      <FormLabel>Numéro de pièce d'identité <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
-                        <Input {...field} className="modern-input" />
+                        <Input placeholder="Numéro de la pièce" className="modern-input" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={form.control}
                   name="autoriteDelivrance"
@@ -534,35 +608,34 @@ export default function NewSaleForm() {
                     <FormItem>
                       <FormLabel>Autorité de délivrance</FormLabel>
                       <FormControl>
-                        <Input {...field} className="modern-input" />
+                        <Input placeholder="Autorité ayant délivré la pièce (optionnel)" className="modern-input" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={form.control}
                   name="dateDelivrance"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Date de délivrance *</FormLabel>
+                      <FormLabel>Date de délivrance <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
-                        <Input {...field} type="date" className="modern-input" />
+                        <Input type="date" className="modern-input" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
-
-              {/* Photos pièce d'identité */}
+              
+              {/* Section Photos */}
               <div className="mt-6 space-y-4">
                 <div>
                   <h4 className="text-sm font-medium text-gray-700">Photos de la pièce d'identité</h4>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Photo Recto */}
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-600">Photo Recto</label>
@@ -571,7 +644,7 @@ export default function NewSaleForm() {
                         <img 
                           src={form.watch('photoRecto')} 
                           alt="Photo recto" 
-                          className="w-full h-32 object-cover border"
+                          className="w-full h-32 object-cover rounded border"
                         />
                         <Button
                           type="button"
@@ -622,7 +695,7 @@ export default function NewSaleForm() {
                         <img 
                           src={form.watch('photoVerso')} 
                           alt="Photo verso" 
-                          className="w-full h-32 object-cover border"
+                          className="w-full h-32 object-cover rounded border"
                         />
                         <Button
                           type="button"
@@ -680,7 +753,7 @@ export default function NewSaleForm() {
                       <img 
                         src={form.watch('photoTicket')} 
                         alt="Photo ticket" 
-                        className="w-full h-32 object-cover border"
+                        className="w-full h-32 object-cover rounded border"
                       />
                       <Button
                         type="button"
@@ -748,14 +821,14 @@ export default function NewSaleForm() {
       </div>
       
       {/* Camera Modal */}
-      <CameraModal
+      <SimpleCameraModal
         isOpen={isCameraOpen}
         photoType={currentPhotoType}
-        onClose={() => {
-          setIsCameraOpen(false);
-          setCurrentPhotoType(null);
-        }}
-        onPhotoTaken={handlePhotoTaken}
+        videoRef={videoRef}
+        canvasRef={canvasRef}
+        isCapturing={isCapturing}
+        onClose={stopCamera}
+        onCapture={handleTakePhoto}
       />
     </div>
   );

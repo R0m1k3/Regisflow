@@ -81,15 +81,15 @@ export const ARTICLE_CATEGORY_MAPPING = {
 } as const;
 
 export const IDENTITY_TYPES = [
-  "Carte Nationale d'Identité",
-  "Passeport", 
-  "Permis de conduire"
+  { value: "CNI", label: "Carte Nationale d'Identité" },
+  { value: "Passeport", label: "Passeport" },
+  { value: "Permis de conduire", label: "Permis de conduire" }
 ] as const;
 
 export const PAYMENT_METHODS = [
-  "Carte Bancaire",
-  "Espèce",
-  "Chèque", 
-  "Carte Cadeau",
-  "Autre"
+  { value: "Carte Bancaire", label: "Carte Bancaire" },
+  { value: "Espèce", label: "Espèce" },
+  { value: "Chèque", label: "Chèque" },
+  { value: "Carte Cadeau", label: "Carte Cadeau" },
+  { value: "Autre", label: "Autre" }
 ] as const;
