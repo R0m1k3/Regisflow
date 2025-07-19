@@ -172,6 +172,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getSalesByStore(storeId: number, startDate?: string, endDate?: string): Promise<Sale[]> {
+    console.log('DEBUG: getSalesByStore called with storeId:', storeId, 'startDate:', startDate, 'endDate:', endDate);
+    
     let query = db.select().from(sales).where(eq(sales.storeId, storeId));
     
     if (startDate && endDate) {
@@ -189,14 +191,42 @@ export class DatabaseStorage implements IStorage {
     }
     
     const salesData = await query.orderBy(desc(sales.timestamp));
+    console.log('DEBUG: Raw sales data count:', salesData.length);
     
-    // Get products for each sale
+    // Get products for each sale and map photo column names correctly
     const salesWithProducts = await Promise.all(
       salesData.map(async (sale) => {
         const products = await db.select().from(saleProducts).where(eq(saleProducts.saleId, sale.id));
-        return { ...sale, products };
+        
+        // Map photo column names from snake_case to camelCase
+        const mappedSale = {
+          ...sale,
+          photoRecto: sale.photo_recto,
+          photoVerso: sale.photo_verso,
+          photoTicket: sale.photo_ticket,
+          products
+        };
+        
+        if (sale.id === 17) {
+          console.log('DEBUG: Sale 17 photo mapping:', {
+            original_photo_recto: sale.photo_recto ? 'PRESENT' : 'NULL',
+            original_photo_verso: sale.photo_verso ? 'PRESENT' : 'NULL', 
+            original_photo_ticket: sale.photo_ticket ? 'PRESENT' : 'NULL',
+            mapped_photoRecto: mappedSale.photoRecto ? 'PRESENT' : 'NULL',
+            mapped_photoVerso: mappedSale.photoVerso ? 'PRESENT' : 'NULL',
+            mapped_photoTicket: mappedSale.photoTicket ? 'PRESENT' : 'NULL'
+          });
+        }
+        
+        return mappedSale;
       })
     );
+    
+    const salesWithPhotos = salesWithProducts.filter(s => s.photoRecto || s.photoVerso || s.photoTicket);
+    console.log('DEBUG: Sales with photos found:', salesWithPhotos.length);
+    if (salesWithPhotos.length > 0) {
+      console.log('DEBUG: First sale with photos:', salesWithPhotos[0].id);
+    }
     
     return salesWithProducts;
   }
