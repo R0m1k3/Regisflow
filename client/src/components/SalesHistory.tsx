@@ -200,21 +200,72 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
         if (sale.photoRecto || sale.photoVerso || sale.photoTicket) {
           doc.setFont('helvetica', 'bold');
           doc.text('DOCUMENTS PHOTOGRAPHIÉS:', 20, currentY);
-          currentY += 6;
-          doc.setFont('helvetica', 'normal');
+          currentY += 8;
+          
+          const photoWidth = 80;
+          const photoHeight = 60;
+          let photoX = 20;
           
           if (sale.photoRecto) {
-            doc.text('✓ Photo recto pièce d\'identité', 25, currentY);
+            // Vérifier si on a assez de place pour la photo
+            if (currentY + photoHeight > 280) {
+              doc.addPage();
+              currentY = 20;
+            }
+            
+            doc.setFont('helvetica', 'normal');
+            doc.text('Photo recto pièce d\'identité:', photoX, currentY);
             currentY += 5;
+            
+            try {
+              doc.addImage(sale.photoRecto, 'JPEG', photoX, currentY, photoWidth, photoHeight);
+              currentY += photoHeight + 5;
+            } catch (error) {
+              doc.text('Photo non disponible (format non supporté)', photoX, currentY);
+              currentY += 5;
+            }
           }
+          
           if (sale.photoVerso) {
-            doc.text('✓ Photo verso pièce d\'identité', 25, currentY);
+            // Vérifier si on a assez de place pour la photo
+            if (currentY + photoHeight > 280) {
+              doc.addPage();
+              currentY = 20;
+            }
+            
+            doc.setFont('helvetica', 'normal');
+            doc.text('Photo verso pièce d\'identité:', photoX, currentY);
             currentY += 5;
+            
+            try {
+              doc.addImage(sale.photoVerso, 'JPEG', photoX, currentY, photoWidth, photoHeight);
+              currentY += photoHeight + 5;
+            } catch (error) {
+              doc.text('Photo non disponible (format non supporté)', photoX, currentY);
+              currentY += 5;
+            }
           }
+          
           if (sale.photoTicket) {
-            doc.text('✓ Photo ticket/reçu', 25, currentY);
+            // Vérifier si on a assez de place pour la photo
+            if (currentY + photoHeight > 280) {
+              doc.addPage();
+              currentY = 20;
+            }
+            
+            doc.setFont('helvetica', 'normal');
+            doc.text('Photo ticket/reçu:', photoX, currentY);
             currentY += 5;
+            
+            try {
+              doc.addImage(sale.photoTicket, 'JPEG', photoX, currentY, photoWidth, photoHeight);
+              currentY += photoHeight + 5;
+            } catch (error) {
+              doc.text('Photo non disponible (format non supporté)', photoX, currentY);
+              currentY += 5;
+            }
           }
+          
           currentY += 5;
         }
 
