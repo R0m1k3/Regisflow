@@ -2,9 +2,21 @@ import cron from 'node-cron';
 import fs from 'fs';
 import path from 'path';
 import { storage } from './storage';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
 
 const BACKUP_DIR = path.join(process.cwd(), 'backups');
 const MAX_BACKUPS = 10;
+
+// Database connection info from environment variables
+const DB_HOST = process.env.PGHOST || 'localhost';
+const DB_PORT = process.env.PGPORT || '5432';
+const DB_NAME = process.env.PGDATABASE || 'postgres';
+const DB_USER = process.env.PGUSER || 'postgres';
+const DB_PASSWORD = process.env.PGPASSWORD || '';
+const DATABASE_URL = process.env.DATABASE_URL;
 
 // Ensure backup directory exists
 if (!fs.existsSync(BACKUP_DIR)) {
@@ -13,66 +25,117 @@ if (!fs.existsSync(BACKUP_DIR)) {
 
 export async function createAutomaticBackup() {
   try {
-    console.log('Creating automatic backup...');
+    console.log('Creating automatic SQL backup...');
     
-    // Get all data from the database
-    const users = await storage.getAllUsers();
-    const stores = await storage.getAllStores();
-    
-    // Get all sales from all stores
-    const allSales = [];
-    for (const store of stores) {
-      const storeSales = await storage.getSalesByStore(store.id);
-      allSales.push(...storeSales);
-    }
-
-    const backupData = {
-      timestamp: new Date().toISOString(),
-      version: "1.0",
-      type: "automatic",
-      data: {
-        users: users.map(user => ({
-          ...user,
-          // Don't include the password hash in backup for security
-          password: undefined
-        })),
-        stores,
-        sales: allSales
-      },
-      metadata: {
-        totalUsers: users.length,
-        totalStores: stores.length,
-        totalSales: allSales.length,
-        exportedBy: 'system-auto-backup'
-      }
-    };
-
     // Create filename with timestamp
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const filename = `auto-backup-${timestamp}.json`;
+    const filename = `auto-backup-${timestamp}.sql`;
     const filepath = path.join(BACKUP_DIR, filename);
 
-    // Write backup to file
-    fs.writeFileSync(filepath, JSON.stringify(backupData, null, 2));
+    // Create SQL dump using pg_dump
+    await createSQLBackup(filepath);
     
-    console.log(`✅ Automatic backup created: ${filename}`);
-    console.log(`📊 Backup stats: ${users.length} users, ${stores.length} stores, ${allSales.length} sales`);
+    // Get stats for logging
+    const users = await storage.getAllUsers();
+    const stores = await storage.getAllStores();
+    let totalSales = 0;
+    for (const store of stores) {
+      const storeSales = await storage.getSalesByStore(store.id);
+      totalSales += storeSales.length;
+    }
+    
+    console.log(`✅ Automatic SQL backup created: ${filename}`);
+    console.log(`📊 Backup stats: ${users.length} users, ${stores.length} stores, ${totalSales} sales`);
 
     // Clean up old backups
     await cleanupOldBackups();
     
-    return { success: true, filename, stats: backupData.metadata };
+    return { 
+      success: true, 
+      filename, 
+      stats: {
+        totalUsers: users.length,
+        totalStores: stores.length,
+        totalSales: totalSales,
+        exportedBy: 'system-auto-backup'
+      }
+    };
   } catch (error) {
-    console.error('❌ Failed to create automatic backup:', error);
+    console.error('❌ Failed to create automatic SQL backup:', error);
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
+export async function createSQLBackup(filepath: string): Promise<void> {
+  try {
+    // Use pg_dump to create SQL backup
+    let command: string;
+    
+    if (DATABASE_URL) {
+      // Use DATABASE_URL if available
+      command = `pg_dump "${DATABASE_URL}" --no-owner --no-privileges --clean --if-exists`;
+    } else {
+      // Use individual connection parameters
+      command = `PGPASSWORD="${DB_PASSWORD}" pg_dump -h "${DB_HOST}" -p "${DB_PORT}" -U "${DB_USER}" -d "${DB_NAME}" --no-owner --no-privileges --clean --if-exists`;
+    }
+    
+    const { stdout, stderr } = await execAsync(command, {
+      maxBuffer: 50 * 1024 * 1024, // 50MB buffer for large databases
+    });
+    
+    if (stderr && !stderr.includes('NOTICE')) {
+      console.warn('pg_dump warnings:', stderr);
+    }
+    
+    // Write SQL dump to file
+    fs.writeFileSync(filepath, stdout);
+    
+    console.log(`SQL backup created: ${path.basename(filepath)}`);
+  } catch (error) {
+    console.error('Failed to create SQL backup:', error);
+    throw new Error(`SQL backup failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+export async function restoreSQLBackup(filepath: string): Promise<void> {
+  try {
+    console.log(`Restoring SQL backup from: ${path.basename(filepath)}`);
+    
+    // Read SQL file
+    const sqlContent = fs.readFileSync(filepath, 'utf8');
+    
+    // Use psql to restore the backup
+    let command: string;
+    
+    if (DATABASE_URL) {
+      // Use DATABASE_URL if available
+      command = `psql "${DATABASE_URL}"`;
+    } else {
+      // Use individual connection parameters
+      command = `PGPASSWORD="${DB_PASSWORD}" psql -h "${DB_HOST}" -p "${DB_PORT}" -U "${DB_USER}" -d "${DB_NAME}"`;
+    }
+    
+    const { stderr } = await execAsync(command, {
+      input: sqlContent,
+      maxBuffer: 50 * 1024 * 1024, // 50MB buffer for large databases
+    });
+    
+    if (stderr && !stderr.includes('NOTICE')) {
+      console.warn('psql warnings:', stderr);
+    }
+    
+    console.log(`✅ SQL backup restored successfully from: ${path.basename(filepath)}`);
+  } catch (error) {
+    console.error('Failed to restore SQL backup:', error);
+    throw new Error(`SQL restore failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
 
 async function cleanupOldBackups() {
   try {
-    // Get all backup files
+    // Get all backup files (now SQL files)
     const files = fs.readdirSync(BACKUP_DIR)
-      .filter(file => file.startsWith('auto-backup-') && file.endsWith('.json'))
+      .filter(file => file.startsWith('auto-backup-') && file.endsWith('.sql'))
       .map(file => ({
         name: file,
         path: path.join(BACKUP_DIR, file),
@@ -99,7 +162,7 @@ async function cleanupOldBackups() {
 export function getBackupStats() {
   try {
     const files = fs.readdirSync(BACKUP_DIR)
-      .filter(file => file.startsWith('auto-backup-') && file.endsWith('.json'));
+      .filter(file => file.startsWith('auto-backup-') && file.endsWith('.sql'));
     
     return {
       totalBackups: files.length,
