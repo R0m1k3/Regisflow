@@ -342,6 +342,16 @@ Preferred communication style: Simple, everyday language.
 - ✅ **Health Diagnostics**: Added production-ready health checks and monitoring
 - ✅ **Multi-stage Build**: Optimized Dockerfile for production performance and security
 
+### Critical Production Fixes - Store Management & Permissions (January 19, 2025)
+- ✅ **Store Selection Bug Fixed**: Frontend used 'admin' instead of 'administrator' role check
+- ✅ **Sales Creation Fixed**: Ventes now created on selected store instead of default Frouard
+- ✅ **API Routes Corrected**: All routes use 'administrator' role consistently
+- ✅ **Delete Permissions Fixed**: Sales deletion route corrected from 'admin' to 'administrator'
+- ✅ **Admin Store Access Fixed**: Admin users have store_id = NULL for full access
+- ✅ **Production Database Corrected**: Applied SQL fixes for user ID 3 (gael) permissions
+- ✅ **Complete Store Management**: Admin can select any store, create sales on selected store
+- ✅ **Permission Consistency**: All CRUD operations work with standardized 'administrator' role
+
 ### Previous Docker Issues (January 13, 2025)
 - ✅ Resolved cache corruption errors during Docker deployment
 - ✅ Fixed missing prod-start.js references in Dockerfile and entrypoint scripts
