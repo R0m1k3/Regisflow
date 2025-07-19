@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/useAuth";
 import { StoreProvider, useStoreContext } from "@/hooks/useStoreContext";
-import NewSaleFormMulti from "@/components/NewSaleFormMulti";
+import NewSaleForm from "@/components/NewSaleForm";
 import SalesHistory from "@/components/SalesHistory";
 import Administration from "@/components/Administration";
 import { Package, History, Settings, LogOut, User, Building2, Shield } from "lucide-react";
@@ -146,7 +146,7 @@ function DashboardContent() {
 
             <TabsContent value="new-sale" className="mt-8">
               <div className="slide-in-up">
-                <NewSaleFormMulti />
+                <NewSaleForm />
               </div>
             </TabsContent>
 

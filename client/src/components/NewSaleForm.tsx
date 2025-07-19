@@ -17,13 +17,16 @@ import { Package, User, Users, Save, Calendar, BadgeCheck, Info, Camera, Upload,
 import SimpleCameraModal from '@/components/SimpleCameraModal';
 import type { PhotoType } from '@/types/sale';
 
-interface FormData {
-  vendeur: string;
-  dateVente: string;
+interface Product {
   typeArticle: string;
   categorie: string;
   quantite: string;
   gencode: string;
+}
+
+interface FormData {
+  vendeur: string;
+  products: Product[];
   nom: string;
   prenom: string;
   dateNaissance: string;
@@ -61,11 +64,7 @@ export default function NewSaleForm() {
   const form = useForm<FormData>({
     defaultValues: {
       vendeur: '',
-      dateVente: new Date().toISOString().split('T')[0],
-      typeArticle: '',
-      categorie: '',
-      quantite: '',
-      gencode: '',
+      products: [{ typeArticle: '', categorie: '', quantite: '', gencode: '' }],
       nom: '',
       prenom: '',
       dateNaissance: '',
@@ -81,8 +80,20 @@ export default function NewSaleForm() {
     }
   });
 
-  const typeArticle = form.watch('typeArticle');
-  const availableCategories = typeArticle ? ARTICLE_CATEGORY_MAPPING[typeArticle as keyof typeof ARTICLE_CATEGORY_MAPPING] || [] : [];
+  // Gestion des produits multiples
+  const products = form.watch('products');
+  
+  const addProduct = () => {
+    const currentProducts = form.getValues('products');
+    form.setValue('products', [...currentProducts, { typeArticle: '', categorie: '', quantite: '', gencode: '' }]);
+  };
+
+  const removeProduct = (index: number) => {
+    const currentProducts = form.getValues('products');
+    if (currentProducts.length > 1) {
+      form.setValue('products', currentProducts.filter((_, i) => i !== index));
+    }
+  };
 
   const createSaleMutation = useMutation({
     mutationFn: async (saleData: any) => {
@@ -106,11 +117,7 @@ export default function NewSaleForm() {
       });
       form.reset({
         vendeur: '',
-        dateVente: new Date().toISOString().split('T')[0],
-        typeArticle: '',
-        categorie: '',
-        quantite: '',
-        gencode: '',
+        products: [{ typeArticle: '', categorie: '', quantite: '', gencode: '' }],
         nom: '',
         prenom: '',
         dateNaissance: '',
@@ -148,21 +155,26 @@ export default function NewSaleForm() {
         return;
       }
 
-      if (!validateEAN13(data.gencode)) {
-        toast({
-          title: "Code EAN13 invalide",
-          description: "Le gencode doit être un code EAN13 valide à 13 chiffres",
-          variant: "destructive",
-        });
-        return;
+      // Validation EAN13 pour chaque produit
+      for (const product of data.products) {
+        if (!validateEAN13(product.gencode)) {
+          toast({
+            title: "Code EAN13 invalide",
+            description: `Le gencode "${product.gencode}" doit être un code EAN13 valide à 13 chiffres`,
+            variant: "destructive",
+          });
+          return;
+        }
       }
 
       const saleData = {
         vendeur: data.vendeur,
-        typeArticle: data.typeArticle,
-        categorie: data.categorie as 'F2' | 'F3',
-        quantite: parseInt(data.quantite),
-        gencode: data.gencode,
+        products: data.products.map(product => ({
+          typeArticle: product.typeArticle,
+          categorie: product.categorie as 'F2' | 'F3',
+          quantite: parseInt(product.quantite),
+          gencode: product.gencode,
+        })),
         nom: data.nom,
         prenom: data.prenom,
         dateNaissance: data.dateNaissance,
@@ -386,13 +398,13 @@ export default function NewSaleForm() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="typeArticle"
+                  name="products.0.typeArticle"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Type d'article <span className="text-destructive">*</span></FormLabel>
                       <Select value={field.value} onValueChange={(value) => {
                         field.onChange(value);
-                        form.setValue('categorie', '');
+                        form.setValue('products.0.categorie', '');
                       }}>
                         <FormControl>
                           <SelectTrigger className="modern-input">
@@ -413,18 +425,18 @@ export default function NewSaleForm() {
                 />
                 <FormField
                   control={form.control}
-                  name="categorie"
+                  name="products.0.categorie"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Catégorie réglementaire <span className="text-destructive">*</span></FormLabel>
-                      <Select value={field.value} onValueChange={field.onChange} disabled={!typeArticle}>
+                      <Select value={field.value} onValueChange={field.onChange} disabled={!form.watch('products')?.[0]?.typeArticle}>
                         <FormControl>
                           <SelectTrigger className="modern-input">
                             <SelectValue placeholder="Sélectionner une catégorie" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {availableCategories.map((category) => (
+                          {(form.watch('products')?.[0]?.typeArticle ? ARTICLE_CATEGORY_MAPPING[form.watch('products')?.[0]?.typeArticle as keyof typeof ARTICLE_CATEGORY_MAPPING] || [] : []).map((category) => (
                             <SelectItem key={category} value={category}>
                               {category}
                             </SelectItem>
@@ -437,7 +449,7 @@ export default function NewSaleForm() {
                 />
                 <FormField
                   control={form.control}
-                  name="quantite"
+                  name="products.0.quantite"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Quantité <span className="text-destructive">*</span></FormLabel>
@@ -450,7 +462,7 @@ export default function NewSaleForm() {
                 />
                 <FormField
                   control={form.control}
-                  name="gencode"
+                  name="products.0.gencode"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Gencode (EAN13) <span className="text-destructive">*</span></FormLabel>
