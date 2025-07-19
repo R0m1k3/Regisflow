@@ -4,7 +4,7 @@ export async function exportToExcel(sales: Sale[]): Promise<void> {
   if (sales.length === 0) return;
 
   try {
-    const XLSX = await import('xlsx-js-style');
+    const XLSX = await import('xlsx');
     const { utils, writeFile } = XLSX;
 
     // Créer un nouveau classeur
@@ -129,29 +129,34 @@ export async function exportToExcel(sales: Sale[]): Promise<void> {
         };
         
         // Ajouter les informations sur les photos disponibles
+        photoRow['Photo Recto'] = sale.photoRecto ? 'DISPONIBLE' : 'NON DISPONIBLE';
+        photoRow['Photo Verso'] = sale.photoVerso ? 'DISPONIBLE' : 'NON DISPONIBLE';
+        photoRow['Photo Ticket'] = sale.photoTicket ? 'DISPONIBLE' : 'NON DISPONIBLE';
+        
+        // Ajouter des informations sur la taille des photos pour référence
         if (sale.photoRecto) {
-          photoRow['Photo Recto'] = 'DISPONIBLE';
-          photoRow['Lien Recto'] = `data:image/jpeg;base64,${sale.photoRecto.split(',')[1] || sale.photoRecto}`;
+          const rectoSize = Math.round(sale.photoRecto.length / 1024);
+          photoRow['Taille Recto (KB)'] = `${rectoSize} KB`;
         } else {
-          photoRow['Photo Recto'] = 'NON DISPONIBLE';
-          photoRow['Lien Recto'] = '';
+          photoRow['Taille Recto (KB)'] = 'N/A';
         }
         
         if (sale.photoVerso) {
-          photoRow['Photo Verso'] = 'DISPONIBLE';
-          photoRow['Lien Verso'] = `data:image/jpeg;base64,${sale.photoVerso.split(',')[1] || sale.photoVerso}`;
+          const versoSize = Math.round(sale.photoVerso.length / 1024);
+          photoRow['Taille Verso (KB)'] = `${versoSize} KB`;
         } else {
-          photoRow['Photo Verso'] = 'NON DISPONIBLE';
-          photoRow['Lien Verso'] = '';
+          photoRow['Taille Verso (KB)'] = 'N/A';
         }
         
         if (sale.photoTicket) {
-          photoRow['Photo Ticket'] = 'DISPONIBLE';
-          photoRow['Lien Ticket'] = `data:image/jpeg;base64,${sale.photoTicket.split(',')[1] || sale.photoTicket}`;
+          const ticketSize = Math.round(sale.photoTicket.length / 1024);
+          photoRow['Taille Ticket (KB)'] = `${ticketSize} KB`;
         } else {
-          photoRow['Photo Ticket'] = 'NON DISPONIBLE';
-          photoRow['Lien Ticket'] = '';
+          photoRow['Taille Ticket (KB)'] = 'N/A';
         }
+        
+        // Information pour accéder aux photos
+        photoRow['Instructions'] = 'Voir détails de la vente dans l\'application pour télécharger les photos';
         
         photosData.push(photoRow);
       });
@@ -165,11 +170,12 @@ export async function exportToExcel(sales: Sale[]): Promise<void> {
         { wch: 20 }, // Client
         { wch: 15 }, // Vendeur
         { wch: 15 }, // Photo Recto
-        { wch: 50 }, // Lien Recto
         { wch: 15 }, // Photo Verso
-        { wch: 50 }, // Lien Verso
         { wch: 15 }, // Photo Ticket
-        { wch: 50 }  // Lien Ticket
+        { wch: 15 }, // Taille Recto (KB)
+        { wch: 15 }, // Taille Verso (KB)
+        { wch: 15 }, // Taille Ticket (KB)
+        { wch: 40 }  // Instructions
       ];
       
       // Ajuster la hauteur des lignes pour mieux voir les liens
