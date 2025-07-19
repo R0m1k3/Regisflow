@@ -121,16 +121,38 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
         doc.text(period, 20, 35);
       }
 
-      const tableData = filteredSales.map(sale => [
-        new Date(sale.timestamp).toLocaleDateString('fr-FR'),
-        sale.vendeur,
-        `${sale.nom} ${sale.prenom}`,
-        sale.typeArticle,
-        sale.categorie,
-        sale.quantite.toString(),
-        sale.modePaiement,
-        sale.gencode
-      ]);
+      // Créer une ligne pour chaque produit de chaque vente
+      const tableData: string[][] = [];
+      
+      filteredSales.forEach(sale => {
+        if (sale.products && sale.products.length > 0) {
+          // Pour chaque produit, créer une ligne avec les infos de la vente
+          sale.products.forEach(product => {
+            tableData.push([
+              new Date(sale.timestamp).toLocaleDateString('fr-FR'),
+              sale.vendeur,
+              `${sale.nom} ${sale.prenom}`,
+              product.typeArticle,
+              product.categorie,
+              product.quantite.toString(),
+              sale.modePaiement,
+              product.gencode || ''
+            ]);
+          });
+        } else {
+          // Fallback pour les ventes sans produits (anciennes données)
+          tableData.push([
+            new Date(sale.timestamp).toLocaleDateString('fr-FR'),
+            sale.vendeur,
+            `${sale.nom} ${sale.prenom}`,
+            'N/A',
+            'N/A',
+            '0',
+            sale.modePaiement,
+            ''
+          ]);
+        }
+      });
 
       autoTable(doc, {
         head: [['Date', 'Vendeur', 'Client', 'Article', 'Cat.', 'Qty', 'Paiement', 'Code']],

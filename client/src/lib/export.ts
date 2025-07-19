@@ -21,23 +21,52 @@ export function exportToCSV(sales: Sale[]): void {
     'Date de délivrance'
   ];
 
-  const rows = sales.map(sale => [
-    new Date(sale.timestamp).toLocaleString('fr-FR'),
-    sale.vendeur,
-    sale.typeArticle,
-    sale.categorie,
-    sale.quantite.toString(),
-    sale.gencode || '',
-    sale.nom,
-    sale.prenom,
-    sale.dateNaissance || '',
-    sale.lieuNaissance || '',
-    sale.modePaiement || '',
-    sale.typeIdentite || '',
-    sale.numeroIdentite || '',
-    sale.autoriteDelivrance || '',
-    sale.dateDelivrance || ''
-  ]);
+  // Créer une ligne pour chaque produit de chaque vente
+  const rows: string[][] = [];
+  
+  sales.forEach(sale => {
+    if (sale.products && sale.products.length > 0) {
+      // Pour chaque produit, créer une ligne avec les infos de la vente
+      sale.products.forEach(product => {
+        rows.push([
+          new Date(sale.timestamp).toLocaleString('fr-FR'),
+          sale.vendeur,
+          product.typeArticle,
+          product.categorie,
+          product.quantite.toString(),
+          product.gencode || '',
+          sale.nom,
+          sale.prenom,
+          sale.dateNaissance || '',
+          sale.lieuNaissance || '',
+          sale.modePaiement || '',
+          sale.typeIdentite || '',
+          sale.numeroIdentite || '',
+          sale.autoriteDelivrance || '',
+          sale.dateDelivrance || ''
+        ]);
+      });
+    } else {
+      // Fallback pour les ventes sans produits (anciennes données)
+      rows.push([
+        new Date(sale.timestamp).toLocaleString('fr-FR'),
+        sale.vendeur,
+        'N/A',
+        'N/A',
+        '0',
+        '',
+        sale.nom,
+        sale.prenom,
+        sale.dateNaissance || '',
+        sale.lieuNaissance || '',
+        sale.modePaiement || '',
+        sale.typeIdentite || '',
+        sale.numeroIdentite || '',
+        sale.autoriteDelivrance || '',
+        sale.dateDelivrance || ''
+      ]);
+    }
+  });
 
   const csvContent = [headers, ...rows]
     .map(row => row.map(field => `"${String(field).replace(/"/g, '""')}"`).join(';'))
