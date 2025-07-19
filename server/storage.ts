@@ -246,6 +246,14 @@ export class DatabaseStorage implements IStorage {
     const salesMap = new Map();
     
     results.forEach(row => {
+      if (row.id === 17) {
+        console.log('DEBUG: Row data for sale 17:', {
+          id: row.id,
+          photo_recto: row.photo_recto ? 'PRESENT' : 'NULL',
+          photo_verso: row.photo_verso ? 'PRESENT' : 'NULL', 
+          photo_ticket: row.photo_ticket ? 'PRESENT' : 'NULL'
+        });
+      }
       if (!salesMap.has(row.id)) {
         salesMap.set(row.id, {
           id: row.id,
