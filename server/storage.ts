@@ -201,6 +201,89 @@ export class DatabaseStorage implements IStorage {
     return salesWithProducts;
   }
 
+  async getAllSales(storeId?: number): Promise<any[]> {
+    // Récupérer les ventes avec leurs produits
+    const query = db
+      .select({
+        // Sale fields
+        id: sales.id,
+        storeId: sales.storeId,
+        userId: sales.userId,
+        timestamp: sales.timestamp,
+        vendeur: sales.vendeur,
+        nom: sales.nom,
+        prenom: sales.prenom,
+        dateNaissance: sales.dateNaissance,
+        lieuNaissance: sales.lieuNaissance,
+        modePaiement: sales.modePaiement,
+        typeIdentite: sales.typeIdentite,
+        numeroIdentite: sales.numeroIdentite,
+        autoriteDelivrance: sales.autoriteDelivrance,
+        dateDelivrance: sales.dateDelivrance,
+        photo_recto: sales.photo_recto,
+        photo_verso: sales.photo_verso,
+        photo_ticket: sales.photo_ticket,
+        // Product fields
+        productId: saleProducts.id,
+        typeArticle: saleProducts.typeArticle,
+        categorie: saleProducts.categorie,
+        quantite: saleProducts.quantite,
+        gencode: saleProducts.gencode
+      })
+      .from(sales)
+      .leftJoin(saleProducts, eq(sales.id, saleProducts.saleId));
+    
+    if (storeId) {
+      const results = await query.where(eq(sales.storeId, storeId)).orderBy(desc(sales.timestamp));
+      return this.groupSalesByProducts(results);
+    }
+    
+    const results = await query.orderBy(desc(sales.timestamp));
+    return this.groupSalesByProducts(results);
+  }
+
+  private groupSalesByProducts(results: any[]): any[] {
+    const salesMap = new Map();
+    
+    results.forEach(row => {
+      if (!salesMap.has(row.id)) {
+        salesMap.set(row.id, {
+          id: row.id,
+          storeId: row.storeId,
+          userId: row.userId,
+          timestamp: row.timestamp,
+          vendeur: row.vendeur,
+          nom: row.nom,
+          prenom: row.prenom,
+          dateNaissance: row.dateNaissance,
+          lieuNaissance: row.lieuNaissance,
+          modePaiement: row.modePaiement,
+          typeIdentite: row.typeIdentite,
+          numeroIdentite: row.numeroIdentite,
+          autoriteDelivrance: row.autoriteDelivrance,
+          dateDelivrance: row.dateDelivrance,
+          photo_recto: row.photo_recto,
+          photo_verso: row.photo_verso,
+          photo_ticket: row.photo_ticket,
+          products: []
+        });
+      }
+      
+      // Ajouter le produit s'il existe
+      if (row.productId) {
+        salesMap.get(row.id).products.push({
+          id: row.productId,
+          typeArticle: row.typeArticle,
+          categorie: row.categorie,
+          quantite: row.quantite,
+          gencode: row.gencode
+        });
+      }
+    });
+    
+    return Array.from(salesMap.values());
+  }
+
   async deleteSale(id: number): Promise<void> {
     // Delete sale products first (cascade should handle this, but being explicit)
     await db.delete(saleProducts).where(eq(saleProducts.saleId, id));

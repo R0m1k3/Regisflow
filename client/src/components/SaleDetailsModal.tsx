@@ -43,13 +43,24 @@ export default function SaleDetailsModal({ isOpen, sale, onClose }: SaleDetailsM
           
           {/* Product Information */}
           <div className="border border-gray-200 p-4 bg-white">
-            <h4 className="font-medium text-gray-900 mb-3">Informations Produit</h4>
-            <div className="text-sm space-y-1">
-              <div><span className="font-medium">Type d'article:</span> {sale.typeArticle}</div>
-              <div><span className="font-medium">Catégorie:</span> {sale.categorie}</div>
-              <div><span className="font-medium">Quantité:</span> {sale.quantite}</div>
-              <div><span className="font-medium">Code produit:</span> {sale.gencode || 'Non spécifié'}</div>
-            </div>
+            <h4 className="font-medium text-gray-900 mb-3">Informations Produits</h4>
+            {sale.products && sale.products.length > 0 ? (
+              <div className="space-y-3">
+                {sale.products.map((product: any, index: number) => (
+                  <div key={product.id || index} className="border-l-4 border-blue-500 pl-3 bg-gray-50 p-2">
+                    <div className="text-sm font-medium text-gray-700 mb-1">Produit {index + 1}</div>
+                    <div className="text-sm space-y-1">
+                      <div><span className="font-medium">Type d'article:</span> {product.typeArticle}</div>
+                      <div><span className="font-medium">Catégorie:</span> {product.categorie}</div>
+                      <div><span className="font-medium">Quantité:</span> {product.quantite}</div>
+                      <div><span className="font-medium">Code produit:</span> {product.gencode || 'Non spécifié'}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-sm text-gray-500">Aucun produit associé</div>
+            )}
           </div>
           
           {/* Customer Information */}
