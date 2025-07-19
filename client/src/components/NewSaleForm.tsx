@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,11 +9,10 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useStoreContext } from '@/hooks/useStoreContext';
-import { useSimpleCamera } from '@/hooks/useSimpleCamera';
 
 import { apiRequest } from '@/lib/queryClient';
 import { validateRequiredFields, validateEAN13, ARTICLE_CATEGORY_MAPPING, IDENTITY_TYPES, PAYMENT_METHODS } from '@/lib/validation';
-import { Package, User, Users, Save, Calendar, BadgeCheck, Info, Camera, Upload, Trash2 } from 'lucide-react';
+import { Package, User, Users, Save, Calendar, BadgeCheck, Info, Camera, Upload, Trash2, Plus, X } from 'lucide-react';
 import CameraModal from '@/components/CameraModal';
 import type { PhotoType } from '@/types/sale';
 
@@ -49,22 +48,14 @@ export default function NewSaleForm() {
   const { selectedStoreId } = useStoreContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Camera functionality
-  const {
-    isOpen: isCameraOpen,
-    currentPhotoType,
-    isCapturing,
-    videoRef,
-    canvasRef,
-    startCamera,
-    capturePhoto,
-    stopCamera
-  } = useSimpleCamera();
+  // Camera state
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [currentPhotoType, setCurrentPhotoType] = useState<PhotoType | null>(null);
 
   const form = useForm<FormData>({
     defaultValues: {
       vendeur: '',
-      products: [{ typeArticle: '', categorie: '', quantite: '', gencode: '' }],
+      products: [{ typeArticle: '', categorie: '', quantite: '1', gencode: '' }],
       nom: '',
       prenom: '',
       dateNaissance: '',
@@ -80,20 +71,10 @@ export default function NewSaleForm() {
     }
   });
 
-  // Gestion des produits multiples
-  const products = form.watch('products');
-  
-  const addProduct = () => {
-    const currentProducts = form.getValues('products');
-    form.setValue('products', [...currentProducts, { typeArticle: '', categorie: '', quantite: '', gencode: '' }]);
-  };
-
-  const removeProduct = (index: number) => {
-    const currentProducts = form.getValues('products');
-    if (currentProducts.length > 1) {
-      form.setValue('products', currentProducts.filter((_, i) => i !== index));
-    }
-  };
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "products"
+  });
 
   const createSaleMutation = useMutation({
     mutationFn: async (saleData: any) => {
@@ -117,7 +98,7 @@ export default function NewSaleForm() {
       });
       form.reset({
         vendeur: '',
-        products: [{ typeArticle: '', categorie: '', quantite: '', gencode: '' }],
+        products: [{ typeArticle: '', categorie: '', quantite: '1', gencode: '' }],
         nom: '',
         prenom: '',
         dateNaissance: '',
@@ -198,84 +179,28 @@ export default function NewSaleForm() {
   };
 
   // Photo capture functions
-  const handlePhotoCapture = async (photoType: PhotoType) => {
-    console.log('=== PHOTO CAPTURE REQUESTED ===');
-    console.log('Photo type:', photoType);
-    
-    // Vérifications préliminaires
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      toast({
-        title: "Navigateur non compatible",
-        description: "Votre navigateur ne supporte pas la capture photo. Utilisez Chrome, Firefox ou Safari récent.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Vérifier si nous sommes en HTTPS (requis par certains navigateurs)
-    if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
-      toast({
-        title: "Connexion sécurisée requise",
-        description: "L'accès à la caméra nécessite une connexion HTTPS.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      console.log('Attempting to start camera...');
-      
-      // Afficher toast de démarrage
-      toast({
-        title: "Démarrage de la caméra",
-        description: "Préparation de la caméra en cours...",
-      });
-      
-      // Démarrer la caméra simple
-      await startCamera(photoType);
-      console.log('Simple camera started successfully');
-      
-    } catch (error) {
-      console.error('Camera start failed:', error);
-      toast({
-        title: "Erreur d'accès à la caméra",
-        description: error instanceof Error ? error.message : "Impossible d'accéder à la caméra",
-        variant: "destructive",
-      });
-    }
+  const handlePhotoCapture = (photoType: PhotoType) => {
+    setCurrentPhotoType(photoType);
+    setIsCameraOpen(true);
   };
 
-  const handleCapture = async () => {
-    if (!currentPhotoType) return;
-    
-    try {
-      console.log('Attempting to capture photo...');
-      const photoData = await capturePhoto();
-      console.log('Photo captured successfully, data length:', photoData.length);
-      
-      if (currentPhotoType === 'recto') {
-        form.setValue('photoRecto', photoData);
-      } else if (currentPhotoType === 'verso') {
-        form.setValue('photoVerso', photoData);
-      } else if (currentPhotoType === 'ticket') {
-        form.setValue('photoTicket', photoData);
-      }
-      
-      toast({
-        title: "Photo capturée",
-        description: `Photo ${currentPhotoType} enregistrée avec succès`,
-        variant: "success",
-      });
-      
-      stopCamera();
-    } catch (error) {
-      console.error('Photo capture error:', error);
-      toast({
-        title: "Erreur de capture",
-        description: error instanceof Error ? error.message : "Erreur lors de la capture",
-        variant: "destructive",
-      });
+  const handlePhotoTaken = (photoData: string) => {
+    if (currentPhotoType === 'recto') {
+      form.setValue('photoRecto', photoData);
+    } else if (currentPhotoType === 'verso') {
+      form.setValue('photoVerso', photoData);
+    } else if (currentPhotoType === 'ticket') {
+      form.setValue('photoTicket', photoData);
     }
+    
+    toast({
+      title: "Photo capturée",
+      description: `Photo ${currentPhotoType} enregistrée avec succès`,
+      variant: "success",
+    });
+    
+    setIsCameraOpen(false);
+    setCurrentPhotoType(null);
   };
 
   const handleRemovePhoto = (photoType: PhotoType) => {
@@ -328,236 +253,222 @@ export default function NewSaleForm() {
       toast({
         title: "Photo ajoutée",
         description: `Photo ${photoType} ajoutée avec succès`,
+        variant: "success",
       });
     };
     reader.readAsDataURL(file);
   };
 
-  // Camera test function
-  const handleCameraTest = async () => {
-    toast({
-      title: "Test en cours...",
-      description: "Vérification de l'accès aux caméras",
-    });
-    
-    const results = await runCameraTest();
-    
-    let message = `Test de caméra terminé:\n`;
-    message += `✓ Navigateur compatible: ${results.hasMediaDevices ? 'Oui' : 'Non'}\n`;
-    message += `✓ getUserMedia disponible: ${results.hasGetUserMedia ? 'Oui' : 'Non'}\n`;
-    message += `✓ Caméras détectées: ${results.videoDevicesCount}\n`;
-    message += `✓ Permissions: ${results.permissions}\n`;
-    
-    if (results.error) {
-      message += `❌ Erreur: ${results.error}`;
-    } else {
-      message += `✅ Caméra fonctionnelle`;
-    }
-    
-    toast({
-      title: results.error ? "Test échoué" : "Test réussi",
-      description: message,
-      variant: results.error ? "destructive" : "default",
-    });
-  };
-
   return (
-    <div className="elegant-card animate-slide-in">
-      <div className="p-6">
+    <div className="space-y-6">
+      <div className="modern-card">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             {/* Section Vendeur */}
-            <div className="section-vendor">
-              <div className="section-header">
-                <User className="h-5 w-5" />
-                <span>Informations Vendeur</span>
+            <div className="modern-section" style={{ backgroundColor: '#f0f9ff' }}>
+              <div className="flex items-center gap-2 mb-4">
+                <User className="h-5 w-5 text-primary" />
+                <h3 className="text-lg font-semibold text-gray-900">Informations Vendeur</h3>
               </div>
-              <div className="grid grid-cols-1 gap-4">
-                <FormField
-                  control={form.control}
-                  name="vendeur"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Vendeur <span className="text-destructive">*</span></FormLabel>
-                      <FormControl>
-                        <Input placeholder="Nom du vendeur" className="modern-input" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              
+              <FormField
+                control={form.control}
+                name="vendeur"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nom du vendeur *</FormLabel>
+                    <FormControl>
+                      <Input {...field} className="modern-input" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
-            {/* Section Produit */}
-            <div className="section-product">
-              <div className="section-header">
-                <Package className="h-5 w-5" />
-                <span>Informations Produit</span>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="products.0.typeArticle"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Type d'article <span className="text-destructive">*</span></FormLabel>
-                      <Select value={field.value} onValueChange={(value) => {
-                        field.onChange(value);
-                        form.setValue('products.0.categorie', '');
-                      }}>
-                        <FormControl>
-                          <SelectTrigger className="modern-input">
-                            <SelectValue placeholder="Sélectionner un type" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {Object.keys(ARTICLE_CATEGORY_MAPPING).map((type) => (
-                            <SelectItem key={type} value={type}>
-                              {type}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="products.0.categorie"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Catégorie réglementaire <span className="text-destructive">*</span></FormLabel>
-                      <Select value={field.value} onValueChange={field.onChange} disabled={!form.watch('products')?.[0]?.typeArticle}>
-                        <FormControl>
-                          <SelectTrigger className="modern-input">
-                            <SelectValue placeholder="Sélectionner une catégorie" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {(form.watch('products')?.[0]?.typeArticle ? ARTICLE_CATEGORY_MAPPING[form.watch('products')?.[0]?.typeArticle as keyof typeof ARTICLE_CATEGORY_MAPPING] || [] : []).map((category) => (
-                            <SelectItem key={category} value={category}>
-                              {category}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="products.0.quantite"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Quantité <span className="text-destructive">*</span></FormLabel>
-                      <FormControl>
-                        <Input type="number" min="1" placeholder="Entrez la quantité" className="modern-input" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="products.0.gencode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Gencode (EAN13) <span className="text-destructive">*</span></FormLabel>
-                      <FormControl>
-                        <Input placeholder="Code EAN13 à 13 chiffres" className="modern-input" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            {/* Section Produits */}
+            <div className="modern-section" style={{ backgroundColor: '#f0fdf4' }}>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Package className="h-5 w-5 text-primary" />
+                  <h3 className="text-lg font-semibold text-gray-900">Produits</h3>
+                </div>
+                <Button
+                  type="button"
+                  onClick={() => append({ typeArticle: '', categorie: '', quantite: '1', gencode: '' })}
+                  variant="outline"
+                  size="sm"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Ajouter un produit
+                </Button>
               </div>
 
-              <Alert className="mt-4 border-blue-200 bg-blue-50">
-                <Info className="h-4 w-4 text-blue-600" />
-                <AlertDescription className="text-blue-800">
-                  <strong>Information réglementaire :</strong> F1 = vente interdite aux mineurs de moins de 12 ans • F2/F3 = artifices puissants réservés aux majeurs, vente encadrée
-                </AlertDescription>
-              </Alert>
+              <div className="space-y-4">
+                {fields.map((field, index) => (
+                  <div key={field.id} className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 border rounded-lg bg-white">
+                    <FormField
+                      control={form.control}
+                      name={`products.${index}.typeArticle`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Type d'article *</FormLabel>
+                          <FormControl>
+                            <Input {...field} className="modern-input" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name={`products.${index}.categorie`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Catégorie *</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="modern-input">
+                                <SelectValue placeholder="Choisir" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="F2">F2</SelectItem>
+                              <SelectItem value="F3">F3</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name={`products.${index}.quantite`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Quantité *</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="number" min="1" className="modern-input" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name={`products.${index}.gencode`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Gencode EAN13 *</FormLabel>
+                          <FormControl>
+                            <Input {...field} className="modern-input" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="flex items-end">
+                      {fields.length > 1 && (
+                        <Button
+                          type="button"
+                          onClick={() => remove(index)}
+                          variant="outline"
+                          size="sm"
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* Section Client */}
-            <div className="section-client">
-              <div className="section-header">
-                <Users className="h-5 w-5" />
-                <span>Informations Client</span>
+            <div className="modern-section" style={{ backgroundColor: '#fefce8' }}>
+              <div className="flex items-center gap-2 mb-4">
+                <Users className="h-5 w-5 text-primary" />
+                <h3 className="text-lg font-semibold text-gray-900">Informations Client</h3>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
                   name="nom"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nom de famille <span className="text-destructive">*</span></FormLabel>
+                      <FormLabel>Nom *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Nom de famille" className="modern-input" {...field} />
+                        <Input {...field} className="modern-input" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="prenom"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Prénom <span className="text-destructive">*</span></FormLabel>
+                      <FormLabel>Prénom *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Prénom" className="modern-input" {...field} />
+                        <Input {...field} className="modern-input" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="dateNaissance"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Date de naissance <span className="text-destructive">*</span></FormLabel>
+                      <FormLabel>Date de naissance *</FormLabel>
                       <FormControl>
-                        <Input type="date" className="modern-input" {...field} />
+                        <Input {...field} type="date" className="modern-input" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="lieuNaissance"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Lieu de naissance <span className="text-destructive">*</span></FormLabel>
+                      <FormLabel>Lieu de naissance *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Ville de naissance" className="modern-input" {...field} />
+                        <Input {...field} className="modern-input" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="modePaiement"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Mode de paiement <span className="text-destructive">*</span></FormLabel>
-                      <Select value={field.value} onValueChange={field.onChange}>
+                      <FormLabel>Mode de paiement *</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger className="modern-input">
-                            <SelectValue placeholder="Sélectionner le mode de paiement" />
+                            <SelectValue />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           {PAYMENT_METHODS.map((method) => (
-                            <SelectItem key={method.value} value={method.value}>
-                              {method.label}
+                            <SelectItem key={method} value={method}>
+                              {method}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -570,28 +481,29 @@ export default function NewSaleForm() {
             </div>
 
             {/* Section Identité */}
-            <div className="section-identity">
-              <div className="section-header">
-                <BadgeCheck className="h-5 w-5" />
-                <span>Pièce d'Identité</span>
+            <div className="modern-section" style={{ backgroundColor: '#fdf2f8' }}>
+              <div className="flex items-center gap-2 mb-4">
+                <BadgeCheck className="h-5 w-5 text-primary" />
+                <h3 className="text-lg font-semibold text-gray-900">Pièce d'Identité</h3>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
                   name="typeIdentite"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Type de pièce d'identité <span className="text-destructive">*</span></FormLabel>
-                      <Select value={field.value} onValueChange={field.onChange}>
+                      <FormLabel>Type de pièce d'identité *</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger className="modern-input">
-                            <SelectValue placeholder="Sélectionner le type" />
+                            <SelectValue placeholder="Choisir un type" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           {IDENTITY_TYPES.map((type) => (
-                            <SelectItem key={type.value} value={type.value}>
-                              {type.label}
+                            <SelectItem key={type} value={type}>
+                              {type}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -600,19 +512,21 @@ export default function NewSaleForm() {
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="numeroIdentite"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Numéro de pièce d'identité <span className="text-destructive">*</span></FormLabel>
+                      <FormLabel>Numéro de pièce d'identité *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Numéro de la pièce" className="modern-input" {...field} />
+                        <Input {...field} className="modern-input" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="autoriteDelivrance"
@@ -620,34 +534,35 @@ export default function NewSaleForm() {
                     <FormItem>
                       <FormLabel>Autorité de délivrance</FormLabel>
                       <FormControl>
-                        <Input placeholder="Autorité ayant délivré la pièce (optionnel)" className="modern-input" {...field} />
+                        <Input {...field} className="modern-input" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="dateDelivrance"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Date de délivrance <span className="text-destructive">*</span></FormLabel>
+                      <FormLabel>Date de délivrance *</FormLabel>
                       <FormControl>
-                        <Input type="date" className="modern-input" {...field} />
+                        <Input {...field} type="date" className="modern-input" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
-              
-              {/* Section Photos */}
+
+              {/* Photos pièce d'identité */}
               <div className="mt-6 space-y-4">
                 <div>
                   <h4 className="text-sm font-medium text-gray-700">Photos de la pièce d'identité</h4>
                 </div>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Photo Recto */}
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-600">Photo Recto</label>
@@ -656,7 +571,7 @@ export default function NewSaleForm() {
                         <img 
                           src={form.watch('photoRecto')} 
                           alt="Photo recto" 
-                          className="w-full h-32 object-cover rounded border"
+                          className="w-full h-32 object-cover border"
                         />
                         <Button
                           type="button"
@@ -707,7 +622,7 @@ export default function NewSaleForm() {
                         <img 
                           src={form.watch('photoVerso')} 
                           alt="Photo verso" 
-                          className="w-full h-32 object-cover rounded border"
+                          className="w-full h-32 object-cover border"
                         />
                         <Button
                           type="button"
@@ -765,7 +680,7 @@ export default function NewSaleForm() {
                       <img 
                         src={form.watch('photoTicket')} 
                         alt="Photo ticket" 
-                        className="w-full h-32 object-cover rounded border"
+                        className="w-full h-32 object-cover border"
                       />
                       <Button
                         type="button"
@@ -836,11 +751,11 @@ export default function NewSaleForm() {
       <CameraModal
         isOpen={isCameraOpen}
         photoType={currentPhotoType}
-        videoRef={videoRef}
-        canvasRef={canvasRef}
-        isCapturing={isCapturing}
-        onClose={stopCamera}
-        onCapture={handleCapture}
+        onClose={() => {
+          setIsCameraOpen(false);
+          setCurrentPhotoType(null);
+        }}
+        onPhotoTaken={handlePhotoTaken}
       />
     </div>
   );

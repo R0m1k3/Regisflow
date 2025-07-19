@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Camera, X } from 'lucide-react';
@@ -7,78 +7,113 @@ import { PhotoType } from '@/types/sale';
 interface CameraModalProps {
   isOpen: boolean;
   photoType: PhotoType | null;
-  videoRef: React.RefObject<HTMLVideoElement>;
-  canvasRef: React.RefObject<HTMLCanvasElement>;
-  isCapturing: boolean;
   onClose: () => void;
-  onCapture: () => void;
+  onPhotoTaken: (photoData: string) => void;
 }
 
 export default function CameraModal({
   isOpen,
   photoType,
-  videoRef,
-  canvasRef,
-  isCapturing,
   onClose,
-  onCapture
+  onPhotoTaken
 }: CameraModalProps) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [isCapturing, setIsCapturing] = useState(false);
+
   useEffect(() => {
-    if (isOpen && videoRef.current) {
-      const video = videoRef.current;
-      console.log('CameraModal useEffect - video element ready');
-      
-      const handleLoadedMetadata = () => {
-        console.log('CameraModal: Video metadata loaded, dimensions:', video.videoWidth, 'x', video.videoHeight);
-      };
-      
-      const handleCanPlay = () => {
-        console.log('CameraModal: Video can play, readyState:', video.readyState);
-      };
-      
-      const handleError = (error: Event) => {
-        console.error('CameraModal: Video error event:', error);
-      };
-      
-      const handlePlay = () => {
-        console.log('CameraModal: Video started playing');
-      };
-      
-      video.addEventListener('loadedmetadata', handleLoadedMetadata);
-      video.addEventListener('canplay', handleCanPlay);
-      video.addEventListener('error', handleError);
-      video.addEventListener('play', handlePlay);
-      
-      // Forcer le play avec gestion d'erreur
-      const startPlayback = async () => {
-        try {
-          await video.play();
-          console.log('CameraModal: Video play() successful');
-        } catch (playError) {
-          console.error('CameraModal: Video play() failed:', playError);
-        }
-      };
-      
-      startPlayback();
-      
-      return () => {
-        video.removeEventListener('loadedmetadata', handleLoadedMetadata);
-        video.removeEventListener('canplay', handleCanPlay);
-        video.removeEventListener('error', handleError);
-        video.removeEventListener('play', handlePlay);
-      };
+    if (isOpen) {
+      startCamera();
+    } else {
+      stopCamera();
     }
-  }, [isOpen, videoRef]);
+
+    return () => {
+      stopCamera();
+    };
+  }, [isOpen]);
+
+  const startCamera = async () => {
+    try {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: 'environment',
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        }
+      });
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+        setStream(mediaStream);
+      }
+    } catch (error) {
+      console.error('Error accessing camera:', error);
+      // Fallback: try without specific constraints
+      try {
+        const mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: true
+        });
+
+        if (videoRef.current) {
+          videoRef.current.srcObject = mediaStream;
+          setStream(mediaStream);
+        }
+      } catch (fallbackError) {
+        console.error('Fallback camera access failed:', fallbackError);
+      }
+    }
+  };
+
+  const stopCamera = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      setStream(null);
+    }
+  };
+
+  const capturePhoto = () => {
+    if (!videoRef.current || !canvasRef.current) return;
+
+    setIsCapturing(true);
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const context = canvas.getContext('2d');
+
+    if (!context) return;
+
+    // Set canvas dimensions to match video
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    // Draw video frame to canvas
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // Convert to data URL
+    const photoData = canvas.toDataURL('image/jpeg', 0.8);
+    
+    onPhotoTaken(photoData);
+    setIsCapturing(false);
+  };
+
+  const handleClose = () => {
+    stopCamera();
+    onClose();
+  };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-lg w-full mx-auto">
         <DialogHeader>
-          <DialogTitle>
-            Photo {photoType ? photoType.charAt(0).toUpperCase() + photoType.slice(1) : ''}
+          <DialogTitle className="flex items-center justify-between">
+            <span>Capturer photo {photoType}</span>
+            <Button variant="ghost" size="sm" onClick={handleClose}>
+              <X className="h-4 w-4" />
+            </Button>
           </DialogTitle>
         </DialogHeader>
-        
+
         <div className="space-y-4">
           <div className="relative">
             <video
@@ -86,44 +121,25 @@ export default function CameraModal({
               autoPlay
               playsInline
               muted
-              className="w-full max-w-full h-auto camera-preview rounded-lg border bg-black"
-              style={{ 
-                aspectRatio: '16/9',
-                objectFit: 'cover',
-                maxHeight: '400px',
-                minHeight: '200px'
-              }}
-              onLoadedMetadata={() => console.log('CameraModal: Video metadata loaded')}
-              onCanPlay={() => console.log('CameraModal: Video can play')}
-              onPlay={() => console.log('CameraModal: Video playing')}
-              onError={(e) => console.error('CameraModal: Video error:', e)}
+              className="w-full h-64 object-cover bg-black rounded"
             />
-            <canvas ref={canvasRef} className="hidden" />
-            
-            {/* Overlay pour aider à cadrer la pièce d'identité */}
-            <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute inset-4 border-2 border-white border-dashed rounded-lg opacity-70"></div>
-              <div className="absolute bottom-2 left-2 text-white text-sm bg-black bg-opacity-70 px-2 py-1 rounded">
-                Cadrez la pièce d'identité dans le rectangle
-              </div>
-              <div className="absolute top-2 right-2 text-white text-xs bg-black bg-opacity-70 px-2 py-1 rounded">
-                {photoType === 'recto' ? 'RECTO' : 'VERSO'}
-              </div>
-            </div>
+            <canvas
+              ref={canvasRef}
+              className="hidden"
+            />
           </div>
-          
-          <div className="flex justify-between space-x-3">
-            <Button variant="outline" onClick={onClose} className="flex-1">
-              <X className="h-4 w-4 mr-2" />
-              Fermer
-            </Button>
-            <Button 
-              onClick={onCapture} 
+
+          <div className="flex justify-center gap-4">
+            <Button
+              onClick={capturePhoto}
               disabled={isCapturing}
-              className="bg-green-600 hover:bg-green-700 text-white flex-1"
+              className="flex items-center gap-2"
             >
-              <Camera className="h-4 w-4 mr-2" />
+              <Camera className="h-4 w-4" />
               {isCapturing ? 'Capture...' : 'Prendre la photo'}
+            </Button>
+            <Button variant="outline" onClick={handleClose}>
+              Annuler
             </Button>
           </div>
         </div>
