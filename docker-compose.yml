@@ -53,7 +53,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 5000
-      DATABASE_URL: postgresql://regisflow:${POSTGRES_PASSWORD:-RegisFlow2025!PostgreSQL}@regisflow-db:5432/regisflow
+      DATABASE_URL: postgresql://regisflow:${POSTGRES_PASSWORD:-RegisFlow2025!PostgreSQL}@regisflow-db:5432/regisflow?sslmode=disable
       SESSION_SECRET: ${SESSION_SECRET:-RegisFlow2025SessionSecretKey1234567890ABCDEF}
       TZ: ${TZ:-Europe/Paris}
       SECURE_COOKIES: ${SECURE_COOKIES:-true}

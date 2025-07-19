@@ -68,6 +68,11 @@ else
 fi
 
 echo "🌟 Starting RegisFlow application..."
+# Assurer que sslmode=disable est présent
+if [[ "$DATABASE_URL" != *"sslmode=disable"* ]]; then
+    export DATABASE_URL="${DATABASE_URL}?sslmode=disable"
+fi
+echo "   Database URL configured with SSL disabled"
 exec npm start
 EOF
 

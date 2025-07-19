@@ -8,9 +8,20 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-export const pool = new Pool({ 
+// Configuration de connexion avec SSL désactivé pour Docker local
+const connectionConfig = {
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-});
+  ssl: false // Désactiver SSL pour production Docker locale
+};
+
+// Si DATABASE_URL contient déjà sslmode=disable, ne pas forcer SSL
+if (process.env.DATABASE_URL?.includes('sslmode=disable')) {
+  connectionConfig.ssl = false;
+} else if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL?.includes('localhost')) {
+  // Activer SSL uniquement pour production externe (pas Docker local)
+  connectionConfig.ssl = { rejectUnauthorized: false };
+}
+
+export const pool = new Pool(connectionConfig);
 
 export const db = drizzle(pool, { schema });

@@ -52,9 +52,16 @@ docker-compose up -d
 curl http://localhost:5000/health
 ```
 
-### Status : ✅ RÉSOLU
+### Problème SSL PostgreSQL Résolu
 
-Cette solution garantit un déploiement Docker fiable en production sans les problèmes de fichiers manquants.
+4. **Erreur SSL** : "The server does not support SSL connections"
+   - **Solution** : Configuration SSL désactivée pour Docker local
+   - **Implémentation** : sslmode=disable dans DATABASE_URL
+   - **Robustesse** : Détection automatique du mode SSL nécessaire
+
+### Status : ✅ RÉSOLU COMPLET
+
+Cette solution garantit un déploiement Docker fiable en production sans les problèmes de fichiers manquants, migrations échouées, ou erreurs SSL.
 
 ---
 
