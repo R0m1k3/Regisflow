@@ -33,9 +33,9 @@ function DashboardContent() {
     }
   };
 
-  const canAccessAdmin = user?.role === "admin";
-  const canDeleteSales = user?.role === "admin" || user?.role === "manager";
-  const isAdmin = user?.role === "admin";
+  const canAccessAdmin = user?.role === "administrator";
+  const canDeleteSales = user?.role === "administrator" || user?.role === "manager";
+  const isAdmin = user?.role === "administrator";
 
   return (
     <div className="min-h-screen bg-background">
