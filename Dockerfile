@@ -61,12 +61,13 @@ COPY --from=builder --chown=regisflow:nodejs /build/dist/public ./public
 RUN npm cache clean --force && \
     rm -rf /tmp/*
 
-# Copier le script d'entrée directement dans /app (accessible)
-COPY docker-entrypoint.sh /app/docker-entrypoint.sh
-RUN chmod +x /app/docker-entrypoint.sh && \
-    chown regisflow:nodejs /app/docker-entrypoint.sh
+# Changer vers l'utilisateur non-root AVANT de copier le script
+USER regisflow
 
-# Changer vers l'utilisateur non-root
+# Copier le script d'entrée directement dans /app après changement d'utilisateur
+COPY --chown=regisflow:nodejs docker-entrypoint.sh /app/docker-entrypoint.sh
+USER root
+RUN chmod +x /app/docker-entrypoint.sh
 USER regisflow
 
 # Exposer le port

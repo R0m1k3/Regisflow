@@ -40,7 +40,7 @@ services:
   regisflow:
     build: 
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.alternative
       target: production
       args:
         - NODE_ENV=production

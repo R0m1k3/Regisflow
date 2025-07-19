@@ -9,8 +9,8 @@ echo "🧹 Cleaning up existing containers..."
 docker-compose down -v 2>/dev/null || true
 docker system prune -f >/dev/null 2>&1 || true
 
-# Test de build 
-echo "🔨 Building fresh Docker image..."
+# Test de build avec la nouvelle approche
+echo "🔨 Building fresh Docker image (alternative approach)..."
 if docker-compose build --no-cache regisflow; then
     echo "✅ Build successful"
 else
