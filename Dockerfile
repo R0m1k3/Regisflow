@@ -62,7 +62,7 @@ RUN npm cache clean --force && \
     rm -rf /tmp/*
 
 # Copier les scripts de configuration
-COPY --chown=regisflow:nodejs docker-entrypoint-simple.sh /usr/local/bin/docker-entrypoint.sh
+COPY --chown=regisflow:nodejs docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Changer vers l'utilisateur non-root

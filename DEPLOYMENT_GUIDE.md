@@ -1,83 +1,219 @@
-# Guide de Déploiement RegisFlow Production 2025
+# RegisFlow - Guide de Déploiement Production 2025
 
-## Prérequis
+## 🚀 Déploiement Rapide
 
-- Docker 20.10+
-- Docker Compose 2.0+
-- 2GB RAM minimum
-- 5GB espace disque minimum
+### Prérequis
+- Docker 20.10+ et Docker Compose 2.0+
+- Base de données PostgreSQL externe ou utiliser le docker-compose fourni
+- Au minimum 2GB RAM et 5GB d'espace disque libre
 
-## Installation Rapide
-
-### 1. Cloner et Configurer
+### Installation Express
 
 ```bash
-git clone <repository-url> regisflow
+# 1. Cloner le repository
+git clone <votre-repo> regisflow
 cd regisflow
 
-# Copier et modifier la configuration
+# 2. Créer le fichier de configuration
 cp .env.production.example .env.production
+
+# 3. Modifier les variables critiques (OBLIGATOIRE)
 nano .env.production
-```
+# Changer POSTGRES_PASSWORD et SESSION_SECRET
 
-### 2. Modifier la Configuration
-
-Dans `.env.production`, changez **obligatoirement** :
-
-```env
-# Mot de passe PostgreSQL sécurisé
-POSTGRES_PASSWORD=VotreMotDePasseSecure2025!
-
-# Clé de session unique (32+ caractères)
-SESSION_SECRET=VotreCleDeSessionUnique2025_32CharacteresMinimum
-```
-
-### 3. Déployer
-
-```bash
-# Construction et démarrage
+# 4. Démarrer l'application
 docker-compose up -d
 
-# Vérifier les logs
-docker-compose logs -f regisflow
-
-# Vérifier l'état
-docker-compose ps
+# 5. Vérifier le déploiement
+curl http://localhost:5000/health
 ```
 
-## URLs d'Accès
+## 🔧 Configuration Production
 
-- **Application** : http://localhost:5000
-- **Health Check** : http://localhost:5000/health
-- **Base de données** : localhost:5433
+### Variables d'Environnement (.env.production)
 
-## Comptes par Défaut
+```env
+# DATABASE - OBLIGATOIRE à modifier
+POSTGRES_PASSWORD=VotreMotDePasseSecure2025!
+DATABASE_URL=postgresql://regisflow:VotreMotDePasseSecure2025!@regisflow-db:5432/regisflow
 
-- **Utilisateur** : admin
-- **Mot de passe** : admin123
+# SECURITY - OBLIGATOIRE à modifier  
+SESSION_SECRET=VotreCleDeSessionUnique32Caracteres+
 
-⚠️ **Important** : Changez le mot de passe admin dès la première connexion !
+# APPLICATION
+NODE_ENV=production
+APP_PORT=5000
+POSTGRES_PORT=5433
 
-## Configuration Avancée
+# SÉCURITÉ
+SECURE_COOKIES=true
 
-### Avec Reverse Proxy (Nginx)
+# DONNÉES
+DATA_RETENTION_MONTHS=19
+```
 
-1. Décommentez dans `docker-compose.yml` :
+### Sécurité Importante
+
+⚠️ **ATTENTION** : Changez toujours ces variables avant le déploiement :
+- `POSTGRES_PASSWORD` : Mot de passe fort (16+ caractères)  
+- `SESSION_SECRET` : Clé unique (32+ caractères)
+
+## 🐳 Docker Compose
+
+### Démarrage
+```bash
+# Premier démarrage
+docker-compose up -d
+
+# Voir les logs
+docker-compose logs -f
+
+# Arrêt
+docker-compose down
+
+# Redémarrage complet
+docker-compose down && docker-compose up -d
+```
+
+### Architecture
+
 ```yaml
-networks:
-  default:
-    external: true
-    name: nginx_default
+services:
+  regisflow-db:     # PostgreSQL 16 avec persistence
+  regisflow:        # Application RegisFlow optimisée
 ```
 
-2. Configuration Nginx :
+## 📊 Monitoring et Santé
+
+### Health Checks
+
+```bash
+# Status général
+curl http://localhost:5000/health
+
+# Informations détaillées
+curl http://localhost:5000/health | jq .
+
+# Vérifier la base de données
+docker exec regisflow-db pg_isready -U regisflow
+```
+
+### Logs
+
+```bash
+# Application
+docker-compose logs regisflow
+
+# Base de données
+docker-compose logs regisflow-db
+
+# Temps réel
+docker-compose logs -f
+```
+
+## 🔍 Troubleshooting
+
+### Problèmes Courants
+
+#### 1. Erreur "docker-entrypoint.sh: No such file or directory"
+```bash
+# Solution : Rebuild avec cache vidé
+docker-compose down
+docker system prune -f
+docker-compose build --no-cache
+docker-compose up -d
+```
+
+#### 2. Base de données inaccessible
+```bash
+# Vérifier la connexion
+docker exec regisflow-db pg_isready -U regisflow
+
+# Redémarrer la DB
+docker-compose restart regisflow-db
+
+# Logs de la DB
+docker-compose logs regisflow-db
+```
+
+#### 3. Migration échoue
+```bash
+# Exécuter manuellement
+docker exec regisflow npm run db:push
+
+# Vérifier les tables
+docker exec regisflow-db psql -U regisflow -c "\dt"
+```
+
+#### 4. Permissions d'accès
+```bash
+# Nettoyer les volumes
+docker-compose down
+docker volume prune
+docker-compose up -d
+```
+
+### Tests de Diagnostic
+
+```bash
+# Status complet
+docker-compose ps
+
+# Utilisation des ressources
+docker stats regisflow regisflow-db
+
+# Espace disque
+docker system df
+
+# Réseau
+docker network ls | grep regisflow
+```
+
+## 🔒 Sécurité Production
+
+### Configuration Système
+- Application s'exécute avec utilisateur non-root
+- Conteneurs en lecture seule (tmpfs pour /tmp)
+- Ressources CPU/RAM limitées
+- Health checks automatiques
+
+### Base de Données
+- Authentication SCRAM-SHA-256
+- Isolation réseau entre conteneurs
+- Volumes persistants chiffrés
+- Sauvegardes automatiques
+
+### Application
+- Sessions sécurisées (HttpOnly cookies)
+- HTTPS enforcement (en production)
+- Validation stricte des entrées
+- Audit trail complet
+
+## 📁 Structure Production
+
+```
+regisflow/
+├── docker-compose.yml      # Configuration production
+├── Dockerfile             # Build multi-stage optimisé
+├── docker-entrypoint.sh   # Script de démarrage
+├── .env.production        # Variables de production
+├── init.sql              # Schema initial PostgreSQL
+└── dist/                 # Application compilée
+    ├── index.js          # Serveur Express
+    └── public/           # Assets client
+```
+
+## 🚀 Déploiement Avancé
+
+### Avec Reverse Proxy (nginx)
+
 ```nginx
 server {
     listen 80;
     server_name votre-domaine.com;
     
     location / {
-        proxy_pass http://regisflow:5000;
+        proxy_pass http://localhost:5000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -86,131 +222,34 @@ server {
 }
 ```
 
-### Sauvegarde Automatique
-
-Les sauvegardes automatiques sont activées :
-- **Fréquence** : Toutes les 12 heures (00:00 et 12:00)
-- **Rétention** : 20 sauvegardes maximum
-- **Emplacement** : Volume Docker `backup_data`
-
-### Purge Automatique
-
-Suppression automatique des données > 19 mois :
-- **Fréquence** : 1er de chaque mois à 02:00
-- **Conformité** : Réglementation française
-
-## Surveillance et Maintenance
-
-### Logs d'Application
+### Surveillance Continue
 
 ```bash
-# Logs en temps réel
-docker-compose logs -f regisflow
+# Monitoring en continu
+watch -n 30 'curl -s http://localhost:5000/health | jq .'
 
-# Logs PostgreSQL
-docker-compose logs -f regisflow-db
-
-# Dernières 100 lignes
-docker-compose logs --tail=100 regisflow
+# Alertes Slack/Discord (exemple)
+curl -X POST -H 'Content-type: application/json' \
+    --data '{"text":"RegisFlow Health: OK"}' \
+    YOUR_WEBHOOK_URL
 ```
 
-### Health Checks
+## 📈 Performance
 
-```bash
-# Vérifier la santé des containers
-docker-compose ps
+### Ressources Recommandées
+- **Development** : 1GB RAM, 2GB disque
+- **Production** : 2GB RAM, 10GB disque  
+- **Enterprise** : 4GB RAM, 50GB disque
 
-# Test manuel du health check
-curl http://localhost:5000/health
-```
-
-### Sauvegarde Manuelle
-
-```bash
-# Accéder au container
-docker exec -it regisflow-app sh
-
-# Interface admin pour sauvegardes manuelles
-# Via l'application : Menu → Administration → Sauvegardes
-```
-
-### Mise à Jour
-
-```bash
-# Arrêter les services
-docker-compose down
-
-# Récupérer les dernières modifications
-git pull
-
-# Reconstruire et redémarrer
-docker-compose up -d --build
-
-# Vérifier les logs
-docker-compose logs -f regisflow
-```
-
-## Résolution de Problèmes
-
-### Base de données inaccessible
-
-```bash
-# Vérifier PostgreSQL
-docker-compose logs regisflow-db
-
-# Redémarrer si nécessaire
-docker-compose restart regisflow-db
-```
-
-### Application ne démarre pas
-
-```bash
-# Vérifier les logs de démarrage
-docker-compose logs regisflow
-
-# Vérifier les variables d'environnement
-docker exec regisflow-app env | grep -E "(DATABASE_URL|SESSION_SECRET)"
-```
-
-### Problème de permissions
-
-```bash
-# Vérifier les volumes
-docker volume inspect regisflow_backup_data
-
-# Réinitialiser les permissions
-docker-compose down
-docker volume rm regisflow_backup_data regisflow_logs_data
-docker-compose up -d
-```
-
-## Sécurité en Production
-
-### 1. Variables d'Environnement
-
-- ✅ `POSTGRES_PASSWORD` : Mot de passe complexe unique
-- ✅ `SESSION_SECRET` : Clé de 32+ caractères aléatoires
-- ✅ `SECURE_COOKIES=true` : Cookies sécurisés (HTTPS)
-
-### 2. Réseau
-
-- ✅ Isolation des containers
-- ✅ Ports exposés uniquement nécessaires
-- ✅ Reverse proxy recommandé pour HTTPS
-
-### 3. Données
-
-- ✅ Volumes Docker persistants
-- ✅ Sauvegardes automatiques chiffrées
-- ✅ Purge automatique conforme RGPD
-
-## Support
-
-Pour toute question technique :
-1. Vérifiez les logs : `docker-compose logs -f`
-2. Consultez le health check : `curl http://localhost:5000/health`
-3. Vérifiez la configuration réseau et les ports
+### Optimisations
+- Node.js 20 avec optimisations V8
+- PostgreSQL 16 avec indexation optimisée
+- Gzip compression activée
+- Cache statique pour assets
 
 ---
 
-**RegisFlow 2025** - Gestion professionnelle des ventes de feux d'artifice
+**RegisFlow Production Ready 2025**
+
+Support: [Votre email/contact]
+Documentation: [Lien vers docs complètes]
