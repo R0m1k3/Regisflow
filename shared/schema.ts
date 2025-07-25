@@ -91,6 +91,42 @@ export const saleProducts = pgTable("sale_products", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Customer Orders table
+export const customerOrders = pgTable("customer_orders", {
+  id: serial("id").primaryKey(),
+  storeId: integer("store_id").references(() => stores.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  timestamp: timestamp("timestamp").defaultNow(),
+  
+  // Client information
+  nom: varchar("nom", { length: 255 }).notNull(),
+  prenom: varchar("prenom", { length: 255 }).notNull(),
+  telephone: varchar("telephone", { length: 20 }),
+  email: varchar("email", { length: 255 }),
+  adresse: text("adresse"),
+  
+  // Order details
+  statut: varchar("statut", { length: 50 }).notNull().default("En attente de commande"),
+  dateCommande: timestamp("date_commande"),
+  dateLivraison: timestamp("date_livraison"),
+  montant: integer("montant"), // En centimes
+  commentaire: text("commentaire"), // Champ commentaire principal
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Customer Order Products table
+export const customerOrderProducts = pgTable("customer_order_products", {
+  id: serial("id").primaryKey(),
+  orderId: integer("order_id").references(() => customerOrders.id, { onDelete: "cascade" }).notNull(),
+  produit: varchar("produit", { length: 255 }).notNull(),
+  quantite: integer("quantite").notNull().default(1),
+  prixUnitaire: integer("prix_unitaire"), // En centimes
+  total: integer("total"), // En centimes
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const storesRelations = relations(stores, ({ many }) => ({
   users: many(users),
