@@ -558,24 +558,9 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
                       {sale.products && sale.products.length > 0 ? (
                         <div className="space-y-1">
                           {sale.products.map((product, index) => (
-                            <div key={index} className="text-xs">
+                            <div key={index} className="text-sm leading-relaxed">
                               {product.typeArticle}
                             </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <span className="text-gray-400">-</span>
-                      )}
-                    </td>
-                    <td>
-                      {sale.products && sale.products.length > 0 ? (
-                        <div className="space-y-1">
-                          {sale.products.map((product, index) => (
-                            <span key={index} className={`modern-badge block ${
-                              product.categorie === 'F3' || product.categorie === 'F4' ? 'badge-destructive' : 'badge-secondary'
-                            }`}>
-                              {product.categorie}
-                            </span>
                           ))}
                         </div>
                       ) : (
@@ -586,7 +571,26 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
                       {sale.products && sale.products.length > 0 ? (
                         <div className="space-y-1">
                           {sale.products.map((product, index) => (
-                            <div key={index} className="text-xs">
+                            <div key={index} className="text-sm font-medium">
+                              <span className={`inline-block px-2 py-1 rounded text-xs font-semibold ${
+                                product.categorie === 'F3' || product.categorie === 'F4' 
+                                  ? 'bg-red-100 text-red-800' 
+                                  : 'bg-blue-100 text-blue-800'
+                              }`}>
+                                {product.categorie}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </td>
+                    <td className="text-center">
+                      {sale.products && sale.products.length > 0 ? (
+                        <div className="space-y-1">
+                          {sale.products.map((product, index) => (
+                            <div key={index} className="text-sm font-medium leading-relaxed">
                               {product.quantite}
                             </div>
                           ))}
