@@ -520,7 +520,7 @@ class MemStorage implements IStorage {
     return newSale;
   }
 
-  async getSalesByStore(storeId: number, startDate?: string, endDate?: string): Promise<Sale[]> {
+  async getSalesByStore(storeId: number, startDate?: string, endDate?: string): Promise<(Sale & { products: SaleProduct[] })[]> {
     let filteredSales = this.sales.filter(s => s.storeId === storeId);
     
     if (startDate) {
@@ -534,7 +534,13 @@ class MemStorage implements IStorage {
       filteredSales = filteredSales.filter(s => s.timestamp && s.timestamp <= end);
     }
     
-    return filteredSales.sort((a, b) => (b.timestamp?.getTime() || 0) - (a.timestamp?.getTime() || 0));
+    // Add products to each sale
+    const salesWithProducts = filteredSales.map(sale => ({
+      ...sale,
+      products: this.saleProducts.filter(p => p.saleId === sale.id)
+    }));
+    
+    return salesWithProducts.sort((a, b) => (b.timestamp?.getTime() || 0) - (a.timestamp?.getTime() || 0));
   }
 
   async getSaleWithProducts(id: number): Promise<(Sale & { products: SaleProduct[] }) | undefined> {

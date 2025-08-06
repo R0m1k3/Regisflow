@@ -554,15 +554,47 @@ export default function SalesHistory({ canDelete = false }: SalesHistoryProps) {
                         <span>{sale.nom} {sale.prenom}</span>
                       </div>
                     </td>
-                    <td className="text-sm">{sale.typeArticle}</td>
-                    <td>
-                      <span className={`modern-badge ${
-                        sale.categorie === 'F3' ? 'badge-destructive' : 'badge-secondary'
-                      }`}>
-                        {sale.categorie}
-                      </span>
+                    <td className="text-sm">
+                      {sale.products && sale.products.length > 0 ? (
+                        <div className="space-y-1">
+                          {sale.products.map((product, index) => (
+                            <div key={index} className="text-xs">
+                              {product.typeArticle}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
                     </td>
-                    <td className="text-center">{sale.quantite}</td>
+                    <td>
+                      {sale.products && sale.products.length > 0 ? (
+                        <div className="space-y-1">
+                          {sale.products.map((product, index) => (
+                            <span key={index} className={`modern-badge block ${
+                              product.categorie === 'F3' || product.categorie === 'F4' ? 'badge-destructive' : 'badge-secondary'
+                            }`}>
+                              {product.categorie}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </td>
+                    <td className="text-center">
+                      {sale.products && sale.products.length > 0 ? (
+                        <div className="space-y-1">
+                          {sale.products.map((product, index) => (
+                            <div key={index} className="text-xs">
+                              {product.quantite}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </td>
                     <td className="text-sm">{sale.modePaiement}</td>
                     <td>
                       <div className="flex items-center gap-2">
