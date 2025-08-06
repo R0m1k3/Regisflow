@@ -8,19 +8,15 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-// Configuration de connexion avec SSL désactivé pour Docker local
+// Configuration de connexion avec support Unix socket pour PostgreSQL local
 const connectionConfig = {
-  connectionString: process.env.DATABASE_URL,
-  ssl: false // Désactiver SSL pour production Docker locale
+  user: process.env.PGUSER,
+  password: process.env.PGPASSWORD,
+  database: process.env.PGDATABASE,
+  host: '/home/runner/postgres_data/socket',
+  port: 5432,
+  ssl: false // Désactiver SSL pour PostgreSQL local
 };
-
-// Si DATABASE_URL contient déjà sslmode=disable, ne pas forcer SSL
-if (process.env.DATABASE_URL?.includes('sslmode=disable')) {
-  connectionConfig.ssl = false;
-} else if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL?.includes('localhost')) {
-  // Activer SSL uniquement pour production externe (pas Docker local)
-  connectionConfig.ssl = { rejectUnauthorized: false };
-}
 
 export const pool = new Pool(connectionConfig);
 

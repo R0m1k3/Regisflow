@@ -375,4 +375,300 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-export const storage = new DatabaseStorage();
+class MemStorage implements IStorage {
+  private users: User[] = [];
+  private stores: Store[] = [];
+  private sales: Sale[] = [];
+  private saleProducts: SaleProduct[] = [];
+  private nextUserId = 1;
+  private nextStoreId = 1;
+  private nextSaleId = 1;
+  private nextSaleProductId = 1;
+
+  // User operations
+  async getUser(id: number): Promise<User | undefined> {
+    return this.users.find(u => u.id === id);
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    return this.users.find(u => u.username === username);
+  }
+
+  async createUser(userData: InsertUser): Promise<User> {
+    // Hash password if provided
+    if (userData.password) {
+      userData.password = await this.hashPassword(userData.password);
+    }
+    
+    // Convert empty email to null to avoid unique constraint issues
+    if (userData.email === "") {
+      userData.email = null;
+    }
+    
+    const user: User = {
+      ...userData,
+      id: this.nextUserId++,
+      email: userData.email || null,
+      isActive: userData.isActive || true,
+      updatedAt: null,
+      firstName: userData.firstName || null,
+      lastName: userData.lastName || null,
+      storeId: userData.storeId || null,
+      createdAt: new Date(),
+    };
+    this.users.push(user);
+    return user;
+  }
+
+  async updateUser(id: number, userData: Partial<InsertUser>): Promise<User | undefined> {
+    const userIndex = this.users.findIndex(u => u.id === id);
+    if (userIndex === -1) return undefined;
+    
+    // Hash password if provided
+    if (userData.password) {
+      userData.password = await this.hashPassword(userData.password);
+    }
+    
+    // Convert empty email to null to avoid unique constraint issues
+    if (userData.email === "") {
+      userData.email = null;
+    }
+    
+    this.users[userIndex] = { ...this.users[userIndex], ...userData };
+    return this.users[userIndex];
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return [...this.users].sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0));
+  }
+
+  async deleteUser(id: number): Promise<void> {
+    this.users = this.users.filter(u => u.id !== id);
+  }
+
+  // Store operations
+  async getStore(id: number): Promise<Store | undefined> {
+    return this.stores.find(s => s.id === id);
+  }
+
+  async createStore(storeData: InsertStore): Promise<Store> {
+    const store: Store = {
+      ...storeData,
+      id: this.nextStoreId++,
+      address: storeData.address || null,
+      phone: storeData.phone || null,
+      email: storeData.email || null,
+      isActive: storeData.isActive || true,
+      updatedAt: null,
+      createdAt: new Date(),
+    };
+    this.stores.push(store);
+    return store;
+  }
+
+  async getAllStores(): Promise<Store[]> {
+    return [...this.stores].sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0));
+  }
+
+  async updateStore(id: number, storeData: Partial<InsertStore>): Promise<Store | undefined> {
+    const storeIndex = this.stores.findIndex(s => s.id === id);
+    if (storeIndex === -1) return undefined;
+    
+    this.stores[storeIndex] = { ...this.stores[storeIndex], ...storeData };
+    return this.stores[storeIndex];
+  }
+
+  async deleteStore(id: number): Promise<void> {
+    this.stores = this.stores.filter(s => s.id !== id);
+  }
+
+  // Sale operations
+  async getSale(id: number): Promise<Sale | undefined> {
+    return this.sales.find(s => s.id === id);
+  }
+
+  async createSaleWithProducts(sale: InsertSale, products: InsertSaleProduct[]): Promise<Sale> {
+    const newSale: Sale = {
+      ...sale,
+      id: this.nextSaleId++,
+      timestamp: new Date(),
+      lieuNaissance: sale.lieuNaissance || null,
+      autoriteDelivrance: sale.autoriteDelivrance || null,
+      documentType: sale.documentType || null,
+      documentNumber: sale.documentNumber || null,
+      adresse: sale.adresse || null,
+      photoRecto: sale.photoRecto || null,
+      photoVerso: sale.photoVerso || null,
+      photo_ticket: sale.photo_ticket || null,
+    };
+    this.sales.push(newSale);
+
+    // Create sale products
+    for (const product of products) {
+      const saleProduct: SaleProduct = {
+        ...product,
+        id: this.nextSaleProductId++,
+        saleId: newSale.id,
+        createdAt: null,
+      };
+      this.saleProducts.push(saleProduct);
+    }
+
+    return newSale;
+  }
+
+  async getSalesByStore(storeId: number, startDate?: string, endDate?: string): Promise<Sale[]> {
+    let filteredSales = this.sales.filter(s => s.storeId === storeId);
+    
+    if (startDate) {
+      const start = new Date(startDate);
+      filteredSales = filteredSales.filter(s => s.timestamp && s.timestamp >= start);
+    }
+    
+    if (endDate) {
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999); // Include the entire end date
+      filteredSales = filteredSales.filter(s => s.timestamp && s.timestamp <= end);
+    }
+    
+    return filteredSales.sort((a, b) => (b.timestamp?.getTime() || 0) - (a.timestamp?.getTime() || 0));
+  }
+
+  async getSaleWithProducts(id: number): Promise<(Sale & { products: SaleProduct[] }) | undefined> {
+    const sale = await this.getSale(id);
+    if (!sale) return undefined;
+    
+    const products = this.saleProducts.filter(sp => sp.saleId === id);
+    return { ...sale, products };
+  }
+
+  async deleteSale(id: number): Promise<void> {
+    this.saleProducts = this.saleProducts.filter(sp => sp.saleId !== id);
+    this.sales = this.sales.filter(s => s.id !== id);
+  }
+
+  // Auth operations
+  async authenticateUser(username: string, password: string): Promise<User | null> {
+    const user = await this.getUserByUsername(username);
+    if (!user || !user.isActive) {
+      return null;
+    }
+    
+    const isValid = await bcrypt.compare(password, user.password);
+    return isValid ? user : null;
+  }
+
+  async hashPassword(password: string): Promise<string> {
+    return await bcrypt.hash(password, 12);
+  }
+
+  // Check if admin still uses default password
+  async isUsingDefaultPassword(): Promise<boolean> {
+    const adminUser = await this.getUserByUsername('admin');
+    if (!adminUser) {
+      return false;
+    }
+    
+    // Check if the stored password hash matches the default password "admin123"
+    return await bcrypt.compare('admin123', adminUser.password);
+  }
+
+  // Initialize default admin user and store if none exist
+  async initializeDefaults(): Promise<{ defaultAdminCredentials?: { username: string; password: string } }> {
+    const existingUsers = await this.getAllUsers();
+    
+    if (existingUsers.length === 0) {
+      // Create default store
+      const defaultStore = await this.createStore({
+        name: "Magasin Principal",
+        address: "À définir",
+        isActive: true,
+      });
+
+      // Create default admin user
+      const defaultPassword = "admin123";
+      const adminUser = await this.createUser({
+        username: "admin",
+        password: defaultPassword,
+        email: "admin@example.com",
+        firstName: "Administrateur",
+        lastName: "Principal",
+        role: "administrator",
+        storeId: defaultStore.id,
+        isActive: true,
+      });
+
+      return {
+        defaultAdminCredentials: {
+          username: "admin",
+          password: defaultPassword
+        }
+      };
+    }
+    
+    return {};
+  }
+}
+
+// Add methods for backup and purge functionality
+class MemStorageWithBackup extends MemStorage {
+  // Backup/export functionality 
+  async exportData() {
+    return {
+      users: this.users.map(u => ({ ...u, password: undefined })), // Exclude passwords
+      stores: this.stores,
+      sales: this.sales,
+      saleProducts: this.saleProducts
+    };
+  }
+  
+  // Import/restore functionality
+  async importData(data: any) {
+    if (data.users) this.users = data.users;
+    if (data.stores) this.stores = data.stores;
+    if (data.sales) this.sales = data.sales;
+    if (data.saleProducts) this.saleProducts = data.saleProducts;
+    
+    // Update counters to avoid ID conflicts
+    this.nextUserId = Math.max(...this.users.map(u => u.id), 0) + 1;
+    this.nextStoreId = Math.max(...this.stores.map(s => s.id), 0) + 1;
+    this.nextSaleId = Math.max(...this.sales.map(s => s.id), 0) + 1;
+    this.nextSaleProductId = Math.max(...this.saleProducts.map(sp => sp.id), 0) + 1;
+  }
+  
+  // Purge old sales data (19 months+)
+  async purgeOldSales(): Promise<{ deletedCount: number }> {
+    const cutoffDate = new Date();
+    cutoffDate.setMonth(cutoffDate.getMonth() - 19);
+    
+    const oldSalesCount = this.sales.filter(s => s.timestamp && s.timestamp < cutoffDate).length;
+    
+    // Remove old sales and their products
+    const oldSaleIds = this.sales
+      .filter(s => s.timestamp && s.timestamp < cutoffDate)
+      .map(s => s.id);
+    
+    this.sales = this.sales.filter(s => !s.timestamp || s.timestamp >= cutoffDate);
+    this.saleProducts = this.saleProducts.filter(sp => !oldSaleIds.includes(sp.saleId));
+    
+    return { deletedCount: oldSalesCount };
+  }
+  
+  // Get purge statistics
+  async getPurgeStats() {
+    const cutoffDate = new Date();
+    cutoffDate.setMonth(cutoffDate.getMonth() - 19);
+    
+    const totalSales = this.sales.length;
+    const oldSales = this.sales.filter(s => s.timestamp && s.timestamp < cutoffDate).length;
+    
+    return {
+      totalSales,
+      oldSales,
+      cutoffDate: cutoffDate.toISOString()
+    };
+  }
+}
+
+// Use in-memory storage with backup functionality for now
+export const storage = new MemStorageWithBackup();

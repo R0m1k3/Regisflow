@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
+import MemoryStore from "memorystore";
 import { loginSchema, insertUserSchema, insertStoreSchema, insertSaleSchema } from "@shared/schema";
 import { z } from "zod";
 import { createAutomaticBackup, getBackupStats } from "./backup-scheduler";
@@ -48,13 +49,11 @@ declare global {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Session configuration with PostgreSQL store
-  const pgStore = connectPg(session);
+  // Use memory store for sessions when database is not available
+  const MemStoreClass = MemoryStore(session);
   app.use(session({
-    store: new pgStore({
-      conString: process.env.DATABASE_URL,
-      createTableIfMissing: false,
-      tableName: 'sessions',
+    store: new MemStoreClass({
+      checkPeriod: 86400000 // prune expired entries every 24h
     }),
     secret: process.env.SESSION_SECRET || 'fireworks-secret-key-2024',
     resave: false,
@@ -323,6 +322,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Parse and validate products
       const validatedProducts = products.map((product: any) => ({
+        saleId: 0, // Will be set by storage layer
         typeArticle: product.typeArticle,
         categorie: product.categorie,
         quantite: parseInt(product.quantite),

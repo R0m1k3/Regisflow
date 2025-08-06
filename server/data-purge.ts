@@ -1,6 +1,4 @@
-import { db } from './db';
-import { sales } from '@shared/schema';
-import { lt } from 'drizzle-orm';
+import { storage } from './storage';
 import cron from 'node-cron';
 
 /**
@@ -15,13 +13,9 @@ export async function purgeSalesData() {
     
     console.log(`🗑️  Démarrage purge des ventes antérieures au ${cutoffDate.toLocaleDateString('fr-FR')}`);
     
-    // Supprimer les ventes antérieures à la date limite
-    const result = await db
-      .delete(sales)
-      .where(lt(sales.timestamp, cutoffDate))
-      .returning({ id: sales.id });
-    
-    const deletedCount = result.length;
+    // Use storage's purge method
+    const result = await (storage as any).purgeOldSales();
+    const deletedCount = result.deletedCount;
     
     if (deletedCount > 0) {
       console.log(`✅ Purge terminée : ${deletedCount} vente(s) supprimée(s)`);
@@ -51,25 +45,14 @@ export async function purgeSalesData() {
  */
 export async function getPurgeStats() {
   try {
-    const cutoffDate = new Date();
-    cutoffDate.setMonth(cutoffDate.getMonth() - 19);
-    
-    // Compter les ventes qui seraient supprimées
-    const oldSales = await db
-      .select({ id: sales.id })
-      .from(sales)
-      .where(lt(sales.timestamp, cutoffDate));
-    
-    // Compter le total des ventes
-    const totalSales = await db
-      .select({ id: sales.id })
-      .from(sales);
+    // Use storage's stats method
+    const stats = await (storage as any).getPurgeStats();
     
     return {
-      totalSales: totalSales.length,
-      oldSales: oldSales.length,
-      cutoffDate: cutoffDate.toISOString(),
-      purgeEligible: oldSales.length > 0
+      totalSales: stats.totalSales,
+      oldSales: stats.oldSales,
+      cutoffDate: stats.cutoffDate,
+      purgeEligible: stats.oldSales > 0
     };
     
   } catch (error) {
