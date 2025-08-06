@@ -679,5 +679,7 @@ class MemStorageWithBackup extends MemStorage {
   }
 }
 
-// Use in-memory storage with backup functionality for now
-export const storage = new MemStorageWithBackup();
+// Use PostgreSQL storage in production, in-memory for development
+export const storage = process.env.NODE_ENV === 'production' 
+  ? new DatabaseStorage() 
+  : new MemStorageWithBackup();

@@ -8,16 +8,13 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-// Configuration de connexion avec support Unix socket pour PostgreSQL local
-const connectionConfig = {
-  user: process.env.PGUSER,
-  password: process.env.PGPASSWORD,
-  database: process.env.PGDATABASE,
-  host: '/home/runner/postgres_data/socket',
-  port: 5432,
-  ssl: false // Désactiver SSL pour PostgreSQL local
-};
-
-export const pool = new Pool(connectionConfig);
+// Configuration pour production avec DATABASE_URL
+export const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  max: 20, // Maximum number of clients in the pool
+  idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
+  connectionTimeoutMillis: 2000, // Return an error after 2 seconds if connection cannot be established
+});
 
 export const db = drizzle(pool, { schema });
