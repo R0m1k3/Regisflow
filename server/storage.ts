@@ -494,8 +494,11 @@ class MemStorage implements IStorage {
       timestamp: new Date(),
       lieuNaissance: sale.lieuNaissance || null,
       autoriteDelivrance: sale.autoriteDelivrance || null,
-      documentType: sale.documentType || null,
-      documentNumber: sale.documentNumber || null,
+      // Map typeIdentite to documentType field for historical reasons
+      documentType: sale.typeIdentite || null,
+      // Map numeroIdentite to documentNumber field  
+      documentNumber: sale.numeroIdentite || null,
+      // Ensure adresse is properly mapped
       adresse: sale.adresse || null,
       photoRecto: sale.photoRecto || null,
       photoVerso: sale.photoVerso || null,

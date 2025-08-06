@@ -74,6 +74,13 @@ export const sales = pgTable("sales", {
   autoriteDelivrance: varchar("autorite_delivrance", { length: 255 }),
   dateDelivrance: varchar("date_delivrance", { length: 10 }).notNull(),
   
+  // Adresse - ajout du champ manquant
+  adresse: text("adresse"),
+  
+  // Champs legacy pour compatibilité historique
+  documentType: varchar("document_type", { length: 50 }),
+  documentNumber: varchar("document_number", { length: 100 }),
+  
   // Photos
   photo_recto: text("photo_recto"),
   photo_verso: text("photo_verso"),
